@@ -1,0 +1,8 @@
+venv/
+.env
+media/
+db.sqlite3
+.*pyc
+home/__pycache__/
+accounts/__pycache__/
+glance/__pycache__/
