@@ -129,11 +129,15 @@ MEDIA_ROOT = BASE_DIR / "media"
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
-MESSAGE_TAGS={
-   message.ERROR: 'danger',
-    message.SUCCESS: 'success',
-    message.INFO: 'info',
-    message.WARNING: 'warning',
-    message.DEBUG: 'secondary',
 
+# Specifying the custom user model
+AUTH_USER_MODEL = 'accounts.User'
+
+# Messages configuration for displaying alerts
+MESSAGE_TAGS = {
+    message.DEBUG: 'alert-info',
+    message.INFO: 'alert-info',
+    message.SUCCESS: 'alert-success',
+    message.WARNING: 'alert-warning',
+    message.ERROR: 'alert-danger',
 }

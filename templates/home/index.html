@@ -99,8 +99,8 @@
                     </li>
                 </ul>
                 <div class="auth-buttons">
-                    <a href="#" class="btn btn-outline-light btn-sm">Sign In</a>
-                    <a href="#" class="btn btn-primary btn-sm">Sign Up</a>
+                    <a href="{% url 'signin' %}" class="btn btn-outline-light btn-sm">Sign In</a>
+                    <a href="{% url 'signup' %}" class="btn btn-primary btn-sm">Sign Up</a>
                 </div>
             </div>
         </div>
@@ -115,7 +115,7 @@
                     <h1 class="hero-title">Glance Job Fair 2.0</h1>
                     <h2 class="hero-subtitle">Your Gateway to Career Excellence</h2>
                     <div class="d-flex flex-wrap gap-3">
-                        <a href="signup.html" class="btn btn-primary">Sign Up</a>
+                        <a href="{% url 'signup' %}" class="btn btn-primary">Sign Up</a>
                         <a href="#about" class="btn btn-outline-light">Learn More</a>
                     </div>
                 </div>
