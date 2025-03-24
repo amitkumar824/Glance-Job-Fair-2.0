@@ -7,8 +7,8 @@ from django.core.validators import validate_email
 from django.db import IntegrityError
 from django.utils import timezone
 from django.conf import settings
-from .models import User
-from .forms import SignUpForm
+from .models import User, Certificate
+from .forms import SignUpForm, UserProfileForm
 from django.contrib.auth.tokens import default_token_generator
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from django.utils.encoding import force_bytes, force_str
@@ -16,7 +16,12 @@ from django.core.mail import send_mail
 from django.template.loader import render_to_string
 from django.views.decorators.http import require_http_methods
 from django.core.cache import cache
+from django.http import JsonResponse
+from django.core.files.storage import default_storage
+from django.core.files.base import ContentFile
 import re
+import os
+import json
 
 def validate_password(password):
     if len(password) < 8:
@@ -178,3 +183,98 @@ def home(request):
 def logout(request):
     messages.success(request, "Successfully logged out!")
     return redirect('home')
+
+@login_required
+def profile(request):
+    if request.method == 'POST':
+        form = UserProfileForm(request.POST, request.FILES, instance=request.user)
+        if form.is_valid():
+            user = form.save()
+            # Handle theme preference update
+            theme = request.POST.get('theme_preference')
+            if theme in ['light', 'dark']:
+                user.theme_preference = theme
+                user.save()
+            messages.success(request, 'Profile updated successfully!')
+            return redirect('profile')
+        else:
+            messages.error(request, 'Please correct the errors below.')
+    else:
+        form = UserProfileForm(instance=request.user)
+
+    # Calculate profile completion percentage
+    required_fields = ['first_name', 'last_name', 'email', 'college', 'branch', 'year_of_study']
+    filled_fields = sum(1 for field in required_fields if getattr(request.user, field))
+    completion_percentage = (filled_fields / len(required_fields)) * 100
+
+    # Get ATS score if resume exists
+    ats_score = None
+    if request.user.resume:
+        ats_score = calculate_ats_score(request.user.resume)
+
+    context = {
+        'form': form,
+        'completion_percentage': completion_percentage,
+        'ats_score': ats_score,
+        'certificates': Certificate.objects.filter(user=request.user)
+    }
+    return render(request, 'dashboard/profile.html', context)
+
+@login_required
+def upload_resume(request):
+    if request.method == 'POST' and request.FILES.get('resume'):
+        resume = request.FILES['resume']
+        if resume.size > 5 * 1024 * 1024:  # 5MB limit
+            messages.error(request, 'Resume file size must be less than 5MB.')
+            return redirect('profile')
+
+        # Delete old resume if exists
+        if request.user.resume:
+            try:
+                os.remove(request.user.resume.path)
+            except:
+                pass
+
+        # Save new resume
+        filename = f'resumes/{request.user.id}/{resume.name}'
+        path = default_storage.save(filename, ContentFile(resume.read()))
+        request.user.resume = path
+        request.user.save()
+
+        messages.success(request, 'Resume uploaded successfully!')
+    return redirect('profile')
+
+@login_required
+def add_certificate(request):
+    if request.method == 'POST' and request.FILES.get('certificate_file'):
+        certificate_file = request.FILES['certificate_file']
+        if certificate_file.size > 5 * 1024 * 1024:  # 5MB limit
+            messages.error(request, 'Certificate file size must be less than 5MB.')
+            return redirect('profile')
+
+        Certificate.objects.create(
+            user=request.user,
+            name=request.POST.get('certificate_name'),
+            issuing_organization=request.POST.get('issuing_organization'),
+            issue_date=request.POST.get('issue_date'),
+            file=certificate_file
+        )
+
+        messages.success(request, 'Certificate added successfully!')
+    return redirect('profile')
+
+@login_required
+@require_http_methods(["POST"])
+def update_theme(request):
+    try:
+        data = json.loads(request.body)
+        theme = data.get('theme')
+        
+        if theme in ['light', 'dark']:
+            request.user.theme_preference = theme
+            request.user.save()
+            return JsonResponse({'success': True})
+        else:
+            return JsonResponse({'success': False, 'error': 'Invalid theme'})
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': str(e)})

@@ -1,28 +1,31 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
-from .models import User
+from .models import User, Certificate
 
 class CustomUserAdmin(UserAdmin):
-    # Add custom fields to fieldsets
+    list_display = ('username', 'email', 'full_name', 'current_year', 'course', 'is_staff', 'is_active')
+    list_filter = ('is_staff', 'is_active', 'course', 'current_year', 'gender')
+    search_fields = ('username', 'email', 'full_name', 'college')
+    ordering = ('username',)
+    
     fieldsets = (
-        (None, {'fields': ('username', 'password')}),
-        ('Personal info', {'fields': ('first_name', 'last_name', 'email', 'course', 'year', 'gender', 'phone_number')}),
+        (None, {'fields': ('username', 'email', 'password')}),
+        ('Personal Information', {'fields': ('full_name', 'phone', 'gender', 'profile_picture')}),
+        ('Academic Information', {'fields': ('college', 'current_year', 'course', 'specialization', 'cgpa', 'total_backlogs', 'current_backlogs')}),
+        ('Professional Links', {'fields': ('github_profile', 'linkedin_profile')}),
+        ('Additional Information', {'fields': ('high_school_info', 'internship_details', 'resume')}),
+        ('Status', {'fields': ('is_placed', 'is_shortlisted', 'is_btech')}),
         ('Permissions', {'fields': ('is_active', 'is_staff', 'is_superuser', 'groups', 'user_permissions')}),
         ('Important dates', {'fields': ('last_login', 'date_joined')}),
     )
-    # Add custom fields to add_fieldsets
+    
     add_fieldsets = (
         (None, {
             'classes': ('wide',),
-            'fields': ('username', 'email', 'course', 'year', 'gender', 'password1', 'password2'),
+            'fields': ('username', 'email', 'password1', 'password2'),
         }),
     )
-    # Add custom fields to list_display
-    list_display = ('username', 'email', 'course', 'year', 'gender', 'is_staff')
-    # Add custom fields to search_fields
-    search_fields = ('username', 'email', 'course')
-    # Add custom fields to list_filter
-    list_filter = ('is_staff', 'is_superuser', 'is_active', 'gender', 'year')
 
 # Register custom User model
 admin.site.register(User, CustomUserAdmin)
+admin.site.register(Certificate)
