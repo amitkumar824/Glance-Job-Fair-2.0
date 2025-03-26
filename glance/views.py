@@ -81,7 +81,7 @@ def signout(request):
     messages.success(request, 'Logged out successfully!')
     return redirect('home')
 
-@login_required
+
 def dashboard_home(request):
     """Dashboard home view showing overview of student's profile and opportunities."""
     context = {
