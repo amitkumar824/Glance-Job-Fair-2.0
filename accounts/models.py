@@ -1,11 +1,9 @@
 from django.db import models
 from django.contrib.auth.models import User
 from django.core.validators import MinValueValidator, MaxValueValidator, FileExtensionValidator
-from django.db.models.signals import post_save
-from django.dispatch import receiver
-from django.utils import timezone
 
-class BaseProfile(User):
+class BaseProfile(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
     phone = models.CharField(max_length=15, blank=True, null=True)
     whatsapp = models.CharField(max_length=15, blank=True, null=True)
     location = models.CharField(max_length=200, blank=True, null=True)
@@ -19,7 +17,10 @@ class BaseProfile(User):
     class Meta:
         abstract = True
 
-class StudentProfile(BaseProfile):
+    def __str__(self):
+        return f"{self.user.username}'s Student Profile"
+
+class Student(BaseProfile):
     GENDER_CHOICES = [
         ('M', 'Male'),
         ('F', 'Female'),
@@ -61,7 +62,7 @@ class StudentProfile(BaseProfile):
     def __str__(self):
         return f"{self.user.username}'s Student Profile"
 
-class RecruiterProfile(BaseProfile):
+class Recruiter(BaseProfile):
     company_name = models.CharField(max_length=200)
     company_description = models.TextField()
     company_website = models.URLField()
@@ -76,37 +77,7 @@ class RecruiterProfile(BaseProfile):
     def __str__(self):
         return f"{self.company_name} - Recruiter Profile"
 
-class JobPosting(models.Model):
-    JOB_TYPE_CHOICES = [
-        ('FT', 'Full-time'),
-        ('PT', 'Part-time'),
-        ('RM', 'Remote'),
-        ('HY', 'Hybrid'),
-        ('IO', 'In-office'),
-    ]
-
-    INTERVIEW_MODE_CHOICES = [
-        ('ON', 'Online'),
-        ('OF', 'Offline'),
-        ('CP', 'CPN'),
-    ]
-
-    recruiter = models.ForeignKey(RecruiterProfile, on_delete=models.CASCADE, related_name='job_postings')
-    title = models.CharField(max_length=200)
-    job_type = models.CharField(max_length=2, choices=JOB_TYPE_CHOICES)
-    job_mode = models.CharField(max_length=2, choices=JOB_TYPE_CHOICES)
-    salary_range = models.CharField(max_length=100)
-    description = models.TextField()
-    internship_details = models.TextField(blank=True, null=True)
-    interview_mode = models.CharField(max_length=2, choices=INTERVIEW_MODE_CHOICES)
-    created_at = models.DateTimeField(auto_now_add=True)
-    deadline = models.DateTimeField()
-    is_active = models.BooleanField(default=True)
-
-    def __str__(self):
-        return f"{self.title} at {self.recruiter.company_name}"
-
-class AdministratorProfile(BaseProfile):
+class Administrator(BaseProfile):
     responsibilities = models.TextField()
     skills = models.TextField()
     departments = models.TextField()
@@ -118,7 +89,7 @@ class AdministratorProfile(BaseProfile):
     def __str__(self):
         return f"{self.user.username}'s Administrator Profile"
 
-class VolunteerProfile(BaseProfile):
+class Volunteer(BaseProfile):
     responsibilities = models.TextField()
     skills = models.TextField()
     departments = models.TextField()
@@ -127,18 +98,3 @@ class VolunteerProfile(BaseProfile):
 
     def __str__(self):
         return f"{self.user.username}'s Volunteer Profile"
-
-# Signals for profile creation
-@receiver(post_save, sender=User)
-def create_user_profile(sender, instance, created, **kwargs):
-    if created:
-        # The profile type will be determined during registration
-        pass
-
-@receiver(post_save, sender=User)
-def save_user_profile(sender, instance, **kwargs):
-    try:
-        # Try to get any type of profile
-        instance.profile.save()
-    except:
-        pass

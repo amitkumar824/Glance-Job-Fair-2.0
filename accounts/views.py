@@ -10,13 +10,9 @@ from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from django.utils.encoding import force_bytes, force_str
 from django.contrib.auth.tokens import default_token_generator
 from django.conf import settings
-from .forms import (
-    CustomUserCreationForm, CustomAuthenticationForm,
-    StudentProfileForm, RecruiterProfileForm,
-    AdministratorProfileForm, VolunteerProfileForm,
-    JobPostingForm
-)
-from .models import StudentProfile, RecruiterProfile, AdministratorProfile, VolunteerProfile, JobPosting
+
+from .models import Student, Recruiter, Administrator, Volunteer
+from student.models import Job
 
 # Create your views here.
 
@@ -85,7 +81,7 @@ def signup(request):
         
         # Create profile based on role
         if role == 'student':
-            profile = StudentProfile.objects.create(
+            profile = Student.objects.create(
                 user=user,
                 phone=request.POST.get('phone'),
                 whatsapp=request.POST.get('whatsapp'),
@@ -97,7 +93,7 @@ def signup(request):
                 gender=request.POST.get('gender')
             )
         elif role == 'recruiter':
-            profile = RecruiterProfile.objects.create(
+            profile = Recruiter.objects.create(
                 user=user,
                 phone=request.POST.get('phone'),
                 whatsapp=request.POST.get('whatsapp'),
@@ -110,7 +106,7 @@ def signup(request):
                 company_logo=request.FILES.get('company_logo')
             )
         elif role == 'admin':
-            profile = AdministratorProfile.objects.create(
+            profile = Administrator.objects.create(
                 user=user,
                 phone=request.POST.get('phone'),
                 whatsapp=request.POST.get('whatsapp'),
@@ -121,7 +117,7 @@ def signup(request):
                 departments=request.POST.get('departments', '')
             )
         else:  # volunteer
-            profile = VolunteerProfile.objects.create(
+            profile = Volunteer.objects.create(
                 user=user,
                 phone=request.POST.get('phone'),
                 whatsapp=request.POST.get('whatsapp'),
@@ -183,104 +179,3 @@ def signin(request):
             
     return render(request, 'accounts/signin.html')
 
-@login_required
-def profile(request):
-    user = request.user
-    if not hasattr(user, 'profile'):
-        raise PermissionDenied("No profile found for this user.")
-    
-    profile = user.profile
-    context = {
-        'user': user,
-        'profile': profile
-    }
-    return render(request, 'accounts/profile.html', context)
-
-@login_required
-def edit_profile(request):
-    user = request.user
-    if not hasattr(user, 'profile'):
-        raise PermissionDenied("No profile found for this user.")
-    
-    profile = user.profile
-    
-    if request.method == 'POST':
-        # Update user fields
-        user.email = request.POST.get('email', user.email)
-        user.save()
-        
-        # Update profile fields
-        profile.phone = request.POST.get('phone', profile.phone)
-        profile.whatsapp = request.POST.get('whatsapp', profile.whatsapp)
-        profile.location = request.POST.get('location', profile.location)
-        
-        if 'profile_picture' in request.FILES:
-            profile.profile_picture = request.FILES['profile_picture']
-            
-        # Update role-specific fields
-        if isinstance(profile, StudentProfile):
-            profile.high_school = request.POST.get('high_school', profile.high_school)
-            profile.current_year = request.POST.get('current_year', profile.current_year)
-            profile.graduation_year = request.POST.get('graduation_year', profile.graduation_year)
-            profile.gender = request.POST.get('gender', profile.gender)
-        elif isinstance(profile, RecruiterProfile):
-            profile.company_name = request.POST.get('company_name', profile.company_name)
-            profile.company_description = request.POST.get('company_description', profile.company_description)
-            profile.company_website = request.POST.get('company_website', profile.company_website)
-            profile.company_email = request.POST.get('company_email', profile.company_email)
-            if 'company_logo' in request.FILES:
-                profile.company_logo = request.FILES['company_logo']
-                
-        profile.save()
-        messages.success(request, 'Profile updated successfully.')
-        return redirect('profile')
-        
-    return render(request, 'accounts/edit_profile.html', {'profile': profile})
-
-# Job posting views
-@login_required
-def create_job_posting(request):
-    if not isinstance(request.user.profile, RecruiterProfile):
-        raise PermissionDenied("Only recruiters can create job postings.")
-    
-    if request.method == 'POST':
-        form = JobPostingForm(request.POST)
-        if form.is_valid():
-            job = form.save(commit=False)
-            job.recruiter = request.user.profile
-            job.save()
-            messages.success(request, 'Job posting created successfully.')
-            return redirect('recruiter_dashboard')
-        else:
-            for field in form:
-                for error in field.errors:
-                    messages.error(request, f"{field.label}: {error}")
-    else:
-        form = JobPostingForm()
-    
-    return render(request, 'accounts/create_job_posting.html', {'form': form})
-
-@login_required
-def edit_job_posting(request, job_id):
-    if not isinstance(request.user.profile, RecruiterProfile):
-        raise PermissionDenied("Only recruiters can edit job postings.")
-    
-    try:
-        job = JobPosting.objects.get(id=job_id, recruiter=request.user.profile)
-    except JobPosting.DoesNotExist:
-        raise PermissionDenied("Job posting not found or you don't have permission to edit it.")
-    
-    if request.method == 'POST':
-        form = JobPostingForm(request.POST, instance=job)
-        if form.is_valid():
-            form.save()
-            messages.success(request, 'Job posting updated successfully.')
-            return redirect('recruiter_dashboard')
-        else:
-            for field in form:
-                for error in field.errors:
-                    messages.error(request, f"{field.label}: {error}")
-    else:
-        form = JobPostingForm(instance=job)
-    
-    return render(request, 'accounts/edit_job_posting.html', {'form': form, 'job': job})
