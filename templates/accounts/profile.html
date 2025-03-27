@@ -1,0 +1,71 @@
+{% extends 'accounts/base.html' %}
+
+{% block title %}Profile - {{ user.username }}{% endblock %}
+
+{% block content %}
+<div class="auth-container">
+    <h2 class="text-center mb-4">Profile</h2>
+    <div class="card">
+        <div class="card-body">
+            <div class="row mb-3">
+                <div class="col-sm-4">
+                    <strong>Username:</strong>
+                </div>
+                <div class="col-sm-8">
+                    {{ user.username }}
+                </div>
+            </div>
+            <div class="row mb-3">
+                <div class="col-sm-4">
+                    <strong>Email:</strong>
+                </div>
+                <div class="col-sm-8">
+                    {{ user.email }}
+                </div>
+            </div>
+            <div class="row mb-3">
+                <div class="col-sm-4">
+                    <strong>Course:</strong>
+                </div>
+                <div class="col-sm-8">
+                    {{ profile.course }}
+                </div>
+            </div>
+            <div class="row mb-3">
+                <div class="col-sm-4">
+                    <strong>Year:</strong>
+                </div>
+                <div class="col-sm-8">
+                    {{ profile.year }}
+                </div>
+            </div>
+            <div class="row mb-3">
+                <div class="col-sm-4">
+                    <strong>Gender:</strong>
+                </div>
+                <div class="col-sm-8">
+                    {{ profile.get_gender_display }}
+                </div>
+            </div>
+            {% if profile.phone %}
+            <div class="row mb-3">
+                <div class="col-sm-4">
+                    <strong>Phone:</strong>
+                </div>
+                <div class="col-sm-8">
+                    {{ profile.phone }}
+                </div>
+            </div>
+            {% endif %}
+            <div class="row mb-3">
+                <div class="col-sm-4">
+                    <strong>Joined:</strong>
+                </div>
+                <div class="col-sm-8">
+                    {{ user.date_joined|date:"F j, Y" }}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 
