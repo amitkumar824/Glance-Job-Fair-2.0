@@ -10,9 +10,6 @@ from django.utils.encoding import force_bytes, force_str
 from django.contrib.auth.tokens import default_token_generator
 from django.conf import settings
 from django.utils.html import strip_tags
-from django.http import JsonResponse
-from django.views.decorators.http import require_POST
-import json
 
 from .models import Student, Recruiter, Administrator, Volunteer
 
@@ -136,21 +133,3 @@ def verify_email(request, token):
     except User.DoesNotExist:
         messages.error(request, 'Invalid verification token.')
         return redirect('signup')
-
-@login_required
-@require_POST
-def update_theme(request):
-    """Update user's theme preference."""
-    try:
-        data = json.loads(request.body)
-        theme = data.get('theme')
-        
-        if theme not in ['light', 'dark']:
-            return JsonResponse({'success': False, 'error': 'Invalid theme'}, status=400)
-            
-        request.user.student.theme_preference = theme
-        request.user.student.save()
-        
-        return JsonResponse({'success': True})
-    except Exception as e:
-        return JsonResponse({'success': False, 'error': str(e)}, status=500)
