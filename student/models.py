@@ -1,7 +1,9 @@
 from django.db import models
-from accounts.models import BaseProfile, Student, Recruiter
-from django.core.validators import FileExtensionValidator, MinValueValidator
+from accounts.models import Student, Recruiter
+from django.core.validators import FileExtensionValidator, MinValueValidator, MaxValueValidator, URLValidator
 from django.utils import timezone
+from django.contrib.auth.models import User
+from django.core.exceptions import ValidationError
 
 class Company(models.Model):
     name = models.CharField(max_length=200)

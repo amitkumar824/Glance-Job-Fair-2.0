@@ -2,8 +2,14 @@ from django.db import models
 from django.contrib.auth.models import User
 from django.core.validators import MinValueValidator, MaxValueValidator, FileExtensionValidator
 
-class BaseProfile(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE)
+
+class Student(User):
+    GENDER_CHOICES = [
+        ('M', 'Male'),
+        ('F', 'Female'),
+        ('O', 'Other'),
+    ]
+    
     phone = models.CharField(max_length=15, blank=True, null=True)
     whatsapp = models.CharField(max_length=15, blank=True, null=True)
     location = models.CharField(max_length=200, blank=True, null=True)
@@ -13,19 +19,6 @@ class BaseProfile(models.Model):
         blank=True,
         null=True
     )
-
-    class Meta:
-        abstract = True
-
-    def __str__(self):
-        return f"{self.user.username}'s Student Profile"
-
-class Student(BaseProfile):
-    GENDER_CHOICES = [
-        ('M', 'Male'),
-        ('F', 'Female'),
-        ('O', 'Other'),
-    ]
 
     high_school = models.CharField(max_length=200)
     current_year = models.IntegerField(
@@ -58,11 +51,15 @@ class Student(BaseProfile):
         blank=True,
         null=True
     )
+    
+    class Meta:
+        verbose_name_plural = "Students"
+        ordering = ['username']
 
     def __str__(self):
-        return f"{self.user.username}'s Student Profile"
+        return f"{self.username}'s Student Profile"
 
-class Recruiter(BaseProfile):
+class Recruiter(User):
     company_name = models.CharField(max_length=200)
     company_description = models.TextField()
     company_website = models.URLField()
@@ -77,7 +74,7 @@ class Recruiter(BaseProfile):
     def __str__(self):
         return f"{self.company_name} - Recruiter Profile"
 
-class Administrator(BaseProfile):
+class Administrator(User):
     responsibilities = models.TextField()
     skills = models.TextField()
     departments = models.TextField()
@@ -89,7 +86,7 @@ class Administrator(BaseProfile):
     def __str__(self):
         return f"{self.user.username}'s Administrator Profile"
 
-class Volunteer(BaseProfile):
+class Volunteer(User):
     responsibilities = models.TextField()
     skills = models.TextField()
     departments = models.TextField()
