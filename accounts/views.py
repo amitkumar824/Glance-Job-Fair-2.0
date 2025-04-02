@@ -9,6 +9,7 @@ from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from django.utils.encoding import force_bytes, force_str
 from django.contrib.auth.tokens import default_token_generator
 from django.conf import settings
+from django.utils.html import strip_tags
 
 from .models import Student, Recruiter, Administrator, Volunteer
 
@@ -84,8 +85,6 @@ def logout_view(request):
     messages.success(request, 'You have been successfully logged out.')
     return redirect('home')
 
-
-
 def send_verification_email(user, request):
     token = default_token_generator.make_token(user)
     uid = urlsafe_base64_encode(force_bytes(user.pk))
@@ -96,28 +95,27 @@ def send_verification_email(user, request):
         'user': user,
         'verification_url': verification_url,
     })
-    
+    #17
+    #
     send_mail(
         subject,
-        message,
+        strip_tags(message),
         settings.DEFAULT_FROM_EMAIL,
         [user.email],
         fail_silently=False,
+        html_message=message
     )
 
-def verify_email(request, uidb64, token):
+def verify_email(request, token):
     try:
-        uid = force_str(urlsafe_base64_decode(uidb64))
-        user = User.objects.get(pk=uid)
-    except (TypeError, ValueError, OverflowError, User.DoesNotExist):
-        user = None
-
-    if user is not None and default_token_generator.check_token(user, token):
-        user.is_active = True
-        user.save()
-        messages.success(request, 'Your email has been verified. You can now login.')
+        user = User.objects.get(verification_token=token)
+        if not user.is_active:
+            user.is_active = True
+            user.save()
+            messages.success(request, 'Email verified successfully! You can now log in.')
+        else:
+            messages.info(request, 'Email already verified. You can log in.')
         return redirect('signin')
-    else:
-        messages.error(request, 'Invalid verification link.')
+    except User.DoesNotExist:
+        messages.error(request, 'Invalid verification token.')
         return redirect('signup')
-
