@@ -1,12 +1,8 @@
-{% extends 'accounts/base.html' %}
-{% load static %}
-
-{% block title %}Register - Glance Job Fair{% endblock %}
-
-{% block content %}
+{% extends 'accounts/base.html' %} {% load static %} {% block title %}Register -
+Glance Job Fair{% endblock %} {% block content %}
 <div class="auth-container">
     <div class="text-center mb-4">
-        <img src="{% static 'img/home/logo.svg' %}" alt="Glance Logo" class="mb-3" style="max-width: 150px;">
+        <img src="{% static 'img/home/logo.svg' %}" alt="Glance Logo" class="mb-3" style="max-width: 150px" />
         <h2>Create Your Account</h2>
         <p class="text-muted">Join our community and start your journey</p>
     </div>
@@ -26,7 +22,7 @@
                         <i class="fas fa-user"></i>
                     </span>
                     <input type="text" class="form-control" id="username" name="username" required
-                        placeholder="Choose a username" maxlength="50">
+                        placeholder="Choose a username" maxlength="50" />
                 </div>
             </div>
 
@@ -39,7 +35,7 @@
                         <i class="fas fa-envelope"></i>
                     </span>
                     <input type="email" class="form-control" id="email" name="email" required
-                        placeholder="Enter your email" maxlength="50">
+                        placeholder="Enter your email" maxlength="50" />
                 </div>
             </div>
 
@@ -52,15 +48,15 @@
                         <i class="fas fa-key"></i>
                     </span>
                     <input type="password" class="form-control" id="password1" name="password1" required
-                        placeholder="Create a password" minlength="8" pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}">
+                        placeholder="Create a password" minlength="8" pattern="(?=.\d)(?=.[a-z])(?=.*[A-Z]).{8,}" />
                     <button class="btn btn-outline-secondary" type="button" id="togglePassword1">
                         <i class="fas fa-eye"></i>
                     </button>
                 </div>
                 <div class="form-text">
                     <i class="fas fa-info-circle me-1"></i>
-                    Password must be at least 8 characters long and contain at least one uppercase letter, one lowercase
-                    letter, and one number.
+                    Password must be at least 8 characters long and contain at least one
+                    uppercase letter, one lowercase letter, and one number.
                 </div>
             </div>
 
@@ -73,12 +69,13 @@
                         <i class="fas fa-key"></i>
                     </span>
                     <input type="password" class="form-control" id="password2" name="password2" required
-                        placeholder="Confirm your password" minlength="8">
+                        placeholder="Confirm your password" minlength="8" />
                     <button class="btn btn-outline-secondary" type="button" id="togglePassword2">
                         <i class="fas fa-eye"></i>
                     </button>
                 </div>
             </div>
+
         </div>
 
         <!-- Profile Information -->
@@ -93,7 +90,7 @@
                         <i class="fas fa-phone"></i>
                     </span>
                     <input type="tel" class="form-control" id="phone" name="phone"
-                        placeholder="Enter your phone number">
+                        placeholder="Enter your phone number" />
                 </div>
             </div>
 
@@ -106,27 +103,67 @@
                         <i class="fab fa-whatsapp"></i>
                     </span>
                     <input type="tel" class="form-control" id="whatsapp" name="whatsapp"
-                        placeholder="Enter your WhatsApp number">
+                        placeholder="Enter your WhatsApp number" />
                 </div>
             </div>
 
             <div class="mb-3">
-                <label for="location" class="form-label">
-                    <i class="fas fa-map-marker-alt me-2"></i>Location
+                <label for="profile_picture" class="form-label">
+                    <i class="fas fa-camera me-2"></i> Profile Picture
                 </label>
-                <div class="input-group">
-                    <span class="input-group-text">
-                        <i class="fas fa-map-marker-alt"></i>
-                    </span>
-                    <input type="text" class="form-control" id="location" name="location"
-                        placeholder="Enter your location">
+                <div class="file-upload">
+                    <label class="file-upload-label">
+                        <i class="fas fa-upload me-2"></i>Choose File
+                    </label>
+                    <input type="file" id="profile_picture" name="profile_picture" accept="image/*" />
                 </div>
+                <div id="file-name" class="form-text"></div>
             </div>
         </div>
 
         <!-- Role-specific fields -->
         <div id="student-fields" class="role-specific-fields">
             <h4 class="mb-3">Student Information</h4>
+            <div class="mb-3">
+                <label for="high_school" class="form-label">
+                    <i class="fas fa-school me-2"></i>High School
+                </label>
+                <div class="input-group">
+                    <span class="input-group-text">
+                        <i class="fas fa-school"></i>
+                    </span>
+                    <input type="number" class="form-control" id="high_school" name="high_school" required
+                        placeholder="Enter your high school name" />
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label for="current_year" class="form-label">
+                        <i class="fas fa-calendar-alt me-2"></i>Current Year
+                    </label>
+                    <div class="input-group">
+                        <span class="input-group-text">
+                            <i class="fas fa-calendar-alt"></i>
+                        </span>
+                        <input type="number" class="form-control" id="current_year" name="current_year" required min="1"
+                            max="4" placeholder="Year (1-4)" />
+                    </div>
+                </div>
+
+                <div class="col-md-6 mb-3">
+                    <label for="graduation_year" class="form-label">
+                        <i class="fas fa-graduation-cap me-2"></i>Graduation Year
+                    </label>
+                    <div class="input-group">
+                        <span class="input-group-text">
+                            <i class="fas fa-graduation-cap"></i>
+                        </span>
+                        <input type="number" class="form-control" id="graduation_year" name="graduation_year" required
+                            min="2024" max="2030" placeholder="Year" />
+                    </div>
+                </div>
+            </div>
 
             <div class="mb-3">
                 <label for="gender" class="form-label">
@@ -138,9 +175,9 @@
                     </span>
                     <select class="form-select" id="gender" name="gender" required>
                         <option value="">Select gender</option>
-                        <option value="M">Male</option>
-                        <option value="F">Female</option>
-                        <option value="O">Other</option>
+                        <option value="Male">Male</option>
+                        <option value="Female">Female</option>
+                        <option value="Prefer Not To Say">Prefer Not To Say</option>
                     </select>
                 </div>
             </div>
@@ -154,70 +191,83 @@
     </form>
 
     <div class="auth-links">
-        <p class="mb-0">Already have an account? <a href="{% url 'login' %}">Sign in here</a></p>
+        <p class="mb-0">
+            Already have an account? <a href="{% url 'login' %}">Sign in here</a>
+        </p>
     </div>
 </div>
 
 <script>
-    document.addEventListener('DOMContentLoaded', function () {
-        const roleSelect = document.getElementById('role');
-        const studentFields = document.getElementById('student-fields');
-        const recruiterFields = document.getElementById('recruiter-fields');
-        const form = document.querySelector('form');
-        const signupBtn = document.getElementById('signupBtn');
-        const togglePassword1 = document.getElementById('togglePassword1');
-        const togglePassword2 = document.getElementById('togglePassword2');
-        const password1 = document.getElementById('password1');
-        const password2 = document.getElementById('password2');
-        const profilePicture = document.getElementById('profile_picture');
-        const companyLogo = document.getElementById('company_logo');
-        const fileName = document.getElementById('file-name');
-        const logoName = document.getElementById('logo-name');
-        const usernameInput = document.getElementById('username');
-        const emailInput = document.getElementById('email');
+    document.addEventListener("DOMContentLoaded", function () {
 
-        
         // Validate passwords match
         function validatePasswords() {
             if (password1.value !== password2.value) {
                 password2.setCustomValidity("Passwords don't match");
             } else {
-                password2.setCustomValidity('');
+                password2.setCustomValidity("");
             }
         }
 
-        password1.addEventListener('change', validatePasswords);
-        password2.addEventListener('keyup', validatePasswords);
+        password1.addEventListener("change", validatePasswords);
+        password2.addEventListener("keyup", validatePasswords);
 
         // Check password requirements
-        password1.addEventListener('keyup', function () {
+        password1.addEventListener("keyup", function () {
             const hasUpperCase = /[A-Z]/.test(this.value);
             const hasLowerCase = /[a-z]/.test(this.value);
             const hasNumber = /\d/.test(this.value);
             const isLongEnough = this.value.length >= 8;
 
             if (!hasUpperCase || !hasLowerCase || !hasNumber || !isLongEnough) {
-                this.setCustomValidity('Password must contain at least 8 characters, including uppercase, lowercase, and number');
+                this.setCustomValidity(
+                    "Password must contain at least 8 characters, including uppercase, lowercase, and number"
+                );
             } else {
-                this.setCustomValidity('');
+                this.setCustomValidity("");
             }
+        });
+
+        // Handle form submission
+        form.addEventListener("submit", function (e) {
+            signupBtn.innerHTML =
+                '<i class="fas fa-spinner fa-spin me-2"></i>Signing you up...';
+            signupBtn.disabled = true;
         });
 
         // Toggle password visibility
         function togglePasswordVisibility(toggleBtn, passwordInput) {
-            toggleBtn.addEventListener('click', function () {
-                const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
-                passwordInput.setAttribute('type', type);
-                this.querySelector('i').classList.toggle('fa-eye');
-                this.querySelector('i').classList.toggle('fa-eye-slash');
+            toggleBtn.addEventListener("click", function () {
+                const type =
+                    passwordInput.getAttribute("type") === "password"
+                        ? "text"
+                        : "password";
+                passwordInput.setAttribute("type", type);
+                this.querySelector("i").classList.toggle("fa-eye");
+                this.querySelector("i").classList.toggle("fa-eye-slash");
             });
         }
 
         togglePasswordVisibility(togglePassword1, password1);
         togglePasswordVisibility(togglePassword2, password2);
 
+        // Handle file upload display
+        function handleFileUpload(input, displayElement) {
+            input.addEventListener("change", function () {
+                if (this.files.length > 0) {
+                    displayElement.textContent = this.files[0].name;
+                    displayElement.style.color = "var(--success-color)";
+                } else {
+                    displayElement.textContent = "";
+                    displayElement.style.color = "";
+                }
+            });
+        }
+
         handleFileUpload(profilePicture, fileName);
         handleFileUpload(companyLogo, logoName);
+
+
     });
 </script>
 {% endblock %}

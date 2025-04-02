@@ -206,32 +206,32 @@
                 </li>
                 <li class="nav-item">
                     <a class="nav-link {% if request.resolver_match.url_name == 'jobs' %}active{% endif %}" 
-                       href="{% url 'student:jobs' %}">
+                       href="">
                         <i class="bi bi-briefcase"></i> Browse Jobs
                     </a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link {% if request.resolver_match.url_name == 'applications' %}active{% endif %}" 
-                       href="{% url 'student:applications' %}">
+                       href="">
                         <i class="bi bi-file-earmark-text"></i> Applications
                     </a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link {% if request.resolver_match.url_name == 'interviews' %}active{% endif %}" 
-                       href="{% url 'student:interviews' %}">
+                       href="">
                         <i class="bi bi-calendar-check"></i> Interviews
                     </a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link {% if request.resolver_match.url_name == 'notifications' %}active{% endif %}" 
-                       href="{% url 'student:notifications' %}">
+                       href="">
                         <i class="bi bi-bell"></i> Notifications
                         <span class="notification-badge">3</span>
                     </a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link {% if request.resolver_match.url_name == 'settings' %}active{% endif %}" 
-                       href="{% url 'student:settings' %}">
+                       href="">
                         <i class="bi bi-gear"></i> Settings
                     </a>
                 </li>
@@ -280,18 +280,18 @@
                     </button>
                     <ul class="dropdown-menu dropdown-menu-end">
                         <li>
-                            <a class="dropdown-item" href="{% url 'student:profile' %}">
+                            <a class="dropdown-item" href="">
                                 <i class="bi bi-person"></i> My Profile
                             </a>
                         </li>
                         <li>
-                            <a class="dropdown-item" href="{% url 'student:settings' %}">
+                            <a class="dropdown-item" href="">
                                 <i class="bi bi-gear"></i> Settings
                             </a>
                         </li>
                         <li><hr class="dropdown-divider"></li>
                         <li>
-                            <a class="dropdown-item text-danger" href="{% url 'accounts:logout' %}">
+                            <a class="dropdown-item text-danger" href="{% url 'logout' %}">
                                 <i class="bi bi-box-arrow-right"></i> Logout
                             </a>
                         </li>

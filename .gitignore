@@ -6,3 +6,7 @@ db.sqlite3
 home/__pycache__/
 accounts/__pycache__/
 glance/__pycache__/
+
+accounts/migrations/__pycache__/
+home/migrations/__pycache__/
+student/migrations/__pycache__/

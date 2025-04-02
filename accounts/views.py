@@ -22,7 +22,12 @@ def signup(request):
         
         phone = request.POST.get('phone')
         whatsapp = request.POST.get('whatsapp')
-        location = request.POST.get('location')
+        current_year = request.POST.get("current_year")
+        graduation_year = request.POST.get("graduation_year")
+        high_school = request.POST.get("high_school")
+        gender = request.POST.get("gender")
+        
+        profile_picture = request.FILES.get("profile_picture")
         
         if User.objects.filter(username=username).exists():
             messages.error(request, 'Username already exists.')
@@ -43,14 +48,21 @@ def signup(request):
             password=password1,
             phone=phone,
             whatsapp=whatsapp,
-            location=location,
+            current_year = current_year,
+            graduation_year = graduation_year,
+            high_school = high_school,
+            gender = gender,
+            profile_picture = profile_picture,
             is_active=False  # User will be activated after email verification
         )
         
+        student.set_password(password1)
+        
+        student.save()
         # Send verification email
         send_verification_email(student, request)
         messages.success(request, 'Please check your email to verify your account.')
-        return redirect('signin')
+        return redirect('login')
         
     return render(request, 'accounts/signup.html')
 
@@ -82,10 +94,10 @@ def login_view(request):
 @login_required
 def logout_view(request):
     logout(request)
-    messages.success(request, 'You have been successfully logged out.')
     return redirect('home')
 
 def send_verification_email(user, request):
+    print("sending email")
     token = default_token_generator.make_token(user)
     uid = urlsafe_base64_encode(force_bytes(user.pk))
     verification_url = request.build_absolute_uri(f'/accounts/verify-email/{uid}/{token}/')
@@ -105,6 +117,8 @@ def send_verification_email(user, request):
         fail_silently=False,
         html_message=message
     )
+    
+    print("email sent")
 
 def verify_email(request, token):
     try:

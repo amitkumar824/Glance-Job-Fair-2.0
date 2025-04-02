@@ -3,7 +3,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.core.files.storage import default_storage
 from django.core.files.base import ContentFile
-from django.core.exceptions import ValidationError
+from django.core.exceptions import ValidationError, PermissionDenied
 from django.conf import settings
 from .models import Student
 from django.contrib.auth.models import User
@@ -15,6 +15,8 @@ import os
 def dashboard(request):
     if not hasattr(request.user, 'student'):
         raise PermissionDenied("This page is only accessible to students.")
+    
+    
     return render(request, 'student/dashboard.html')
 
 @login_required
