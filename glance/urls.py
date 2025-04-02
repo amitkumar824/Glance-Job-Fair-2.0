@@ -17,14 +17,8 @@ urlpatterns = [
     
     # Include accounts URLs
     path('accounts/', include('accounts.urls')),
-    
-    # Dashboard URLs
-    path('dashboard/', views.dashboard_home, name='dashboard_home'),
-    path('dashboard/profile/', views.profile, name='profile'),
-    path('dashboard/companies/', views.companies, name='companies'),
-    path('dashboard/applications/', views.applications, name='applications'),
-    path('dashboard/notifications/', views.notifications, name='notifications'),
-    path('dashboard/settings/', views.settings_view, name='settings'),
+    path("dashboard/", include("student.urls")),
+
 ]
 
 # Serve media files in development

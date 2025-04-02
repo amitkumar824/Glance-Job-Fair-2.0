@@ -1,6 +1,5 @@
 {% extends 'dashboard/base.html' %}
 {% load static %}
-{% load crispy_forms_tags %}
 
 {% block title %}Profile - Glance 2.0{% endblock %}
 
@@ -36,7 +35,7 @@
                                data-preview="profile-picture-preview">
                     </div>
                 </div>
-                <h4 class="profile-name">{{ user.get_full_name|default:user.email }}</h4>
+                <h4 class="profile-name">{{ user }}</h4>
                 <p class="text-muted">{{ user.email }}</p>
                 
                 <!-- Profile Status -->

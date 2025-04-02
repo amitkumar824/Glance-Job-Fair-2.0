@@ -10,6 +10,18 @@
     <link rel="stylesheet" href="{% static 'css/dashboard/style.css' %}">
     <link rel="stylesheet" href="{% static 'css/dashboard/dark-mode.css' %}">
     {% block extra_css %}{% endblock %}
+    <script>
+        // Immediately apply theme to prevent flashing
+        (function() {
+            const savedTheme = localStorage.getItem('theme');
+            if (savedTheme) {
+                document.documentElement.setAttribute('data-theme', savedTheme);
+            } else {
+                const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+                document.documentElement.setAttribute('data-theme', prefersDark ? 'dark' : 'light');
+            }
+        })();
+    </script>
 </head>
 <body>
     <div class="dashboard-wrapper">
@@ -21,25 +33,25 @@
             </div>
             <ul class="nav-links">
                 <li class="{% if request.resolver_match.url_name == 'dashboard_home' %}active{% endif %}">
-                    <a href="{% url 'dashboard_home' %}">
+                    <a href="{% url 'dashboard' %}">
                         <i class="fas fa-home"></i>
                         <span>Dashboard</span>
                     </a>
                 </li>
                 <li class="{% if request.resolver_match.url_name == 'profile' %}active{% endif %}">
-                    <a href="{% url 'profile' %}">
+                    <a href="{% url 'myProfile' %}">
                         <i class="fas fa-user"></i>
                         <span>Profile</span>
                     </a>
                 </li>
                 <li class="{% if request.resolver_match.url_name == 'companies' %}active{% endif %}">
-                    <a href="{% url 'companies' %}">
+                    <a href="{% url 'all_companies' %}">
                         <i class="fas fa-building"></i>
                         <span>Companies</span>
                     </a>
                 </li>
                 <li class="{% if request.resolver_match.url_name == 'applications' %}active{% endif %}">
-                    <a href="{% url 'applications' %}">
+                    <a href="{% url 'my_applications' %}">
                         <i class="fas fa-file-alt"></i>
                         <span>Applications</span>
                     </a>
