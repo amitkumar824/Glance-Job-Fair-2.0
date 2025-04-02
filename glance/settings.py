@@ -114,11 +114,20 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
 
-STATIC_URL = 'static/'
+STATIC_URL = '/static/'
 
 STATICFILES_DIRS = [
     BASE_DIR / "demo_static",
 ]
+<<<<<<< HEAD
+=======
+
+STATIC_ROOT = BASE_DIR / "staticfiles"
+
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / "media" 
+
+>>>>>>> 1687bb20997a2c7c07f6827d1b8042b382a0a73d
 
 # Media files (User uploaded files)
 MEDIA_URL = '/media/'
@@ -129,6 +138,7 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+<<<<<<< HEAD
 MESSAGE_TAGS={
    message.ERROR: 'danger',
     message.SUCCESS: 'success',
@@ -155,3 +165,17 @@ EMAIL_VERIFICATION = True
 LOGIN_REDIRECT_URL = 'home'
 LOGOUT_REDIRECT_URL = 'home'
 
+=======
+
+# Specifying the custom user model
+AUTH_USER_MODEL = 'accounts.User'
+
+# Messages configuration for displaying alerts
+MESSAGE_TAGS = {
+    message.DEBUG: 'alert-info',
+    message.INFO: 'alert-info',
+    message.SUCCESS: 'alert-success',
+    message.WARNING: 'alert-warning',
+    message.ERROR: 'alert-danger',
+}
+>>>>>>> 1687bb20997a2c7c07f6827d1b8042b382a0a73d

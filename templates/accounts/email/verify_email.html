@@ -20,7 +20,11 @@
         .button {
             display: inline-block;
             padding: 10px 20px;
+<<<<<<< HEAD
             background-color: #0d6efd;
+=======
+            background-color: #007bff;
+>>>>>>> 1687bb20997a2c7c07f6827d1b8042b382a0a73d
             color: white;
             text-decoration: none;
             border-radius: 5px;
@@ -36,10 +40,17 @@
 <body>
     <div class="container">
         <h2>Verify Your Email Address</h2>
+<<<<<<< HEAD
         <p>Hello {{ user.username }},</p>
         <p>Thank you for registering with Glance Job Fair. Please click the button below to verify your email address:</p>
         
         <a href="{{ verification_url }}" class="button">Verify Email</a>
+=======
+        <p>Hello {{ user.get_full_name|default:user.email }},</p>
+        <p>Thank you for registering with Glance Job Fair 2.0. Please click the button below to verify your email address:</p>
+        
+        <a href="{{ verification_url }}" class="button">Verify Email Address</a>
+>>>>>>> 1687bb20997a2c7c07f6827d1b8042b382a0a73d
         
         <p>If the button doesn't work, you can copy and paste this link into your browser:</p>
         <p>{{ verification_url }}</p>

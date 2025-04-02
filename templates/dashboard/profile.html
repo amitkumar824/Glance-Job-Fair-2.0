@@ -1,0 +1,710 @@
+{% extends 'dashboard/base.html' %}
+{% load static %}
+
+{% block title %}Profile - Glance 2.0{% endblock %}
+
+{% block page_title %}Profile{% endblock %}
+
+{% block content %}
+<div class="row">
+    <!-- Profile Overview -->
+    <div class="col-lg-4 mb-4">
+        <div class="card profile-card">
+            <div class="card-body text-center">
+                <div class="profile-picture mb-3">
+                    {% if user.profile_picture %}
+                        <img src="{{ user.profile_picture.url }}" 
+                             alt="Profile Picture" 
+                             class="rounded-circle mb-3"
+                             style="width: 150px; height: 150px; object-fit: cover;">
+                    {% else %}
+                        <img src="{% static 'img/dashboard/default-avatar.png' %}" 
+                             alt="Profile Picture" 
+                             class="rounded-circle mb-3"
+                             style="width: 150px; height: 150px; object-fit: cover;">
+                    {% endif %}
+                    <div class="mt-2">
+                        <label for="profile-picture" class="btn btn-outline-primary btn-sm">
+                            <i class="fas fa-camera"></i> Change Picture
+                        </label>
+                        <input type="file" 
+                               id="profile-picture" 
+                               name="profile_picture" 
+                               accept="image/*" 
+                               class="d-none"
+                               data-preview="profile-picture-preview">
+                    </div>
+                </div>
+                <h4 class="profile-name">{{ user }}</h4>
+                <p class="text-muted">{{ user.email }}</p>
+                
+                <!-- Profile Status -->
+                <div class="profile-status mb-3">
+                    <div class="progress mb-2">
+                        <div class="progress-bar profile-progress" 
+                             role="progressbar" 
+                             style="width: 75%;"
+                             aria-valuenow="75" 
+                             aria-valuemin="0" 
+                             aria-valuemax="100">
+                            75%
+                        </div>
+                    </div>
+                    <small class="text-muted">Profile Completion</small>
+                </div>
+
+                <!-- Status Badges -->
+                <div class="status-badges mb-3">
+                    {% if user.is_placed %}
+                        <span class="status-badge success">Placed</span>
+                    {% endif %}
+                    {% if user.is_shortlisted %}
+                        <span class="status-badge warning">Shortlisted</span>
+                    {% endif %}
+                    {% if user.is_btech %}
+                        <span class="status-badge info">Repositol</span>
+                    {% else %}
+                        <span class="status-badge secondary">Non-Rep</span>
+                    {% endif %}
+                </div>
+
+                <!-- Quick Actions -->
+                <div class="quick-actions">
+                    <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#resumeModal">
+                        <i class="fas fa-file-alt"></i> Upload Resume
+                    </button>
+                    <button class="btn btn-outline-primary btn-sm" data-bs-toggle="modal" data-bs-target="#certificatesModal">
+                        <i class="fas fa-certificate"></i> Add Certificates
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Profile Details -->
+    <div class="col-lg-8">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">Profile Information</h5>
+            </div>
+            <div class="card-body">
+                <form method="post" enctype="multipart/form-data" data-validate id="profile-form">
+                    {% csrf_token %}
+                    
+                    <!-- Personal Information -->
+                    <h6 class="mb-3 section-title"><i class="fas fa-user me-2"></i>Personal Information</h6>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Full Name <span class="text-danger">*</span></label>
+                            <input type="text" 
+                                   class="form-control" 
+                                   name="full_name" 
+                                   value="{{ user.get_full_name }}"
+                                   required
+                                   data-required="true">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Phone Number <span class="text-danger">*</span></label>
+                            <input type="tel" 
+                                   class="form-control" 
+                                   name="phone" 
+                                   value="{{ user.phone }}"
+                                   required
+                                   data-required="true">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Gender <span class="text-danger">*</span></label>
+                            <select class="form-select" name="gender" required data-required="true">
+                                <option value="">Select Gender</option>
+                                <option value="M" {% if user.gender == 'M' %}selected{% endif %}>Male</option>
+                                <option value="F" {% if user.gender == 'F' %}selected{% endif %}>Female</option>
+                                <option value="O" {% if user.gender == 'O' %}selected{% endif %}>Other</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Academic Information -->
+                    <h6 class="mb-3 mt-4 section-title"><i class="fas fa-graduation-cap me-2"></i>Academic Information</h6>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">College/University <span class="text-danger">*</span></label>
+                            <input type="text" 
+                                   class="form-control" 
+                                   name="college" 
+                                   value="{{ user.college }}"
+                                   required
+                                   data-required="true">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Current Year <span class="text-danger">*</span></label>
+                            <select class="form-select" name="current_year" required data-required="true">
+                                <option value="">Select Year</option>
+                                <option value="1" {% if user.current_year == 1 %}selected{% endif %}>1st Year</option>
+                                <option value="2" {% if user.current_year == 2 %}selected{% endif %}>2nd Year</option>
+                                <option value="3" {% if user.current_year == 3 %}selected{% endif %}>3rd Year</option>
+                                <option value="4" {% if user.current_year == 4 %}selected{% endif %}>4th Year</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Course <span class="text-danger">*</span></label>
+                            <select class="form-select" name="course" required data-required="true">
+                                <option value="">Select Course</option>
+                                <option value="BTECH" {% if user.course == 'BTECH' %}selected{% endif %}>B.Tech</option>
+                                <option value="MTECH" {% if user.course == 'MTECH' %}selected{% endif %}>M.Tech</option>
+                                <option value="BCA" {% if user.course == 'BCA' %}selected{% endif %}>BCA</option>
+                                <option value="MCA" {% if user.course == 'MCA' %}selected{% endif %}>MCA</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Specialization</label>
+                            <input type="text" 
+                                   class="form-control" 
+                                   name="specialization" 
+                                   value="{{ user.specialization }}">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">CPI/CGPA <span class="text-danger">*</span></label>
+                            <input type="number" 
+                                   class="form-control" 
+                                   name="cgpa" 
+                                   value="{{ user.cgpa }}"
+                                   step="0.01"
+                                   min="0"
+                                   max="10"
+                                   required
+                                   data-required="true">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Backlogs</label>
+                            <div class="row">
+                                <div class="col-6">
+                                    <div class="form-check">
+                                        <input class="form-check-input" 
+                                               type="radio" 
+                                               name="has_backlogs" 
+                                               id="no-backlogs" 
+                                               value="0"
+                                               {% if not user.has_backlogs %}checked{% endif %}>
+                                        <label class="form-check-label" for="no-backlogs">
+                                            No
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="col-6">
+                                    <div class="form-check">
+                                        <input class="form-check-input" 
+                                               type="radio" 
+                                               name="has_backlogs" 
+                                               id="yes-backlogs" 
+                                               value="1"
+                                               {% if user.has_backlogs %}checked{% endif %}>
+                                        <label class="form-check-label" for="yes-backlogs">
+                                            Yes
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Skills & Social -->
+                    <h6 class="mb-3 mt-4 section-title"><i class="fas fa-code me-2"></i>Skills & Social</h6>
+                    <div class="row">
+                        <div class="col-md-12 mb-3">
+                            <label class="form-label">Skills (comma separated)</label>
+                            <input type="text" 
+                                   class="form-control" 
+                                   name="skills" 
+                                   value="{{ user.skills }}"
+                                   placeholder="e.g. Python, JavaScript, React, Machine Learning">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">GitHub Profile</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fab fa-github"></i></span>
+                                <input type="url" 
+                                       class="form-control" 
+                                       name="github_profile" 
+                                       value="{{ user.github_profile }}"
+                                       placeholder="https://github.com/username">
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">LinkedIn Profile</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fab fa-linkedin"></i></span>
+                                <input type="url" 
+                                       class="form-control" 
+                                       name="linkedin_profile" 
+                                       value="{{ user.linkedin_profile }}"
+                                       placeholder="https://linkedin.com/in/username">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Submit Button -->
+                    <div class="mt-4 text-end">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save me-2"></i>Save Changes
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div class="card mb-4 mt-4">
+            <div class="card-header">
+                <h5 class="card-title mb-0">Theme Preferences</h5>
+            </div>
+            <div class="card-body">
+                <div class="theme-options">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <div class="theme-option-card" data-theme="light">
+                                <div class="theme-preview light-theme"></div>
+                                <div class="theme-info">
+                                    <h6>Light Mode</h6>
+                                    <p class="text-muted">Classic light appearance</p>
+                                </div>
+                                <div class="theme-check">
+                                    <i class="fas fa-check-circle"></i>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <div class="theme-option-card" data-theme="dark">
+                                <div class="theme-preview dark-theme"></div>
+                                <div class="theme-info">
+                                    <h6>Dark Mode</h6>
+                                    <p class="text-muted">Easy on the eyes</p>
+                                </div>
+                                <div class="theme-check">
+                                    <i class="fas fa-check-circle"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Resume Upload Modal -->
+<div class="modal fade" id="resumeModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Upload Resume</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="resume-form" method="post" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label for="resume" class="form-label">Select Resume (PDF only)</label>
+                        <input type="file" 
+                               class="form-control" 
+                               id="resume" 
+                               name="resume" 
+                               accept=".pdf" 
+                               required>
+                    </div>
+                    <div class="mb-3">
+                        <div class="form-check">
+                            <input class="form-check-input" 
+                                   type="checkbox" 
+                                   id="make-default" 
+                                   name="make_default" 
+                                   checked>
+                            <label class="form-check-label" for="make-default">
+                                Make this my default resume
+                            </label>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="submit" form="resume-form" class="btn btn-primary">Upload</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Certificates Modal -->
+<div class="modal fade" id="certificatesModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Add Certificates</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="certificate-form" method="post" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label for="certificate-name" class="form-label">Certificate Name</label>
+                        <input type="text" 
+                               class="form-control" 
+                               id="certificate-name" 
+                               name="certificate_name" 
+                               required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="issuing-organization" class="form-label">Issuing Organization</label>
+                        <input type="text" 
+                               class="form-control" 
+                               id="issuing-organization" 
+                               name="issuing_organization" 
+                               required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="issue-date" class="form-label">Issue Date</label>
+                        <input type="date" 
+                               class="form-control" 
+                               id="issue-date" 
+                               name="issue_date" 
+                               required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="certificate-file" class="form-label">Certificate File (PDF)</label>
+                        <input type="file" 
+                               class="form-control" 
+                               id="certificate-file" 
+                               name="certificate_file" 
+                               accept=".pdf" 
+                               required>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="submit" form="certificate-form" class="btn btn-primary">Add Certificate</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .profile-card {
+        border-radius: 12px;
+        overflow: hidden;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    }
+    
+    .profile-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+    }
+    
+    .profile-name {
+        font-weight: 600;
+        margin-top: 0.5rem;
+        background: linear-gradient(90deg, var(--primary-color), #6366f1);
+        -webkit-background-clip: text;
+        background-clip: text;
+        -webkit-text-fill-color: transparent;
+        color: transparent;
+    }
+    
+    .profile-picture img {
+        border: 4px solid rgba(99, 102, 241, 0.2);
+        transition: all 0.3s ease;
+    }
+    
+    .profile-picture img:hover {
+        border-color: var(--primary-color);
+    }
+    
+    .profile-progress {
+        background: linear-gradient(90deg, var(--primary-color), #6366f1);
+        border-radius: 1rem;
+    }
+    
+    .status-badges {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        justify-content: center;
+    }
+    
+    .status-badge {
+        padding: 0.25rem 0.75rem;
+        border-radius: 1rem;
+        font-size: 0.75rem;
+        font-weight: 600;
+    }
+    
+    .status-badge.success {
+        background-color: rgba(16, 185, 129, 0.2);
+        color: #10b981;
+    }
+    
+    .status-badge.warning {
+        background-color: rgba(245, 158, 11, 0.2);
+        color: #f59e0b;
+    }
+    
+    .status-badge.info {
+        background-color: rgba(59, 130, 246, 0.2);
+        color: #3b82f6;
+    }
+    
+    .status-badge.secondary {
+        background-color: rgba(100, 116, 139, 0.2);
+        color: #64748b;
+    }
+    
+    .quick-actions {
+        display: flex;
+        gap: 0.5rem;
+        justify-content: center;
+    }
+    
+    .section-title {
+        font-weight: 600;
+        color: var(--primary-color);
+        padding-bottom: 0.5rem;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+    }
+    
+    /* Theme Options */
+    .theme-options {
+        padding: 1rem 0;
+    }
+    
+    .theme-option-card {
+        border: 2px solid transparent;
+        border-radius: 12px;
+        padding: 1rem;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        transition: all 0.3s ease;
+    }
+    
+    .theme-option-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    }
+    
+    .theme-option-card.active {
+        border-color: var(--primary-color);
+    }
+    
+    .theme-preview {
+        width: 50px;
+        height: 50px;
+        border-radius: 8px;
+        flex-shrink: 0;
+    }
+    
+    .light-theme {
+        background-color: #f8fafc;
+        border: 1px solid #e2e8f0;
+    }
+    
+    .dark-theme {
+        background-color: #1e293b;
+        border: 1px solid #334155;
+    }
+    
+    .theme-info {
+        flex-grow: 1;
+    }
+    
+    .theme-info h6 {
+        margin-bottom: 0.25rem;
+    }
+    
+    .theme-info p {
+        font-size: 0.875rem;
+        margin-bottom: 0;
+    }
+    
+    .theme-check {
+        color: var(--primary-color);
+        display: none;
+    }
+    
+    .theme-option-card.active .theme-check {
+        display: block;
+    }
+    
+    /* Form styling */
+    .form-control:focus, .form-select:focus {
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 0.25rem rgba(99, 102, 241, 0.25);
+    }
+    
+    .input-group-text {
+        background-color: var(--primary-color);
+        color: white;
+        border-color: var(--primary-color);
+    }
+    
+    /* Animation effects */
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    
+    .card {
+        animation: fadeIn 0.5s ease forwards;
+    }
+    
+    /* File upload styling */
+    .custom-file-upload {
+        border: 1px dashed var(--border-color, #e2e8f0);
+        border-radius: 8px;
+        padding: 1.5rem;
+        text-align: center;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+    
+    .custom-file-upload:hover {
+        border-color: var(--primary-color);
+        background-color: rgba(99, 102, 241, 0.05);
+    }
+    
+    .custom-file-upload i {
+        font-size: 2rem;
+        color: var(--primary-color);
+        margin-bottom: 0.5rem;
+    }
+    
+    /* Required field indicator */
+    .form-label .text-danger {
+        font-weight: bold;
+    }
+    
+    /* Error state for form fields */
+    .form-control.is-invalid {
+        border-color: var(--danger-color, #ef4444);
+        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12' width='12' height='12' fill='none' stroke='%23ef4444'%3e%3ccircle cx='6' cy='6' r='4.5'/%3e%3cpath stroke-linejoin='round' d='M5.8 3.6h.4L6 6.5z'/%3e%3ccircle cx='6' cy='8.2' r='.6' fill='%23ef4444' stroke='none'/%3e%3c/svg%3e");
+        background-repeat: no-repeat;
+        background-position: right calc(0.375em + 0.1875rem) center;
+        background-size: calc(0.75em + 0.375rem) calc(0.75em + 0.375rem);
+    }
+    
+    .invalid-feedback {
+        color: var(--danger-color, #ef4444);
+        font-size: 0.875rem;
+        margin-top: 0.25rem;
+    }
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Initialize tooltips
+    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+    var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl);
+    });
+    
+    // Theme option selection
+    document.addEventListener('DOMContentLoaded', function() {
+        const themeOptions = document.querySelectorAll('.theme-option-card');
+        const currentTheme = document.documentElement.getAttribute('data-theme');
+        
+        // Set active theme
+        themeOptions.forEach(option => {
+            if (option.dataset.theme === currentTheme) {
+                option.classList.add('active');
+            }
+            
+            option.addEventListener('click', function() {
+                const theme = this.dataset.theme;
+                
+                // Update UI
+                themeOptions.forEach(opt => opt.classList.remove('active'));
+                this.classList.add('active');
+                
+                // Update theme
+                document.documentElement.setAttribute('data-theme', theme);
+                
+                // Save preference
+                fetch('/accounts/update-theme/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+                    },
+                    body: JSON.stringify({ theme: theme })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Update theme toggle in sidebar
+                        const themeToggle = document.getElementById('theme-toggle');
+                        if (themeToggle) {
+                            const moonIcon = themeToggle.querySelector('.fa-moon');
+                            const sunIcon = themeToggle.querySelector('.fa-sun');
+                            
+                            if (theme === 'dark') {
+                                moonIcon.style.display = 'none';
+                                sunIcon.style.display = 'inline-block';
+                                themeToggle.querySelector('span').textContent = 'Light Mode';
+                            } else {
+                                moonIcon.style.display = 'inline-block';
+                                sunIcon.style.display = 'none';
+                                themeToggle.querySelector('span').textContent = 'Dark Mode';
+                            }
+                        }
+                    }
+                })
+                .catch(error => console.error('Error updating theme:', error));
+            });
+        });
+        
+        // Profile picture preview
+        const profilePictureInput = document.getElementById('profile-picture');
+        if (profilePictureInput) {
+            profilePictureInput.addEventListener('change', function() {
+                const file = this.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        const previewId = profilePictureInput.dataset.preview;
+                        const preview = document.querySelector('.profile-picture img');
+                        if (preview) {
+                            preview.src = e.target.result;
+                        }
+                    }
+                    reader.readAsDataURL(file);
+                }
+            });
+        }
+        
+        // Form validation
+        const profileForm = document.getElementById('profile-form');
+        if (profileForm) {
+            profileForm.addEventListener('submit', function(e) {
+                const requiredFields = this.querySelectorAll('[data-required="true"]');
+                let isValid = true;
+                
+                requiredFields.forEach(field => {
+                    if (!field.value.trim()) {
+                        isValid = false;
+                        field.classList.add('is-invalid');
+                    } else {
+                        field.classList.remove('is-invalid');
+                    }
+                });
+                
+                if (!isValid) {
+                    e.preventDefault();
+                    alert('Please fill in all required fields.');
+                }
+            });
+        }
+    });
+</script>
+{% endblock %}
