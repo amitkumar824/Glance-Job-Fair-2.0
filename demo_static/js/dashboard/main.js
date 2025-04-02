@@ -32,14 +32,21 @@ document.addEventListener('DOMContentLoaded', function() {
             updateThemeIcon(newTheme);
             
             // Send theme preference to server
-            fetch('/update-theme/', {
+            fetch('/accounts/update-theme/', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                     'X-CSRFToken': getCookie('csrftoken')
                 },
                 body: JSON.stringify({ theme: newTheme })
-            });
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (!data.success) {
+                    console.error('Failed to update theme:', data.error);
+                }
+            })
+            .catch(error => console.error('Error updating theme:', error));
         });
     }
 });
@@ -49,8 +56,10 @@ function updateThemeIcon(theme) {
     const themeToggle = document.getElementById('theme-toggle');
     if (themeToggle) {
         const icon = themeToggle.querySelector('i');
+        const text = themeToggle.querySelector('span');
         if (icon) {
             icon.className = theme === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
+            text.textContent = theme === 'dark' ? 'Light Mode' : 'Dark Mode';
         }
     }
 }

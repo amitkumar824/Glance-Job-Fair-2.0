@@ -19,6 +19,10 @@ class Student(User):
         blank=True,
         null=True
     )
+    theme_preference = models.CharField(max_length=10, default='light', choices=[
+        ('light', 'Light Mode'),
+        ('dark', 'Dark Mode')
+    ])
 
     high_school = models.CharField(max_length=200)
     current_year = models.IntegerField(
