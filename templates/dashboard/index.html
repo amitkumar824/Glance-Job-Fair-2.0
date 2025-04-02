@@ -11,7 +11,7 @@
             <div class="card-body">
                 <div class="row align-items-center">
                     <div class="col-md-8">
-                        <h4>Welcome back, {{ user.get_full_name|default:user.username }}!</h4>
+                        <h4 class="welcome-title">Welcome back, {{ user.get_full_name|default:user.username }}! <span class="wave-emoji">👋</span></h4>
                         <p class="text-muted">
                             {% if user.is_placed %}
                             Congratulations on your placement! Your next steps are available in your profile.
@@ -19,7 +19,7 @@
                             Complete your profile to improve your chances of landing your dream job.
                             {% endif %}
                         </p>
-                        <div class="mt-3">
+                        <div class="mt-3 action-buttons">
                             <a href="{% url 'profile' %}" class="btn btn-primary">
                                 <i class="fas fa-user-edit"></i> Update Profile
                             </a>
@@ -34,7 +34,7 @@
                         <div class="progress-circle" style="--percentage: {{ profile_completion|default:30 }};">
                             <div class="progress-circle-inner">
                                 <strong>{{ profile_completion|default:30 }}%</strong>
-                                <span>Completed</span>
+                                <span>Profile Completed</span>
                             </div>
                         </div>
                     </div>
@@ -110,12 +110,13 @@
         </div>
     </div>
 
-    <!-- Upcoming Events -->
+    <!-- Upcoming Events and Notifications Row -->
     <div class="row mb-4">
         <div class="col-md-8">
             <div class="card">
-                <div class="card-header">
+                <div class="card-header d-flex justify-content-between align-items-center">
                     <h5 class="card-title mb-0">Upcoming Events</h5>
+                    <span class="badge rounded-pill bg-primary">{{ upcoming_events|length }} Events</span>
                 </div>
                 <div class="card-body">
                     {% if upcoming_events %}
@@ -132,7 +133,14 @@
                                 <tbody>
                                     {% for event in upcoming_events %}
                                     <tr>
-                                        <td>{{ event.name }}</td>
+                                        <td>
+                                            <div class="d-flex align-items-center">
+                                                <div class="event-icon">
+                                                    <i class="fas fa-calendar-alt"></i>
+                                                </div>
+                                                <span>{{ event.name }}</span>
+                                            </div>
+                                        </td>
                                         <td>{{ event.date }}</td>
                                         <td>{{ event.location }}</td>
                                         <td>
@@ -144,7 +152,12 @@
                             </table>
                         </div>
                     {% else %}
-                        <p class="text-muted">No upcoming events at the moment.</p>
+                        <div class="empty-state">
+                            <div class="empty-state-icon">
+                                <i class="fas fa-calendar-times"></i>
+                            </div>
+                            <p class="empty-state-text">No upcoming events at the moment.</p>
+                        </div>
                     {% endif %}
                 </div>
             </div>
@@ -153,8 +166,9 @@
         <!-- Notifications -->
         <div class="col-md-4">
             <div class="card">
-                <div class="card-header">
+                <div class="card-header d-flex justify-content-between align-items-center">
                     <h5 class="card-title mb-0">Recent Notifications</h5>
+                    <span class="badge rounded-pill bg-danger">{{ notifications|length }}</span>
                 </div>
                 <div class="card-body">
                     <div class="notifications-list">
@@ -167,19 +181,24 @@
                                     <div class="notification-content">
                                         <h6>{{ notification.title }}</h6>
                                         <p>{{ notification.message }}</p>
-                                        <span class="time">{{ notification.time }}</span>
+                                        <span class="time"><i class="far fa-clock me-1"></i>{{ notification.time }}</span>
                                     </div>
                                 </div>
                             {% endfor %}
                             {% if notifications|length > 3 %}
                                 <div class="text-center mt-3">
-                                    <a href="{% url 'notifications' %}" class="btn btn-sm btn-outline-primary">
+                                    <a href="{% url 'notifications' %}" class="btn btn-sm btn-outline-danger">
                                         View All Notifications
                                     </a>
                                 </div>
                             {% endif %}
                         {% else %}
-                            <p class="text-muted">No new notifications.</p>
+                            <div class="empty-state">
+                                <div class="empty-state-icon">
+                                    <i class="fas fa-bell-slash"></i>
+                                </div>
+                                <p class="empty-state-text">No new notifications.</p>
+                            </div>
                         {% endif %}
                     </div>
                 </div>
@@ -191,20 +210,22 @@
     <div class="row">
         <div class="col-12">
             <div class="card">
-                <div class="card-header">
+                <div class="card-header d-flex justify-content-between align-items-center">
                     <h5 class="card-title mb-0">Recent Job Openings</h5>
+                    <a href="{% url 'companies' %}" class="btn btn-sm btn-outline-primary">View All</a>
                 </div>
                 <div class="card-body">
                     <div class="row">
-                        <!-- Placeholder job cards -->
+                        <!-- Job cards -->
                         <div class="col-md-4 mb-3">
                             <div class="job-card">
                                 <div class="company-logo">
                                     <img src="{% static 'img/dashboard/companies/microsoft.png' %}" alt="Microsoft">
                                 </div>
                                 <div class="job-details">
+                                    <div class="job-badge">New</div>
                                     <h5>Software Developer</h5>
-                                    <p class="company-name">Microsoft</p>
+                                    <p class="company-name"><i class="fas fa-building me-1"></i> Microsoft</p>
                                     <div class="job-info">
                                         <span><i class="fas fa-map-marker-alt"></i> Hyderabad</span>
                                         <span><i class="fas fa-rupee-sign"></i> 12-18 LPA</span>
@@ -225,8 +246,9 @@
                                     <img src="{% static 'img/dashboard/companies/google.png' %}" alt="Google">
                                 </div>
                                 <div class="job-details">
+                                    <div class="job-badge">Featured</div>
                                     <h5>Data Scientist</h5>
-                                    <p class="company-name">Google</p>
+                                    <p class="company-name"><i class="fas fa-building me-1"></i> Google</p>
                                     <div class="job-info">
                                         <span><i class="fas fa-map-marker-alt"></i> Bangalore</span>
                                         <span><i class="fas fa-rupee-sign"></i> 15-22 LPA</span>
@@ -247,8 +269,9 @@
                                     <img src="{% static 'img/dashboard/companies/amazon.png' %}" alt="Amazon">
                                 </div>
                                 <div class="job-details">
+                                    <div class="job-badge">Hot</div>
                                     <h5>Full Stack Developer</h5>
-                                    <p class="company-name">Amazon</p>
+                                    <p class="company-name"><i class="fas fa-building me-1"></i> Amazon</p>
                                     <div class="job-info">
                                         <span><i class="fas fa-map-marker-alt"></i> Pune</span>
                                         <span><i class="fas fa-rupee-sign"></i> 14-20 LPA</span>
@@ -263,9 +286,6 @@
                             </div>
                         </div>
                     </div>
-                    <div class="text-center mt-3">
-                        <a href="{% url 'companies' %}" class="btn btn-outline-primary">View All Jobs</a>
-                    </div>
                 </div>
             </div>
         </div>
@@ -277,13 +297,51 @@
 <style>
     /* Dashboard Summary Styles */
     .dashboard-summary {
-        padding: 1rem 0;
+        padding: 1.5rem 0;
+    }
+    
+    /* Welcome Section */
+    .welcome-title {
+        font-size: 1.5rem;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+        display: flex;
+        align-items: center;
+    }
+    
+    .wave-emoji {
+        margin-left: 0.5rem;
+        font-size: 1.5rem;
+        animation: wave 1.5s infinite;
+        display: inline-block;
+        transform-origin: 70% 70%;
+    }
+    
+    @keyframes wave {
+        0% { transform: rotate(0deg); }
+        10% { transform: rotate(14deg); }
+        20% { transform: rotate(-8deg); }
+        30% { transform: rotate(14deg); }
+        40% { transform: rotate(-4deg); }
+        50% { transform: rotate(10deg); }
+        60% { transform: rotate(0deg); }
+        100% { transform: rotate(0deg); }
+    }
+    
+    .action-buttons {
+        display: flex;
+        gap: 0.75rem;
     }
     
     /* Stats Card Styles */
     .stat-card {
         position: relative;
         overflow: hidden;
+        transition: all 0.3s ease;
+    }
+    
+    .stat-card:hover {
+        transform: translateY(-5px);
     }
     
     .stat-icon {
@@ -292,17 +350,18 @@
         justify-content: center;
         width: 50px;
         height: 50px;
-        border-radius: 50%;
+        border-radius: 12px;
         margin-bottom: 1rem;
+        font-size: 1.25rem;
     }
     
     .bg-primary-light {
-        background-color: rgba(37, 99, 235, 0.1);
+        background-color: rgba(67, 97, 238, 0.1);
         color: var(--primary-color);
     }
     
     .bg-success-light {
-        background-color: rgba(34, 197, 94, 0.1);
+        background-color: rgba(16, 185, 129, 0.1);
         color: var(--success-color);
     }
     
@@ -320,18 +379,74 @@
         font-size: 0.875rem;
         color: var(--secondary-color);
         margin-bottom: 0.5rem;
+        font-weight: 500;
     }
     
     .stat-value {
         font-size: 2rem;
-        font-weight: 600;
+        font-weight: 700;
         margin-bottom: 0.5rem;
+        background: linear-gradient(90deg, var(--primary-color), #6366f1);
+        -webkit-background-clip: text;
+        background-clip: text;
+        -webkit-text-fill-color: transparent;
+        color: transparent;
     }
     
     .stat-link a {
         color: var(--primary-color);
         text-decoration: none;
         font-size: 0.875rem;
+        display: flex;
+        align-items: center;
+        gap: 0.25rem;
+        transition: all 0.2s ease;
+    }
+    
+    .stat-link a:hover {
+        gap: 0.5rem;
+    }
+    
+    /* Card Header Styles */
+    .card-header {
+        background-color: white;
+        border-bottom: 1px solid rgba(226, 232, 240, 0.6);
+        padding: 1rem 1.25rem;
+    }
+    
+    .card-title {
+        font-weight: 600;
+        color: #1e293b;
+    }
+    
+    /* Table Styles */
+    .table {
+        margin-bottom: 0;
+    }
+    
+    .table thead th {
+        font-weight: 600;
+        color: var(--secondary-color);
+        border-bottom: 1px solid #e2e8f0;
+        padding: 1rem;
+        font-size: 0.875rem;
+    }
+    
+    .table tbody td {
+        padding: 1rem;
+        vertical-align: middle;
+    }
+    
+    .event-icon {
+        width: 32px;
+        height: 32px;
+        background-color: rgba(67, 97, 238, 0.1);
+        color: var(--primary-color);
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: 0.75rem;
     }
     
     /* Notifications List */
@@ -345,22 +460,28 @@
         display: flex;
         gap: 1rem;
         padding-bottom: 1rem;
-        border-bottom: 1px solid #e2e8f0;
+        border-bottom: 1px solid rgba(226, 232, 240, 0.6);
+    }
+    
+    .notification-item:last-child {
+        border-bottom: none;
     }
     
     .notification-icon {
         width: 40px;
         height: 40px;
-        background-color: rgba(37, 99, 235, 0.1);
+        background-color: rgba(67, 97, 238, 0.1);
         color: var(--primary-color);
-        border-radius: 50%;
+        border-radius: 10px;
         display: flex;
         align-items: center;
         justify-content: center;
+        flex-shrink: 0;
     }
     
     .notification-content h6 {
         margin-bottom: 0.25rem;
+        font-weight: 600;
     }
     
     .notification-content p {
@@ -372,23 +493,26 @@
     .notification-content .time {
         font-size: 0.75rem;
         color: #94a3b8;
+        display: flex;
+        align-items: center;
     }
     
     /* Progress Circle */
     .progress-circle {
         position: relative;
-        width: 120px;
-        height: 120px;
+        width: 140px;
+        height: 140px;
         border-radius: 50%;
         background: conic-gradient(var(--primary-color) calc(var(--percentage) * 1%), #e2e8f0 0);
         display: inline-flex;
         align-items: center;
         justify-content: center;
+        box-shadow: 0 4px 12px rgba(67, 97, 238, 0.15);
     }
     
     .progress-circle-inner {
-        width: 100px;
-        height: 100px;
+        width: 110px;
+        height: 110px;
         background: white;
         border-radius: 50%;
         display: flex;
@@ -398,8 +522,8 @@
     }
     
     .progress-circle strong {
-        font-size: 1.5rem;
-        font-weight: 600;
+        font-size: 1.75rem;
+        font-weight: 700;
         color: var(--primary-color);
     }
     
@@ -410,16 +534,31 @@
     
     /* Job Card */
     .job-card {
-        border: 1px solid #e2e8f0;
-        border-radius: 0.5rem;
+        border: 1px solid rgba(226, 232, 240, 0.6);
+        border-radius: var(--card-border-radius);
         padding: 1.5rem;
         display: flex;
         transition: all 0.3s ease;
+        position: relative;
+        background-color: white;
     }
     
     .job-card:hover {
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-        transform: translateY(-2px);
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+        transform: translateY(-5px);
+    }
+    
+    .job-badge {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        background: linear-gradient(90deg, var(--primary-color), #6366f1);
+        color: white;
+        padding: 0.25rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        box-shadow: 0 2px 8px rgba(67, 97, 238, 0.2);
     }
     
     .company-logo {
@@ -429,11 +568,17 @@
         display: flex;
         align-items: center;
         justify-content: center;
+        background-color: #f8fafc;
+        border-radius: 12px;
+        padding: 0.5rem;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        flex-shrink: 0;
     }
     
     .company-logo img {
         max-width: 100%;
         max-height: 100%;
+        object-fit: contain;
     }
     
     .job-details {
@@ -442,23 +587,94 @@
     
     .job-details h5 {
         margin-bottom: 0.25rem;
+        font-weight: 600;
     }
     
     .company-name {
         color: var(--secondary-color);
         margin-bottom: 0.5rem;
+        font-size: 0.875rem;
+        display: flex;
+        align-items: center;
     }
     
     .job-info {
         display: flex;
         gap: 1rem;
-        margin-bottom: 0.5rem;
+        margin-bottom: 0.75rem;
         font-size: 0.875rem;
         color: #64748b;
     }
     
     .job-tags {
-        margin-bottom: 0.5rem;
+        margin-bottom: 0.75rem;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+    }
+    
+    .job-tags .badge {
+        padding: 0.35rem 0.75rem;
+        font-weight: 500;
+        border-radius: 20px;
+        background-color: #f1f5f9;
+        border: 1px solid #e2e8f0;
+    }
+    
+    /* Empty State */
+    .empty-state {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 2rem 0;
+        color: #94a3b8;
+    }
+    
+    .empty-state-icon {
+        font-size: 2.5rem;
+        margin-bottom: 1rem;
+        color: #cbd5e1;
+    }
+    
+    .empty-state-text {
+        font-size: 0.875rem;
+    }
+    
+    /* Responsive Styles */
+    @media (max-width: 768px) {
+        .action-buttons {
+            flex-direction: column;
+            gap: 0.5rem;
+            align-items: flex-start;
+        }
+        
+        .job-card {
+            flex-direction: column;
+        }
+        
+        .company-logo {
+            margin-bottom: 1rem;
+            margin-right: 0;
+        }
     }
 </style>
-{% endblock %} 
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Animation for stat cards
+    document.addEventListener('DOMContentLoaded', function() {
+        const statCards = document.querySelectorAll('.stat-card');
+        statCards.forEach((card, index) => {
+            card.style.animationDelay = `${index * 0.1}s`;
+        });
+        
+        // Update notification count
+        const notificationCount = document.getElementById('notification-count');
+        if (notificationCount) {
+            notificationCount.textContent = '{{ notifications|length }}';
+        }
+    });
+</script>
+{% endblock %}

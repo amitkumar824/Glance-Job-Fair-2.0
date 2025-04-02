@@ -13,11 +13,14 @@ urlpatterns = [
     path('about/', views.about, name='about'),
     path('contact/', views.contact, name='contact'),
     
+    
+    
     # Include accounts URLs
     path('accounts/', include('accounts.urls')),
     
     # Dashboard URLs
     path('dashboard/', views.dashboard_home, name='dashboard_home'),
+    path('dashboard/profile/', views.profile, name='profile'),
     path('dashboard/companies/', views.companies, name='companies'),
     path('dashboard/applications/', views.applications, name='applications'),
     path('dashboard/notifications/', views.notifications, name='notifications'),

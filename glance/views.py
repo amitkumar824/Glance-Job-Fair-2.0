@@ -123,6 +123,17 @@ def notifications(request):
     return render(request, 'dashboard/notifications.html', context)
 
 @login_required
+def profile(request):
+    """View for user profile."""
+    # Calculate profile completion percentage (placeholder)
+    profile_completion = 75
+    
+    context = {
+        'profile_completion': profile_completion,
+    }
+    return render(request, 'dashboard/profile.html', context)
+
+@login_required
 def settings_view(request):
     """View for user settings."""
     context = {}
