@@ -1,341 +1,139 @@
+{% load static %}
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="{{ user.theme_preference|default:'light' }}">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}Student Dashboard - Glance Job Fair{% endblock %}</title>
-    
-    <!-- Bootstrap CSS -->
+    <title>{% block title %}Student Dashboard - Glance 2.0{% endblock %}</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Bootstrap Icons -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
-    <!-- Custom CSS -->
-    <style>
-        :root {
-            --primary-color: #0d6efd;
-            --secondary-color: #6c757d;
-            --success-color: #198754;
-            --info-color: #0dcaf0;
-            --warning-color: #ffc107;
-            --danger-color: #dc3545;
-            --light-color: #f8f9fa;
-            --dark-color: #212529;
-            --sidebar-width: 280px;
-            --navbar-height: 60px;
-        }
-        
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: var(--light-color);
-            color: var(--dark-color);
-        }
-        
-        /* Sidebar Styles */
-        .sidebar {
-            position: fixed;
-            top: 0;
-            left: 0;
-            height: 100vh;
-            width: var(--sidebar-width);
-            background-color: white;
-            box-shadow: 0 0 10px rgba(0,0,0,0.1);
-            transition: all 0.3s ease;
-            z-index: 1000;
-            padding-top: var(--navbar-height);
-        }
-        
-        .sidebar.collapsed {
-            margin-left: calc(-1 * var(--sidebar-width));
-        }
-        
-        .sidebar .nav-link {
-            color: var(--dark-color);
-            padding: 0.8rem 1.5rem;
-            margin: 0.2rem 0;
-            border-radius: 0.5rem;
-            transition: all 0.3s ease;
-        }
-        
-        .sidebar .nav-link:hover {
-            background-color: var(--light-color);
-            color: var(--primary-color);
-        }
-        
-        .sidebar .nav-link.active {
-            background-color: var(--primary-color);
-            color: white;
-        }
-        
-        .sidebar .nav-link i {
-            margin-right: 0.8rem;
-            font-size: 1.1rem;
-        }
-        
-        /* Navbar Styles */
-        .navbar {
-            height: var(--navbar-height);
-            background-color: white;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            position: fixed;
-            top: 0;
-            right: 0;
-            left: var(--sidebar-width);
-            z-index: 999;
-            transition: all 0.3s ease;
-        }
-        
-        .navbar.expanded {
-            left: 0;
-        }
-        
-        /* Main Content */
-        .main-content {
-            margin-left: var(--sidebar-width);
-            margin-top: var(--navbar-height);
-            padding: 2rem;
-            transition: all 0.3s ease;
-        }
-        
-        .main-content.expanded {
-            margin-left: 0;
-        }
-        
-        /* Card Styles */
-        .dashboard-card {
-            border-radius: 1rem;
-            border: none;
-            box-shadow: 0 0.5rem 1rem rgba(0,0,0,0.1);
-            transition: transform 0.3s ease;
-            background-color: white;
-        }
-        
-        .dashboard-card:hover {
-            transform: translateY(-5px);
-        }
-        
-        /* Profile Status */
-        .profile-status {
-            position: fixed;
-            top: calc(var(--navbar-height) + 1rem);
-            right: 1rem;
-            z-index: 998;
-        }
-        
-        /* Notification Badge */
-        .notification-badge {
-            position: absolute;
-            top: -5px;
-            right: -5px;
-            background-color: var(--danger-color);
-            color: white;
-            border-radius: 50%;
-            padding: 0.25rem 0.5rem;
-            font-size: 0.75rem;
-        }
-        
-        /* Form Styles */
-        .form-control:focus {
-            border-color: var(--primary-color);
-            box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
-        }
-        
-        /* Required Field Indicator */
-        .required-field::after {
-            content: " *";
-            color: var(--danger-color);
-        }
-        
-        /* Progress Bar */
-        .progress {
-            height: 0.5rem;
-            border-radius: 1rem;
-        }
-        
-        /* Status Badges */
-        .status-badge {
-            padding: 0.5rem 1rem;
-            border-radius: 2rem;
-            font-size: 0.875rem;
-        }
-        
-        /* Responsive Adjustments */
-        @media (max-width: 768px) {
-            .sidebar {
-                margin-left: calc(-1 * var(--sidebar-width));
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="{% static 'css/dashboard/style.css' %}">
+    <link rel="stylesheet" href="{% static 'css/dashboard/dark-mode.css' %}">
+    {% block extra_css %}{% endblock %}
+    <script>
+        // Immediately apply theme to prevent flashing
+        (function() {
+            const savedTheme = localStorage.getItem('theme');
+            if (savedTheme) {
+                document.documentElement.setAttribute('data-theme', savedTheme);
+            } else {
+                const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+                document.documentElement.setAttribute('data-theme', prefersDark ? 'dark' : 'light');
             }
-            
-            .sidebar.show {
-                margin-left: 0;
-            }
-            
-            .navbar {
-                left: 0;
-            }
-            
-            .main-content {
-                margin-left: 0;
-            }
-        }
-    </style>
+        })();
+    </script>
 </head>
 <body>
-    <!-- Sidebar -->
-    <div class="sidebar" id="sidebar">
-        <div class="p-3">
-            <div class="text-center mb-4">
-                <img src="{% if user.student.profile_picture %}{{ user.student.profile_picture.url }}{% else %}/static/images/default-avatar.png{% endif %}" 
-                     alt="Profile" 
-                     class="rounded-circle mb-2"
-                     style="width: 80px; height: 80px; object-fit: cover;">
-                <h6 class="mb-1">{{ user.get_full_name|default:user.username }}</h6>
-                <small class="text-muted">{{ user.student.current_year }} Year</small>
+    <div class="dashboard-wrapper">
+        <!-- Sidebar -->
+        <nav class="sidebar">
+            <div class="sidebar-header">
+                <img src="{% static 'img/home/logo.svg' %}" alt="Glance 2.0 Logo" class="logo">
+                <h3>Glance 2.0</h3>
             </div>
-            
-            <ul class="nav flex-column">
-                <li class="nav-item">
-                    <a class="nav-link {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}" 
-                       href="{% url 'student:dashboard' %}">
-                        <i class="bi bi-speedometer2"></i> Dashboard
+            <ul class="nav-links">
+                <li class="{% if request.resolver_match.url_name == 'dashboard_home' %}active{% endif %}">
+                    <a href="{% url 'dashboard' %}">
+                        <i class="fas fa-home"></i>
+                        <span>Dashboard</span>
                     </a>
                 </li>
-                <li class="nav-item">
-                    <a class="nav-link {% if request.resolver_match.url_name == 'profile' %}active{% endif %}" 
-                       href="{% url 'student:profile' %}">
-                        <i class="bi bi-person"></i> My Profile
+                <li class="{% if request.resolver_match.url_name == 'profile' %}active{% endif %}">
+                    <a href="{% url 'myProfile' %}">
+                        <i class="fas fa-user"></i>
+                        <span>Profile</span>
                     </a>
                 </li>
-                <li class="nav-item">
-                    <a class="nav-link {% if request.resolver_match.url_name == 'jobs' %}active{% endif %}" 
-                       href="">
-                        <i class="bi bi-briefcase"></i> Browse Jobs
+                <li class="{% if request.resolver_match.url_name == 'companies' %}active{% endif %}">
+                    <a href="{% url 'all_companies' %}">
+                        <i class="fas fa-building"></i>
+                        <span>Companies</span>
                     </a>
                 </li>
-                <li class="nav-item">
-                    <a class="nav-link {% if request.resolver_match.url_name == 'applications' %}active{% endif %}" 
-                       href="">
-                        <i class="bi bi-file-earmark-text"></i> Applications
+                <li class="{% if request.resolver_match.url_name == 'applications' %}active{% endif %}">
+                    <a href="{% url 'my_applications' %}">
+                        <i class="fas fa-file-alt"></i>
+                        <span>Applications</span>
                     </a>
                 </li>
-                <li class="nav-item">
-                    <a class="nav-link {% if request.resolver_match.url_name == 'interviews' %}active{% endif %}" 
-                       href="">
-                        <i class="bi bi-calendar-check"></i> Interviews
+                <li class="{% if request.resolver_match.url_name == 'notifications' %}active{% endif %}">
+                    <a href="{% url 'notifications' %}">
+                        <i class="fas fa-bell"></i>
+                        <span>Notifications</span>
+                        <span class="notification-badge" id="notification-count">0</span>
                     </a>
                 </li>
-                <li class="nav-item">
-                    <a class="nav-link {% if request.resolver_match.url_name == 'notifications' %}active{% endif %}" 
-                       href="">
-                        <i class="bi bi-bell"></i> Notifications
-                        <span class="notification-badge">3</span>
+                <li>
+                    <a href="#" id="theme-toggle" class="theme-toggle">
+                        <i class="fas fa-moon"></i>
+                        
+                        <span>Dark Mode</span>
                     </a>
                 </li>
-                <li class="nav-item">
-                    <a class="nav-link {% if request.resolver_match.url_name == 'settings' %}active{% endif %}" 
-                       href="">
-                        <i class="bi bi-gear"></i> Settings
+                <li>
+                    <a href="{% url 'logout' %}">
+                        <i class="fas fa-sign-out-alt"></i>
+                        <span>Logout</span>
                     </a>
                 </li>
             </ul>
-        </div>
-    </div>
+        </nav>
 
-    <!-- Navbar -->
-    <nav class="navbar navbar-expand-lg">
-        <div class="container-fluid">
-            <button class="btn btn-link text-dark" id="sidebarToggle">
-                <i class="bi bi-list fs-4"></i>
-            </button>
-            
-            <div class="ms-auto d-flex align-items-center">
-                <!-- Profile Status -->
-                <div class="me-3">
-                    <div class="d-flex align-items-center">
-                        <div class="progress me-2" style="width: 100px;">
-                            <div class="progress-bar bg-success" role="progressbar" style="width: 75%"></div>
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Top Header -->
+            <header class="top-header">
+                <div class="header-left">
+                    <button class="sidebar-toggle">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                    <h1 class="page-title">{% block page_title %}Dashboard{% endblock %}</h1>
+                </div>
+                <div class="header-right">
+                    <div class="search-box">
+                        <i class="fas fa-search"></i>
+                        <input type="text" placeholder="Search...">
+                    </div>
+                    <div class="user-menu">
+                        {% if user.profile_picture %}
+                            <img src="{{ user.profile_picture.url }}" alt="Profile" class="avatar">
+                        {% else %}
+                            <img src="{% static 'img/dashboard/default-avatar.png' %}" alt="Profile" class="avatar">
+                        {% endif %}
+                        <div class="dropdown">
+                            <button class="dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                                {{ user.get_full_name|default:user.username }}
+                            </button>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" href="{% url 'myProfile' %}"><i class="fas fa-user me-2"></i>Profile</a></li>
+                                <li><a class="dropdown-item" href="{% url 'settings' %}"><i class="fas fa-cog me-2"></i>Settings</a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item" href="{% url 'logout' %}"><i class="fas fa-sign-out-alt me-2"></i>Logout</a></li>
+                            </ul>
                         </div>
-                        <small class="text-muted">75% Complete</small>
                     </div>
                 </div>
-                
-                <!-- Notifications -->
-                <div class="dropdown me-3">
-                    <button class="btn btn-link text-dark position-relative" type="button" id="notificationsDropdown" data-bs-toggle="dropdown">
-                        <i class="bi bi-bell fs-5"></i>
-                        <span class="notification-badge">3</span>
-                    </button>
-                    <ul class="dropdown-menu dropdown-menu-end">
-                        <li><h6 class="dropdown-header">Notifications</h6></li>
-                        <li><a class="dropdown-item" href="#">New job matching your profile</a></li>
-                        <li><a class="dropdown-item" href="#">Interview scheduled for tomorrow</a></li>
-                        <li><a class="dropdown-item" href="#">Application status updated</a></li>
-                        <li><hr class="dropdown-divider"></li>
-                        <li><a class="dropdown-item text-center" href="#">View All</a></li>
-                    </ul>
-                </div>
-                
-                <!-- Profile Dropdown -->
-                <div class="dropdown">
-                    <button class="btn btn-link text-dark dropdown-toggle" type="button" id="profileDropdown" data-bs-toggle="dropdown">
-                        <i class="bi bi-person-circle fs-4"></i>
-                    </button>
-                    <ul class="dropdown-menu dropdown-menu-end">
-                        <li>
-                            <a class="dropdown-item" href="">
-                                <i class="bi bi-person"></i> My Profile
-                            </a>
-                        </li>
-                        <li>
-                            <a class="dropdown-item" href="">
-                                <i class="bi bi-gear"></i> Settings
-                            </a>
-                        </li>
-                        <li><hr class="dropdown-divider"></li>
-                        <li>
-                            <a class="dropdown-item text-danger" href="{% url 'logout' %}">
-                                <i class="bi bi-box-arrow-right"></i> Logout
-                            </a>
-                        </li>
-                    </ul>
-                </div>
+            </header>
+
+            <!-- Main Content Area -->
+            <div class="content-wrapper">
+                {% if messages %}
+                    {% for message in messages %}
+                        <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                            {{ message }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    {% endfor %}
+                {% endif %}
+
+                {% block content %}{% endblock %}
             </div>
         </div>
-    </nav>
-
-    <!-- Main Content -->
-    <div class="main-content">
-        {% block content %}{% endblock %}
     </div>
 
-    <!-- Bootstrap Bundle with Popper -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <!-- Custom JavaScript -->
-    <script>
-        // Sidebar Toggle
-        document.getElementById('sidebarToggle').addEventListener('click', function() {
-            document.getElementById('sidebar').classList.toggle('collapsed');
-            document.querySelector('.navbar').classList.toggle('expanded');
-            document.querySelector('.main-content').classList.toggle('expanded');
-        });
-
-        // Mobile Sidebar Toggle
-        if (window.innerWidth <= 768) {
-            document.getElementById('sidebar').classList.add('collapsed');
-        }
-
-        // Form Validation
-        (function () {
-            'use strict'
-            var forms = document.querySelectorAll('.needs-validation')
-            Array.prototype.slice.call(forms).forEach(function (form) {
-                form.addEventListener('submit', function (event) {
-                    if (!form.checkValidity()) {
-                        event.preventDefault()
-                        event.stopPropagation()
-                    }
-                    form.classList.add('was-validated')
-                }, false)
-            })
-        })()
-    </script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="{% static 'js/dashboard/main.js' %}"></script>
+    {% block extra_js %}{% endblock %}
 </body>
-</html> 
+</html>
