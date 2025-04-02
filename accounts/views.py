@@ -78,10 +78,10 @@ def login_view(request):
             # Check user role and redirect accordingly
             if hasattr(user, 'student'):
                 return redirect('student:dashboard')
+            elif hasattr(user, 'administrator'):
+                return redirect('administrator')
             elif hasattr(user, 'recruiter'):
                 return redirect('recruiter:dashboard')
-            elif hasattr(user, 'administrator'):
-                return redirect('administrator:dashboard')
             elif hasattr(user, 'volunteer'):
                 return redirect('volunteer:dashboard')
             else:

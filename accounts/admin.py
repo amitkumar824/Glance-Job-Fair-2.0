@@ -12,3 +12,7 @@ class StudentAdmin(admin.ModelAdmin):
     search_fields = ('username', 'email', 'high_school')
     list_per_page = 25
 
+@admin.register(Administrator)
+class AdministratorAdmin(admin.ModelAdmin):
+    list_display = ('username', "first_name", "last_name")
+    exclude = ('password', 'groups', 'user_permissions', 'is_staff', 'is_active', 'is_superuser', 'last_login')

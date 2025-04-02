@@ -59,6 +59,32 @@ class Student(User):
     def __str__(self):
         return f"{self.username}'s Student Profile"
 
+class Administrator(User):
+    GENDER_CHOICES = [
+        ('M', 'Male'),
+        ('F', 'Female'),
+        ('O', 'Other'),
+    ]
+    
+    phone = models.CharField(max_length=15, blank=True, null=True)
+    profile_picture = models.ImageField(
+        upload_to='profile_pics/',
+        validators=[FileExtensionValidator(['jpg', 'jpeg', 'png'])],
+        blank=True,
+        null=True
+    )
+
+    gender = models.CharField(max_length=1, choices=GENDER_CHOICES)
+
+    class Meta:
+        verbose_name = "Administrator"
+        verbose_name_plural = "Administrators"
+        ordering = ['username']
+
+    def __str__(self):
+        return f"{self.username}'s Administrator Profile"
+
+
 class Recruiter(User):
     company_name = models.CharField(max_length=200)
     company_description = models.TextField()
@@ -74,17 +100,6 @@ class Recruiter(User):
     def __str__(self):
         return f"{self.company_name} - Recruiter Profile"
 
-class Administrator(User):
-    responsibilities = models.TextField()
-    skills = models.TextField()
-    departments = models.TextField()
-    company_interactions = models.TextField(blank=True, null=True)
-    registration_tracking = models.TextField(blank=True, null=True)
-    opening_deadlines = models.TextField(blank=True, null=True)
-    interview_coordination = models.TextField(blank=True, null=True)
-
-    def __str__(self):
-        return f"{self.user.username}'s Administrator Profile"
 
 class Volunteer(User):
     responsibilities = models.TextField()
