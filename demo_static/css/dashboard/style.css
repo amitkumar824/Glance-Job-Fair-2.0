@@ -1,6 +1,7 @@
 /* Dashboard Styles - Glance 2.0 */
 
 :root {
+    /* Main Colors */
     --primary-color: #4361ee;
     --primary-color-hover: #3a56d4;
     --secondary-color: #64748b;
@@ -9,6 +10,42 @@
     --danger-color: #ef4444;
     --light-color: #f8fafc;
     --dark-color: #1e293b;
+    --text-color: #1e293b;
+    --text-muted: #64748b;
+    --bg-color: #f8fafc;
+    --card-bg: #ffffff;
+    --border-color: #e2e8f0;
+    
+    /* Component Backgrounds */
+    --sidebar-bg: #1e293b;
+    --header-bg: #ffffff;
+    --input-bg: #ffffff;
+    --input-color: #1e293b;
+    --input-border: #e2e8f0;
+    --dropdown-bg: #ffffff;
+    --dropdown-color: #1e293b;
+    --dropdown-border: #e2e8f0;
+    --dropdown-link-hover: #f1f5f9;
+    
+    /* Status Colors */
+    --shadow-color: rgba(0, 0, 0, 0.1);
+    --hover-bg: #f1f5f9;
+    
+    /* Light variants for backgrounds */
+    --primary-color-light: rgba(67, 97, 238, 0.1);
+    --success-color-light: rgba(16, 185, 129, 0.1);
+    --warning-color-light: rgba(245, 158, 11, 0.1);
+    --danger-color-light: rgba(239, 68, 68, 0.1);
+    --info-color-light: rgba(67, 97, 238, 0.1);
+    
+    /* Gradients */
+    --primary-gradient: linear-gradient(135deg, #4361ee, #3a56d4);
+    --success-gradient: linear-gradient(135deg, #10b981, #059669);
+    --warning-gradient: linear-gradient(135deg, #f59e0b, #d97706);
+    --danger-gradient: linear-gradient(135deg, #ef4444, #dc2626);
+    --info-gradient: linear-gradient(135deg, #4361ee, #3a56d4);
+    
+    /* Layout */
     --sidebar-width: 250px;
     --sidebar-width-collapsed: 70px;
     --header-height: 65px;
@@ -20,8 +57,8 @@
 /* General Styles */
 body {
     font-family: 'Inter', system-ui, -apple-system, sans-serif;
-    background-color: #f1f5f9;
-    color: #334155;
+    background-color: var(--bg-color);
+    color: var(--text-color);
     line-height: 1.5;
 }
 
@@ -474,4 +511,243 @@ a:hover {
     align-items: center;
     justify-content: center;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Notification Page Styles */
+.notification-page {
+    background: var(--bg-color);
+    min-height: 100vh;
+    padding: 2rem;
+}
+
+.notification-header {
+    background: var(--card-bg);
+    border-radius: 1rem;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+    box-shadow: var(--box-shadow);
+    border: 1px solid var(--border-color);
+}
+
+.notification-header h2 {
+    color: var(--text-color);
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+}
+
+.notification-header p {
+    color: var(--text-muted);
+    margin: 0;
+}
+
+.notification-filters {
+    background: var(--card-bg);
+    border-radius: 1rem;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+    box-shadow: var(--box-shadow);
+    border: 1px solid var(--border-color);
+}
+
+.filter-group {
+    margin-bottom: 1.5rem;
+}
+
+.filter-group:last-child {
+    margin-bottom: 0;
+}
+
+.filter-group h6 {
+    color: var(--text-color);
+    font-weight: 600;
+    margin-bottom: 1rem;
+}
+
+.filter-options {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+}
+
+.filter-option {
+    background: var(--hover-bg);
+    border: 1px solid var(--border-color);
+    color: var(--text-muted);
+    padding: 0.5rem 1rem;
+    border-radius: 2rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.filter-option:hover {
+    background: var(--border-color);
+    border-color: var(--primary-color);
+    color: var(--text-color);
+}
+
+.filter-option.active {
+    background: var(--primary-gradient);
+    border-color: transparent;
+    color: white;
+}
+
+.notification-list {
+    display: grid;
+    gap: 1.5rem;
+}
+
+.notification-card {
+    background: var(--card-bg);
+    border-radius: 1rem;
+    padding: 1.5rem;
+    transition: all 0.3s ease;
+    box-shadow: var(--box-shadow);
+    border: 1px solid var(--border-color);
+}
+
+.notification-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
+    border-color: var(--primary-color);
+}
+
+.notification-card.unread {
+    border-left: 4px solid var(--primary-color);
+    background: var(--primary-color-light);
+}
+
+.notification-icon {
+    background: var(--primary-gradient);
+    color: white;
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    margin-bottom: 1rem;
+    box-shadow: 0 4px 12px rgba(67, 97, 238, 0.2);
+}
+
+.notification-content h5 {
+    color: var(--text-color);
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+}
+
+.notification-content p {
+    color: var(--text-muted);
+    margin-bottom: 1rem;
+}
+
+.notification-meta {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    color: var(--text-muted);
+    font-size: 0.875rem;
+}
+
+.notification-meta i {
+    margin-right: 0.5rem;
+}
+
+.notification-actions {
+    margin-top: 1rem;
+    display: flex;
+    gap: 0.75rem;
+}
+
+.notification-actions .btn {
+    padding: 0.5rem 1rem;
+    border-radius: 0.5rem;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.notification-actions .btn-primary {
+    background: var(--primary-gradient);
+    border: none;
+    color: white;
+    box-shadow: 0 4px 12px rgba(67, 97, 238, 0.2);
+}
+
+.notification-actions .btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(67, 97, 238, 0.3);
+}
+
+.notification-actions .btn-outline {
+    background: none;
+    border: 1px solid var(--border-color);
+    color: var(--text-muted);
+}
+
+.notification-actions .btn-outline:hover {
+    background: var(--hover-bg);
+    border-color: var(--primary-color);
+    color: var(--text-color);
+}
+
+.empty-state {
+    text-align: center;
+    padding: 3rem;
+    background: var(--card-bg);
+    border-radius: 1rem;
+    box-shadow: var(--box-shadow);
+    border: 1px solid var(--border-color);
+}
+
+.empty-state-icon {
+    font-size: 3rem;
+    color: var(--primary-color);
+    margin-bottom: 1rem;
+}
+
+.empty-state-text {
+    color: var(--text-muted);
+    margin-bottom: 1.5rem;
+}
+
+.empty-state .btn {
+    background: var(--primary-gradient);
+    border: none;
+    color: white;
+    padding: 0.75rem 1.5rem;
+    border-radius: 0.5rem;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 12px rgba(67, 97, 238, 0.2);
+}
+
+.empty-state .btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(67, 97, 238, 0.3);
+}
+
+/* Responsive Styles */
+@media (max-width: 768px) {
+    .notification-page {
+        padding: 1rem;
+    }
+    
+    .notification-header,
+    .notification-filters,
+    .notification-card,
+    .empty-state {
+        padding: 1rem;
+    }
+    
+    .filter-options {
+        gap: 0.5rem;
+    }
+    
+    .notification-actions {
+        flex-direction: column;
+    }
+    
+    .notification-actions .btn {
+        width: 100%;
+    }
 }
