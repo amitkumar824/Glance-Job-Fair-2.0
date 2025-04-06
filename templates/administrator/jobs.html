@@ -1,0 +1,829 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Job Management - GLANCE Administrator</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.11.5/css/dataTables.bootstrap5.min.css">
+    <link rel="stylesheet" href="{% static 'css/admin-dashboard.css' %}">
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Sidebar -->
+            <nav id="sidebar" class="col-md-3 col-lg-2 d-md-block bg-dark sidebar collapse">
+                <div class="position-sticky pt-3">
+                    <div class="text-center mb-4">
+                        <h4 class="text-white">GLANCE Admin</h4>
+                    </div>
+                    <ul class="nav flex-column">
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'administrator' %}">
+                                <i class="fas fa-tachometer-alt me-2"></i>
+                                Dashboard
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'manage_companies' %}">
+                                <i class="fas fa-building me-2"></i>
+                                Companies
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link active" href="{% url 'manage_jobs' %}">
+                                <i class="fas fa-briefcase me-2"></i>
+                                Jobs
+                            </a>
+                        </li>
+                        <li class="nav-item mt-5">
+                            <a class="nav-link text-danger" href="{% url 'logout' %}">
+                                <i class="fas fa-sign-out-alt me-2"></i>
+                                Logout
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </nav>
+
+            <!-- Main content -->
+            <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+                <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                    <h1 class="h2">Job Management</h1>
+                    <div class="btn-toolbar mb-2 mb-md-0">
+                        <button type="button" class="btn btn-sm btn-success" data-bs-toggle="modal" data-bs-target="#addJobModal">
+                            <i class="fas fa-plus me-1"></i> Add New Job
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Status Summary Cards -->
+                <div class="row mb-4">
+                    <div class="col-md-4 mb-3">
+                        <div class="card bg-primary text-white h-100">
+                            <div class="card-body py-3">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h6 class="mb-0">Total Jobs</h6>
+                                        <h2 class="mt-2 mb-0">{{ total_jobs }}</h2>
+                                    </div>
+                                    <i class="fas fa-briefcase fa-3x opacity-50"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <div class="card bg-success text-white h-100">
+                            <div class="card-body py-3">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h6 class="mb-0">Active Jobs</h6>
+                                        <h2 class="mt-2 mb-0">{{ active_jobs }}</h2>
+                                    </div>
+                                    <i class="fas fa-check-circle fa-3x opacity-50"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <div class="card bg-secondary text-white h-100">
+                            <div class="card-body py-3">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h6 class="mb-0">Inactive Jobs</h6>
+                                        <h2 class="mt-2 mb-0">{{ total_jobs|add:"-"|add:active_jobs }}</h2>
+                                    </div>
+                                    <i class="fas fa-ban fa-3x opacity-50"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Messages Display -->
+                <div id="messages-container"></div>
+
+                <!-- Jobs Table -->
+                <div class="card">
+                    <div class="card-body">
+                        <table id="jobsTable" class="table table-striped table-hover">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Title</th>
+                                    <th>Company</th>
+                                    <th>Type</th>
+                                    <th>Mode</th>
+                                    <th>Deadline</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for job in jobs %}
+                                <tr>
+                                    <td>{{ job.id }}</td>
+                                    <td>{{ job.title }}</td>
+                                    <td>{{ job.company.name }}</td>
+                                    <td>{{ job.get_job_type_display }}</td>
+                                    <td>{{ job.get_job_mode_display }}</td>
+                                    <td>{{ job.deadline|date:"M d, Y H:i" }}</td>
+                                    <td>
+                                        {% if job.is_active %}
+                                        <span class="badge bg-success">Active</span>
+                                        {% else %}
+                                        <span class="badge bg-secondary">Inactive</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <div class="btn-group">
+                                            <button type="button" class="btn btn-sm btn-info view-job" data-id="{{ job.id }}">
+                                                <i class="fas fa-eye"></i>
+                                            </button>
+                                            <button type="button" class="btn btn-sm btn-warning edit-job" data-id="{{ job.id }}">
+                                                <i class="fas fa-edit"></i>
+                                            </button>
+                                            <button type="button" class="btn btn-sm btn-danger delete-job" data-id="{{ job.id }}" data-title="{{ job.title }}">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="8" class="text-center">No jobs found</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Pagination -->
+                {% if jobs.has_other_pages %}
+                <nav aria-label="Jobs pagination" class="mt-4">
+                    <ul class="pagination justify-content-center">
+                        {% if jobs.has_previous %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ jobs.previous_page_number }}" aria-label="Previous">
+                                <span aria-hidden="true">&laquo;</span>
+                            </a>
+                        </li>
+                        {% else %}
+                        <li class="page-item disabled">
+                            <a class="page-link" href="#" aria-label="Previous">
+                                <span aria-hidden="true">&laquo;</span>
+                            </a>
+                        </li>
+                        {% endif %}
+
+                        {% for num in jobs.paginator.page_range %}
+                            {% if jobs.number == num %}
+                            <li class="page-item active">
+                                <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+                            </li>
+                            {% elif num > jobs.number|add:'-3' and num < jobs.number|add:'3' %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+                            </li>
+                            {% endif %}
+                        {% endfor %}
+
+                        {% if jobs.has_next %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ jobs.next_page_number }}" aria-label="Next">
+                                <span aria-hidden="true">&raquo;</span>
+                            </a>
+                        </li>
+                        {% else %}
+                        <li class="page-item disabled">
+                            <a class="page-link" href="#" aria-label="Next">
+                                <span aria-hidden="true">&raquo;</span>
+                            </a>
+                        </li>
+                        {% endif %}
+                    </ul>
+                </nav>
+                {% endif %}
+            </main>
+        </div>
+    </div>
+
+    <!-- Add Job Modal -->
+    <div class="modal fade" id="addJobModal" tabindex="-1" aria-labelledby="addJobModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header bg-success text-white">
+                    <h5 class="modal-title" id="addJobModalLabel">Add New Job</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="addJobForm">
+                        {% csrf_token %}
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="jobTitle" class="form-label">Job Title*</label>
+                                <input type="text" class="form-control" id="jobTitle" name="title" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="jobCompany" class="form-label">Company*</label>
+                                <select class="form-select" id="jobCompany" name="company_id" required>
+                                    <option value="" selected disabled>Select Company</option>
+                                    {% for company in companies %}
+                                    <option value="{{ company.id }}">{{ company.name }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="jobRecruiter" class="form-label">Recruiter*</label>
+                                <select class="form-select" id="jobRecruiter" name="recruiter_id" required>
+                                    <option value="" selected disabled>Select Recruiter</option>
+                                    {% for recruiter in recruiters %}
+                                    <option value="{{ recruiter.id }}">{{ recruiter.username }} ({{ recruiter.company_name }})</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="jobSalaryRange" class="form-label">Salary Range*</label>
+                                <input type="text" class="form-control" id="jobSalaryRange" name="salary_range" placeholder="e.g. ₹5L - ₹8L per annum" required>
+                            </div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="jobType" class="form-label">Job Type*</label>
+                                <select class="form-select" id="jobType" name="job_type" required>
+                                    <option value="" selected disabled>Select Job Type</option>
+                                    <option value="FT">Full-time</option>
+                                    <option value="PT">Part-time</option>
+                                    <option value="IN">Internship</option>
+                                    <option value="CT">Contract</option>
+                                    <option value="TP">Temporary</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="jobMode" class="form-label">Job Mode*</label>
+                                <select class="form-select" id="jobMode" name="job_mode" required>
+                                    <option value="" selected disabled>Select Job Mode</option>
+                                    <option value="RM">Remote</option>
+                                    <option value="HY">Hybrid</option>
+                                    <option value="IO">In-office</option>
+                                    <option value="FL">Flexible</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="jobInterviewMode" class="form-label">Interview Mode*</label>
+                                <select class="form-select" id="jobInterviewMode" name="interview_mode" required>
+                                    <option value="" selected disabled>Select Interview Mode</option>
+                                    <option value="ON">Online</option>
+                                    <option value="OF">Offline</option>
+                                    <option value="CP">CPN</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="jobOpenings" class="form-label">Number of Openings*</label>
+                                <input type="number" class="form-control" id="jobOpenings" name="number_of_openings" min="1" required>
+                            </div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="jobInterviewDate" class="form-label">Interview Date & Time*</label>
+                                <input type="datetime-local" class="form-control" id="jobInterviewDate" name="interview_date" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="jobDeadline" class="form-label">Application Deadline*</label>
+                                <input type="datetime-local" class="form-control" id="jobDeadline" name="deadline" required>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="jobDescription" class="form-label">Job Description*</label>
+                            <textarea class="form-control" id="jobDescription" name="description" rows="3" required></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label for="jobResponsibilities" class="form-label">Responsibilities*</label>
+                            <textarea class="form-control" id="jobResponsibilities" name="responsibilities" rows="3" required></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label for="jobRequiredSkills" class="form-label">Required Skills*</label>
+                            <textarea class="form-control" id="jobRequiredSkills" name="required_skills" rows="3" required></textarea>
+                        </div>
+                        <div class="form-check form-switch mb-3">
+                            <input class="form-check-input" type="checkbox" id="jobIsActive" name="is_active" checked>
+                            <label class="form-check-label" for="jobIsActive">Active</label>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-success" id="saveJobBtn">Save Job</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- View Job Modal -->
+    <div class="modal fade" id="viewJobModal" tabindex="-1" aria-labelledby="viewJobModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header bg-info text-white">
+                    <h5 class="modal-title" id="viewJobModalLabel">Job Details</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-12">
+                            <h3 id="viewJobTitle">Job Title</h3>
+                            <h5 class="text-muted" id="viewJobCompany">Company Name</h5>
+                        </div>
+                    </div>
+                    <div class="row mt-3">
+                        <div class="col-md-6">
+                            <p><strong>ID:</strong> <span id="viewJobId"></span></p>
+                            <p><strong>Job Type:</strong> <span id="viewJobType"></span></p>
+                            <p><strong>Job Mode:</strong> <span id="viewJobMode"></span></p>
+                            <p><strong>Salary Range:</strong> <span id="viewJobSalary"></span></p>
+                            <p><strong>Openings:</strong> <span id="viewJobOpenings"></span></p>
+                        </div>
+                        <div class="col-md-6">
+                            <p><strong>Status:</strong> <span id="viewJobStatus"></span></p>
+                            <p><strong>Interview Mode:</strong> <span id="viewJobInterviewMode"></span></p>
+                            <p><strong>Interview Date:</strong> <span id="viewJobInterviewDate"></span></p>
+                            <p><strong>Application Deadline:</strong> <span id="viewJobDeadline"></span></p>
+                            <p><strong>Applicants:</strong> <span id="viewJobApplicants"></span></p>
+                        </div>
+                    </div>
+                    <div class="mt-3">
+                        <h5>Description</h5>
+                        <p id="viewJobDescription"></p>
+                    </div>
+                    <div class="mt-3">
+                        <h5>Responsibilities</h5>
+                        <p id="viewJobResponsibilities"></p>
+                    </div>
+                    <div class="mt-3">
+                        <h5>Required Skills</h5>
+                        <p id="viewJobRequiredSkills"></p>
+                    </div>
+                    <div class="mt-3">
+                        <p><strong>Posted:</strong> <span id="viewJobCreated"></span></p>
+                        <p><strong>Last Updated:</strong> <span id="viewJobUpdated"></span></p>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Job Modal -->
+    <div class="modal fade" id="editJobModal" tabindex="-1" aria-labelledby="editJobModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header bg-warning">
+                    <h5 class="modal-title" id="editJobModalLabel">Edit Job</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="editJobForm">
+                        {% csrf_token %}
+                        <input type="hidden" id="editJobId">
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="editJobTitle" class="form-label">Job Title*</label>
+                                <input type="text" class="form-control" id="editJobTitle" name="title" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="editJobCompany" class="form-label">Company*</label>
+                                <select class="form-select" id="editJobCompany" name="company_id" required>
+                                    {% for company in companies %}
+                                    <option value="{{ company.id }}">{{ company.name }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="editJobRecruiter" class="form-label">Recruiter*</label>
+                                <select class="form-select" id="editJobRecruiter" name="recruiter_id" required>
+                                    {% for recruiter in recruiters %}
+                                    <option value="{{ recruiter.id }}">{{ recruiter.username }} ({{ recruiter.company_name }})</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="editJobSalaryRange" class="form-label">Salary Range*</label>
+                                <input type="text" class="form-control" id="editJobSalaryRange" name="salary_range" required>
+                            </div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="editJobType" class="form-label">Job Type*</label>
+                                <select class="form-select" id="editJobType" name="job_type" required>
+                                    <option value="FT">Full-time</option>
+                                    <option value="PT">Part-time</option>
+                                    <option value="IN">Internship</option>
+                                    <option value="CT">Contract</option>
+                                    <option value="TP">Temporary</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="editJobMode" class="form-label">Job Mode*</label>
+                                <select class="form-select" id="editJobMode" name="job_mode" required>
+                                    <option value="RM">Remote</option>
+                                    <option value="HY">Hybrid</option>
+                                    <option value="IO">In-office</option>
+                                    <option value="FL">Flexible</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="editJobInterviewMode" class="form-label">Interview Mode*</label>
+                                <select class="form-select" id="editJobInterviewMode" name="interview_mode" required>
+                                    <option value="ON">Online</option>
+                                    <option value="OF">Offline</option>
+                                    <option value="CP">CPN</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="editJobOpenings" class="form-label">Number of Openings*</label>
+                                <input type="number" class="form-control" id="editJobOpenings" name="number_of_openings" min="1" required>
+                            </div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="editJobInterviewDate" class="form-label">Interview Date & Time*</label>
+                                <input type="datetime-local" class="form-control" id="editJobInterviewDate" name="interview_date" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="editJobDeadline" class="form-label">Application Deadline*</label>
+                                <input type="datetime-local" class="form-control" id="editJobDeadline" name="deadline" required>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="editJobDescription" class="form-label">Job Description*</label>
+                            <textarea class="form-control" id="editJobDescription" name="description" rows="3" required></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label for="editJobResponsibilities" class="form-label">Responsibilities*</label>
+                            <textarea class="form-control" id="editJobResponsibilities" name="responsibilities" rows="3" required></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label for="editJobRequiredSkills" class="form-label">Required Skills*</label>
+                            <textarea class="form-control" id="editJobRequiredSkills" name="required_skills" rows="3" required></textarea>
+                        </div>
+                        <div class="form-check form-switch mb-3">
+                            <input class="form-check-input" type="checkbox" id="editJobIsActive" name="is_active">
+                            <label class="form-check-label" for="editJobIsActive">Active</label>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-warning" id="updateJobBtn">Update Job</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Delete Job Modal -->
+    <div class="modal fade" id="deleteJobModal" tabindex="-1" aria-labelledby="deleteJobModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-danger text-white">
+                    <h5 class="modal-title" id="deleteJobModalLabel">Delete Job</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Are you sure you want to delete the job <strong id="deleteJobTitle"></strong>?</p>
+                    <p class="text-danger">This action cannot be undone. All associated applications will also be deleted.</p>
+                    <input type="hidden" id="deleteJobId">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-danger" id="confirmDeleteJobBtn">Delete</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.11.5/js/dataTables.bootstrap5.min.js"></script>
+    <script>
+        // Get CSRF token
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+
+        // Display messages
+        function showMessage(message, type = 'success') {
+            const alertDiv = document.createElement('div');
+            alertDiv.className = `alert alert-${type} alert-dismissible fade show`;
+            alertDiv.role = 'alert';
+            alertDiv.innerHTML = `
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            `;
+            
+            document.getElementById('messages-container').appendChild(alertDiv);
+            
+            // Auto dismiss after 5 seconds
+            setTimeout(() => {
+                alertDiv.classList.remove('show');
+                setTimeout(() => alertDiv.remove(), 150);
+            }, 5000);
+        }
+
+        $(document).ready(function() {
+            // Initialize DataTable
+            $('#jobsTable').DataTable({
+                "paging": false,  // Disable DataTables paging as we're using Django's pagination
+                "ordering": true,
+                "info": false,
+                "searching": true,
+                "columnDefs": [
+                    { "orderable": false, "targets": [7] }  // Disable sorting for actions column
+                ]
+            });
+
+            // Add New Job
+            $('#saveJobBtn').click(function() {
+                const formData = {
+                    title: $('#jobTitle').val(),
+                    company_id: $('#jobCompany').val(),
+                    recruiter_id: $('#jobRecruiter').val(),
+                    salary_range: $('#jobSalaryRange').val(),
+                    job_type: $('#jobType').val(),
+                    job_mode: $('#jobMode').val(),
+                    interview_mode: $('#jobInterviewMode').val(),
+                    number_of_openings: $('#jobOpenings').val(),
+                    interview_date: $('#jobInterviewDate').val(),
+                    deadline: $('#jobDeadline').val(),
+                    description: $('#jobDescription').val(),
+                    responsibilities: $('#jobResponsibilities').val(),
+                    required_skills: $('#jobRequiredSkills').val(),
+                    is_active: $('#jobIsActive').is(':checked')
+                };
+                
+                $.ajax({
+                    url: '{% url "job_create" %}',
+                    type: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify(formData),
+                    headers: {
+                        'X-CSRFToken': getCookie('csrftoken')
+                    },
+                    success: function(response) {
+                        $('#addJobModal').modal('hide');
+                        showMessage(response.message);
+                        // Reload page to see new job
+                        setTimeout(() => {
+                            location.reload();
+                        }, 1000);
+                    },
+                    error: function(xhr) {
+                        let errorMsg = 'An error occurred while creating the job.';
+                        if (xhr.responseJSON && xhr.responseJSON.message) {
+                            errorMsg = xhr.responseJSON.message;
+                        }
+                        showMessage(errorMsg, 'danger');
+                    }
+                });
+            });
+
+            // Reset add job form when modal closes
+            $('#addJobModal').on('hidden.bs.modal', function() {
+                $('#addJobForm')[0].reset();
+            });
+
+            // View Job Details
+            $('.view-job').click(function() {
+                const jobId = $(this).data('id');
+                
+                $.ajax({
+                    url: `/administration/jobs/${jobId}/`,
+                    type: 'GET',
+                    success: function(response) {
+                        const job = response.job;
+                        
+                        $('#viewJobId').text(job.id);
+                        $('#viewJobTitle').text(job.title);
+                        $('#viewJobCompany').text(job.company_name);
+                        $('#viewJobType').text(getJobTypeDisplay(job.job_type));
+                        $('#viewJobMode').text(getJobModeDisplay(job.job_mode));
+                        $('#viewJobSalary').text(job.salary_range);
+                        $('#viewJobInterviewMode').text(getInterviewModeDisplay(job.interview_mode));
+                        $('#viewJobInterviewDate').text(formatDateTime(job.interview_date));
+                        $('#viewJobDeadline').text(formatDateTime(job.deadline));
+                        $('#viewJobOpenings').text(job.number_of_openings);
+                        $('#viewJobDescription').text(job.description);
+                        $('#viewJobResponsibilities').text(job.responsibilities);
+                        $('#viewJobRequiredSkills').text(job.required_skills);
+                        $('#viewJobCreated').text(job.created_at);
+                        $('#viewJobUpdated').text(job.updated_at);
+                        $('#viewJobApplicants').text(job.applicant_count);
+                        
+                        if (job.is_active) {
+                            $('#viewJobStatus').html('<span class="badge bg-success">Active</span>');
+                        } else {
+                            $('#viewJobStatus').html('<span class="badge bg-secondary">Inactive</span>');
+                        }
+                        
+                        $('#viewJobModal').modal('show');
+                    },
+                    error: function(xhr) {
+                        let errorMsg = 'An error occurred while fetching job details.';
+                        if (xhr.responseJSON && xhr.responseJSON.message) {
+                            errorMsg = xhr.responseJSON.message;
+                        }
+                        showMessage(errorMsg, 'danger');
+                    }
+                });
+            });
+
+            // Load Job Data for Editing
+            $('.edit-job').click(function() {
+                const jobId = $(this).data('id');
+                
+                $.ajax({
+                    url: `/administration/jobs/${jobId}/`,
+                    type: 'GET',
+                    success: function(response) {
+                        const job = response.job;
+                        
+                        $('#editJobId').val(job.id);
+                        $('#editJobTitle').val(job.title);
+                        $('#editJobCompany').val(job.company_id);
+                        $('#editJobRecruiter').val(job.recruiter_id);
+                        $('#editJobType').val(job.job_type);
+                        $('#editJobMode').val(job.job_mode);
+                        $('#editJobSalaryRange').val(job.salary_range);
+                        $('#editJobInterviewMode').val(job.interview_mode);
+                        $('#editJobInterviewDate').val(job.interview_date);
+                        $('#editJobDeadline').val(job.deadline);
+                        $('#editJobOpenings').val(job.number_of_openings);
+                        $('#editJobDescription').val(job.description);
+                        $('#editJobResponsibilities').val(job.responsibilities);
+                        $('#editJobRequiredSkills').val(job.required_skills);
+                        $('#editJobIsActive').prop('checked', job.is_active);
+                        
+                        $('#editJobModal').modal('show');
+                    },
+                    error: function(xhr) {
+                        let errorMsg = 'An error occurred while fetching job data.';
+                        if (xhr.responseJSON && xhr.responseJSON.message) {
+                            errorMsg = xhr.responseJSON.message;
+                        }
+                        showMessage(errorMsg, 'danger');
+                    }
+                });
+            });
+
+            // Update Job
+            $('#updateJobBtn').click(function() {
+                const jobId = $('#editJobId').val();
+                const formData = {
+                    title: $('#editJobTitle').val(),
+                    company_id: $('#editJobCompany').val(),
+                    recruiter_id: $('#editJobRecruiter').val(),
+                    salary_range: $('#editJobSalaryRange').val(),
+                    job_type: $('#editJobType').val(),
+                    job_mode: $('#editJobMode').val(),
+                    interview_mode: $('#editJobInterviewMode').val(),
+                    number_of_openings: $('#editJobOpenings').val(),
+                    interview_date: $('#editJobInterviewDate').val(),
+                    deadline: $('#editJobDeadline').val(),
+                    description: $('#editJobDescription').val(),
+                    responsibilities: $('#editJobResponsibilities').val(),
+                    required_skills: $('#editJobRequiredSkills').val(),
+                    is_active: $('#editJobIsActive').is(':checked')
+                };
+                
+                $.ajax({
+                    url: `/administration/jobs/${jobId}/update/`,
+                    type: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify(formData),
+                    headers: {
+                        'X-CSRFToken': getCookie('csrftoken')
+                    },
+                    success: function(response) {
+                        $('#editJobModal').modal('hide');
+                        showMessage(response.message);
+                        // Reload page to see changes
+                        setTimeout(() => {
+                            location.reload();
+                        }, 1000);
+                    },
+                    error: function(xhr) {
+                        let errorMsg = 'An error occurred while updating the job.';
+                        if (xhr.responseJSON && xhr.responseJSON.message) {
+                            errorMsg = xhr.responseJSON.message;
+                        }
+                        showMessage(errorMsg, 'danger');
+                    }
+                });
+            });
+
+            // Show Delete Confirmation
+            $('.delete-job').click(function() {
+                const jobId = $(this).data('id');
+                const jobTitle = $(this).data('title');
+                
+                $('#deleteJobId').val(jobId);
+                $('#deleteJobTitle').text(jobTitle);
+                $('#deleteJobModal').modal('show');
+            });
+
+            // Delete Job
+            $('#confirmDeleteJobBtn').click(function() {
+                const jobId = $('#deleteJobId').val();
+                
+                $.ajax({
+                    url: `/administration/jobs/${jobId}/delete/`,
+                    type: 'POST',
+                    headers: {
+                        'X-CSRFToken': getCookie('csrftoken')
+                    },
+                    success: function(response) {
+                        $('#deleteJobModal').modal('hide');
+                        showMessage(response.message);
+                        // Reload page to update table
+                        setTimeout(() => {
+                            location.reload();
+                        }, 1000);
+                    },
+                    error: function(xhr) {
+                        let errorMsg = 'An error occurred while deleting the job.';
+                        if (xhr.responseJSON && xhr.responseJSON.message) {
+                            errorMsg = xhr.responseJSON.message;
+                        }
+                        showMessage(errorMsg, 'danger');
+                    }
+                });
+            });
+
+            // Helper functions for display values
+            function getJobTypeDisplay(type) {
+                const types = {
+                    'FT': 'Full-time',
+                    'PT': 'Part-time',
+                    'IN': 'Internship',
+                    'CT': 'Contract',
+                    'TP': 'Temporary'
+                };
+                return types[type] || type;
+            }
+            
+            function getJobModeDisplay(mode) {
+                const modes = {
+                    'RM': 'Remote',
+                    'HY': 'Hybrid',
+                    'IO': 'In-office',
+                    'FL': 'Flexible'
+                };
+                return modes[mode] || mode;
+            }
+            
+            function getInterviewModeDisplay(mode) {
+                const modes = {
+                    'ON': 'Online',
+                    'OF': 'Offline',
+                    'CP': 'CPN'
+                };
+                return modes[mode] || mode;
+            }
+            
+            function formatDateTime(dateTimeStr) {
+                const date = new Date(dateTimeStr);
+                return date.toLocaleString('en-US', {
+                    year: 'numeric',
+                    month: 'short',
+                    day: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                });
+            }
+        });
+    </script>
+</body>
+</html> 

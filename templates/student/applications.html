@@ -1,0 +1,375 @@
+{% extends 'student/base.html' %}
+{% load static %}
+
+{% block title %}Applications - Glance 2.0{% endblock %}
+
+{% block page_title %}My Applications{% endblock %}
+
+{% block content %}
+<div class="applications-section">
+    <!-- Filter and Actions -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-8">
+                    <div class="btn-group" role="group">
+                        <button type="button" class="btn btn-outline-primary active">All (3)</button>
+                        <button type="button" class="btn btn-outline-primary">Pending (1)</button>
+                        <button type="button" class="btn btn-outline-primary">Shortlisted (1)</button>
+                        <button type="button" class="btn btn-outline-primary">Rejected (1)</button>
+                    </div>
+                </div>
+                <div class="col-md-4 text-end">
+                    <div class="dropdown">
+                        <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                            Sort by: Date Applied
+                        </button>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="#">Date Applied</a></li>
+                            <li><a class="dropdown-item" href="#">Company Name</a></li>
+                            <li><a class="dropdown-item" href="#">Status</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Applications List -->
+    <div class="applications-list">
+        <!-- Application Item -->
+        <div class="card mb-3 application-item">
+            <div class="card-body">
+                <div class="row align-items-center">
+                    <div class="col-md-2">
+                        <div class="company-logo">
+                            <img src="{% static 'img/dashboard/companies/microsoft.png' %}" alt="Microsoft">
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <h5 class="mb-1">Software Developer</h5>
+                        <p class="company-name mb-1">Microsoft</p>
+                        <div class="application-details">
+                            <span><i class="fas fa-calendar"></i> Applied: March 10, 2023</span>
+                            <span><i class="fas fa-map-marker-alt"></i> Hyderabad</span>
+                        </div>
+                    </div>
+                    <div class="col-md-2 text-center">
+                        <div class="status-badge shortlisted">Shortlisted</div>
+                    </div>
+                    <div class="col-md-2 text-end">
+                        <button class="btn btn-sm btn-outline-primary" data-bs-toggle="collapse" data-bs-target="#application1">
+                            <i class="fas fa-chevron-down"></i> View Details
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Collapsed Details -->
+                <div class="collapse mt-3" id="application1">
+                    <div class="application-timeline">
+                        <div class="timeline-item">
+                            <div class="timeline-marker completed"></div>
+                            <div class="timeline-content">
+                                <h6>Application Submitted</h6>
+                                <p>March 10, 2023</p>
+                            </div>
+                        </div>
+                        <div class="timeline-item">
+                            <div class="timeline-marker completed"></div>
+                            <div class="timeline-content">
+                                <h6>Resume Screening</h6>
+                                <p>March 12, 2023</p>
+                            </div>
+                        </div>
+                        <div class="timeline-item">
+                            <div class="timeline-marker current"></div>
+                            <div class="timeline-content">
+                                <h6>Technical Interview</h6>
+                                <p>Scheduled for March 18, 2023</p>
+                            </div>
+                        </div>
+                        <div class="timeline-item">
+                            <div class="timeline-marker"></div>
+                            <div class="timeline-content">
+                                <h6>HR Interview</h6>
+                                <p>Pending</p>
+                            </div>
+                        </div>
+                        <div class="timeline-item">
+                            <div class="timeline-marker"></div>
+                            <div class="timeline-content">
+                                <h6>Final Decision</h6>
+                                <p>Pending</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="application-actions mt-3">
+                        <button class="btn btn-sm btn-primary">Prepare for Interview</button>
+                        <button class="btn btn-sm btn-outline-danger">Withdraw Application</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Application Item -->
+        <div class="card mb-3 application-item">
+            <div class="card-body">
+                <div class="row align-items-center">
+                    <div class="col-md-2">
+                        <div class="company-logo">
+                            <img src="{% static 'img/dashboard/companies/google.png' %}" alt="Google">
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <h5 class="mb-1">Data Scientist</h5>
+                        <p class="company-name mb-1">Google</p>
+                        <div class="application-details">
+                            <span><i class="fas fa-calendar"></i> Applied: March 5, 2023</span>
+                            <span><i class="fas fa-map-marker-alt"></i> Bangalore</span>
+                        </div>
+                    </div>
+                    <div class="col-md-2 text-center">
+                        <div class="status-badge pending">Pending</div>
+                    </div>
+                    <div class="col-md-2 text-end">
+                        <button class="btn btn-sm btn-outline-primary" data-bs-toggle="collapse" data-bs-target="#application2">
+                            <i class="fas fa-chevron-down"></i> View Details
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Collapsed Details -->
+                <div class="collapse mt-3" id="application2">
+                    <div class="application-timeline">
+                        <div class="timeline-item">
+                            <div class="timeline-marker completed"></div>
+                            <div class="timeline-content">
+                                <h6>Application Submitted</h6>
+                                <p>March 5, 2023</p>
+                            </div>
+                        </div>
+                        <div class="timeline-item">
+                            <div class="timeline-marker current"></div>
+                            <div class="timeline-content">
+                                <h6>Resume Screening</h6>
+                                <p>In Progress</p>
+                            </div>
+                        </div>
+                        <div class="timeline-item">
+                            <div class="timeline-marker"></div>
+                            <div class="timeline-content">
+                                <h6>Technical Assessment</h6>
+                                <p>Pending</p>
+                            </div>
+                        </div>
+                        <div class="timeline-item">
+                            <div class="timeline-marker"></div>
+                            <div class="timeline-content">
+                                <h6>Interview Rounds</h6>
+                                <p>Pending</p>
+                            </div>
+                        </div>
+                        <div class="timeline-item">
+                            <div class="timeline-marker"></div>
+                            <div class="timeline-content">
+                                <h6>Final Decision</h6>
+                                <p>Pending</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="application-actions mt-3">
+                        <button class="btn btn-sm btn-outline-danger">Withdraw Application</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Application Item -->
+        <div class="card mb-3 application-item">
+            <div class="card-body">
+                <div class="row align-items-center">
+                    <div class="col-md-2">
+                        <div class="company-logo">
+                            <img src="{% static 'img/dashboard/companies/amazon.png' %}" alt="Amazon">
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <h5 class="mb-1">Full Stack Developer</h5>
+                        <p class="company-name mb-1">Amazon</p>
+                        <div class="application-details">
+                            <span><i class="fas fa-calendar"></i> Applied: February 28, 2023</span>
+                            <span><i class="fas fa-map-marker-alt"></i> Pune</span>
+                        </div>
+                    </div>
+                    <div class="col-md-2 text-center">
+                        <div class="status-badge rejected">Rejected</div>
+                    </div>
+                    <div class="col-md-2 text-end">
+                        <button class="btn btn-sm btn-outline-primary" data-bs-toggle="collapse" data-bs-target="#application3">
+                            <i class="fas fa-chevron-down"></i> View Details
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Collapsed Details -->
+                <div class="collapse mt-3" id="application3">
+                    <div class="application-timeline">
+                        <div class="timeline-item">
+                            <div class="timeline-marker completed"></div>
+                            <div class="timeline-content">
+                                <h6>Application Submitted</h6>
+                                <p>February 28, 2023</p>
+                            </div>
+                        </div>
+                        <div class="timeline-item">
+                            <div class="timeline-marker completed"></div>
+                            <div class="timeline-content">
+                                <h6>Resume Screening</h6>
+                                <p>March 2, 2023</p>
+                            </div>
+                        </div>
+                        <div class="timeline-item">
+                            <div class="timeline-marker rejected"></div>
+                            <div class="timeline-content">
+                                <h6>Technical Assessment</h6>
+                                <p>Rejected</p>
+                                <div class="feedback">
+                                    <strong>Feedback:</strong> We were looking for candidates with more experience in AWS.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="application-actions mt-3">
+                        <button class="btn btn-sm btn-primary">Apply for Similar Positions</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .applications-section {
+        padding: 1rem 0;
+    }
+
+    .company-logo {
+        height: 60px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .company-logo img {
+        max-height: 50px;
+        max-width: 100%;
+    }
+
+    .company-name {
+        color: var(--secondary-color);
+    }
+
+    .application-details {
+        display: flex;
+        gap: 1rem;
+        font-size: 0.875rem;
+        color: #64748b;
+    }
+
+    .status-badge {
+        display: inline-block;
+        padding: 0.35rem 0.75rem;
+        border-radius: 9999px;
+        font-size: 0.875rem;
+        font-weight: 500;
+    }
+
+    .status-badge.pending {
+        background-color: #f1f5f9;
+        color: #64748b;
+    }
+
+    .status-badge.shortlisted {
+        background-color: #ecfdf5;
+        color: var(--success-color);
+    }
+
+    .status-badge.rejected {
+        background-color: #fef2f2;
+        color: var(--danger-color);
+    }
+
+    /* Timeline Styles */
+    .application-timeline {
+        position: relative;
+        padding-left: 30px;
+        margin-top: 1rem;
+    }
+
+    .application-timeline:before {
+        content: '';
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        left: 10px;
+        width: 2px;
+        background-color: #e2e8f0;
+        z-index: 0;
+    }
+
+    .timeline-item {
+        position: relative;
+        margin-bottom: 1.5rem;
+    }
+
+    .timeline-marker {
+        position: absolute;
+        left: -30px;
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        background-color: white;
+        border: 2px solid #e2e8f0;
+        z-index: 1;
+    }
+
+    .timeline-marker.completed {
+        background-color: var(--success-color);
+        border-color: var(--success-color);
+    }
+
+    .timeline-marker.current {
+        background-color: var(--primary-color);
+        border-color: var(--primary-color);
+    }
+
+    .timeline-marker.rejected {
+        background-color: var(--danger-color);
+        border-color: var(--danger-color);
+    }
+
+    .timeline-content h6 {
+        margin-bottom: 0.25rem;
+    }
+
+    .timeline-content p {
+        color: var(--secondary-color);
+        margin-bottom: 0.25rem;
+    }
+
+    .feedback {
+        margin-top: 0.5rem;
+        padding: 0.5rem;
+        background-color: #fef2f2;
+        border-radius: 0.25rem;
+        font-size: 0.875rem;
+    }
+
+    .application-actions {
+        display: flex;
+        gap: 0.5rem;
+    }
+</style>
+{% endblock %} 

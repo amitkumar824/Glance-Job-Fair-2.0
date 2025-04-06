@@ -1,0 +1,162 @@
+{% extends 'student/base.html' %}
+{% load static %}
+
+{% block title %}Companies - Glance 2.0{% endblock %}
+
+{% block page_title %}Companies{% endblock %}
+
+{% block content %}
+<div class="companies-section">
+    <!-- Search and Filter Section -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-8">
+                    <div class="search-input">
+                        <i class="fas fa-search"></i>
+                        <input type="text" class="form-control" placeholder="Search for companies or positions...">
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="filter-options">
+                        <select class="form-select">
+                            <option value="">All Categories</option>
+                            <option value="tech">Technology</option>
+                            <option value="finance">Finance</option>
+                            <option value="marketing">Marketing</option>
+                            <option value="consulting">Consulting</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Companies Grid -->
+    <div class="row">
+        <!-- Placeholder for company cards -->
+        <div class="col-md-4 mb-4">
+            <div class="company-card card h-100">
+                <div class="card-body">
+                    <div class="company-logo mb-3">
+                        <img src="{% static 'img/dashboard/companies/microsoft.png' %}" alt="Microsoft">
+                    </div>
+                    <h5 class="company-name">Microsoft</h5>
+                    <p class="company-description">Global technology company developing innovative solutions.</p>
+                    <div class="company-details">
+                        <span><i class="fas fa-map-marker-alt"></i> Multiple Locations</span>
+                        <span><i class="fas fa-users"></i> 3 Open Positions</span>
+                    </div>
+                </div>
+                <div class="card-footer bg-white">
+                    <a href="#" class="btn btn-primary btn-sm">View Jobs</a>
+                    <a href="#" class="btn btn-outline-primary btn-sm">Company Profile</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4 mb-4">
+            <div class="company-card card h-100">
+                <div class="card-body">
+                    <div class="company-logo mb-3">
+                        <img src="{% static 'img/dashboard/companies/google.png' %}" alt="Google">
+                    </div>
+                    <h5 class="company-name">Google</h5>
+                    <p class="company-description">Leading internet services and products company.</p>
+                    <div class="company-details">
+                        <span><i class="fas fa-map-marker-alt"></i> Bangalore, Hyderabad</span>
+                        <span><i class="fas fa-users"></i> 5 Open Positions</span>
+                    </div>
+                </div>
+                <div class="card-footer bg-white">
+                    <a href="#" class="btn btn-primary btn-sm">View Jobs</a>
+                    <a href="#" class="btn btn-outline-primary btn-sm">Company Profile</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4 mb-4">
+            <div class="company-card card h-100">
+                <div class="card-body">
+                    <div class="company-logo mb-3">
+                        <img src="{% static 'img/dashboard/companies/amazon.png' %}" alt="Amazon">
+                    </div>
+                    <h5 class="company-name">Amazon</h5>
+                    <p class="company-description">E-commerce and cloud computing company.</p>
+                    <div class="company-details">
+                        <span><i class="fas fa-map-marker-alt"></i> Delhi, Pune</span>
+                        <span><i class="fas fa-users"></i> 7 Open Positions</span>
+                    </div>
+                </div>
+                <div class="card-footer bg-white">
+                    <a href="#" class="btn btn-primary btn-sm">View Jobs</a>
+                    <a href="#" class="btn btn-outline-primary btn-sm">Company Profile</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Add more company cards here -->
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .companies-section {
+        padding: 1rem 0;
+    }
+
+    .search-input {
+        position: relative;
+    }
+
+    .search-input i {
+        position: absolute;
+        left: 12px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: var(--secondary-color);
+    }
+
+    .search-input input {
+        padding-left: 35px;
+    }
+
+    .company-card {
+        transition: all 0.3s ease;
+        border: 1px solid #e2e8f0;
+    }
+
+    .company-card:hover {
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        transform: translateY(-2px);
+    }
+
+    .company-logo {
+        height: 80px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .company-logo img {
+        max-height: 60px;
+        max-width: 100%;
+    }
+
+    .company-details {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+        margin: 1rem 0;
+        font-size: 0.875rem;
+        color: var(--secondary-color);
+    }
+
+    .card-footer {
+        border-top: 1px solid #e2e8f0;
+        display: flex;
+        gap: 0.5rem;
+    }
+</style>
+{% endblock %} 

@@ -1,0 +1,252 @@
+{% extends 'student/base.html' %}
+{% load static %}
+
+{% block title %}Notifications - Glance 2.0{% endblock %}
+
+{% block page_title %}Notifications{% endblock %}
+
+{% block content %}
+<div class="notifications-section">
+    <!-- Control Bar -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <div class="row align-items-center">
+                <div class="col-md-6">
+                    <div class="btn-group" role="group">
+                        <button type="button" class="btn btn-outline-primary active">All</button>
+                        <button type="button" class="btn btn-outline-primary">Unread</button>
+                        <button type="button" class="btn btn-outline-primary">Important</button>
+                    </div>
+                </div>
+                <div class="col-md-6 text-end">
+                    <button class="btn btn-outline-primary">
+                        <i class="fas fa-check-double"></i> Mark All as Read
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notifications List -->
+    <div class="card">
+        <div class="list-group list-group-flush">
+            <!-- Notification Item - Unread -->
+            <div class="list-group-item notification-item unread">
+                <div class="row align-items-center">
+                    <div class="col-auto">
+                        <div class="notification-icon bg-primary-light">
+                            <i class="fas fa-file-alt"></i>
+                        </div>
+                    </div>
+                    <div class="col">
+                        <h6 class="mb-1">Profile Review</h6>
+                        <p class="mb-1">Your profile has been reviewed by the placement cell.</p>
+                        <small class="text-muted">2 hours ago</small>
+                    </div>
+                    <div class="col-auto">
+                        <div class="dropdown">
+                            <button class="btn btn-sm btn-icon" data-bs-toggle="dropdown">
+                                <i class="fas fa-ellipsis-v"></i>
+                            </button>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" href="#"><i class="fas fa-check"></i> Mark as Read</a></li>
+                                <li><a class="dropdown-item" href="#"><i class="fas fa-star"></i> Mark as Important</a></li>
+                                <li><a class="dropdown-item text-danger" href="#"><i class="fas fa-trash"></i> Delete</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Notification Item - Unread Important -->
+            <div class="list-group-item notification-item unread important">
+                <div class="row align-items-center">
+                    <div class="col-auto">
+                        <div class="notification-icon bg-warning-light">
+                            <i class="fas fa-briefcase"></i>
+                        </div>
+                    </div>
+                    <div class="col">
+                        <h6 class="mb-1">New Job Opening</h6>
+                        <p class="mb-1">A new job opportunity from Microsoft is available.</p>
+                        <small class="text-muted">1 day ago</small>
+                    </div>
+                    <div class="col-auto">
+                        <div class="dropdown">
+                            <button class="btn btn-sm btn-icon" data-bs-toggle="dropdown">
+                                <i class="fas fa-ellipsis-v"></i>
+                            </button>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" href="#"><i class="fas fa-check"></i> Mark as Read</a></li>
+                                <li><a class="dropdown-item" href="#"><i class="fas fa-star-half-alt"></i> Remove Important</a></li>
+                                <li><a class="dropdown-item text-danger" href="#"><i class="fas fa-trash"></i> Delete</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Notification Item - Read -->
+            <div class="list-group-item notification-item">
+                <div class="row align-items-center">
+                    <div class="col-auto">
+                        <div class="notification-icon bg-success-light">
+                            <i class="fas fa-calendar-alt"></i>
+                        </div>
+                    </div>
+                    <div class="col">
+                        <h6 class="mb-1">Resume Workshop</h6>
+                        <p class="mb-1">Don't forget about the resume workshop tomorrow at 3 PM.</p>
+                        <small class="text-muted">2 days ago</small>
+                    </div>
+                    <div class="col-auto">
+                        <div class="dropdown">
+                            <button class="btn btn-sm btn-icon" data-bs-toggle="dropdown">
+                                <i class="fas fa-ellipsis-v"></i>
+                            </button>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" href="#"><i class="fas fa-envelope"></i> Mark as Unread</a></li>
+                                <li><a class="dropdown-item" href="#"><i class="fas fa-star"></i> Mark as Important</a></li>
+                                <li><a class="dropdown-item text-danger" href="#"><i class="fas fa-trash"></i> Delete</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Notification Item - Read -->
+            <div class="list-group-item notification-item">
+                <div class="row align-items-center">
+                    <div class="col-auto">
+                        <div class="notification-icon bg-info-light">
+                            <i class="fas fa-user-graduate"></i>
+                        </div>
+                    </div>
+                    <div class="col">
+                        <h6 class="mb-1">Application Status Update</h6>
+                        <p class="mb-1">Your application for Google Data Scientist position is under review.</p>
+                        <small class="text-muted">3 days ago</small>
+                    </div>
+                    <div class="col-auto">
+                        <div class="dropdown">
+                            <button class="btn btn-sm btn-icon" data-bs-toggle="dropdown">
+                                <i class="fas fa-ellipsis-v"></i>
+                            </button>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" href="#"><i class="fas fa-envelope"></i> Mark as Unread</a></li>
+                                <li><a class="dropdown-item" href="#"><i class="fas fa-star"></i> Mark as Important</a></li>
+                                <li><a class="dropdown-item text-danger" href="#"><i class="fas fa-trash"></i> Delete</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Notification Item - Read -->
+            <div class="list-group-item notification-item">
+                <div class="row align-items-center">
+                    <div class="col-auto">
+                        <div class="notification-icon bg-danger-light">
+                            <i class="fas fa-bell"></i>
+                        </div>
+                    </div>
+                    <div class="col">
+                        <h6 class="mb-1">Profile Completion Reminder</h6>
+                        <p class="mb-1">Complete your profile to increase your chances of getting shortlisted.</p>
+                        <small class="text-muted">5 days ago</small>
+                    </div>
+                    <div class="col-auto">
+                        <div class="dropdown">
+                            <button class="btn btn-sm btn-icon" data-bs-toggle="dropdown">
+                                <i class="fas fa-ellipsis-v"></i>
+                            </button>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" href="#"><i class="fas fa-envelope"></i> Mark as Unread</a></li>
+                                <li><a class="dropdown-item" href="#"><i class="fas fa-star"></i> Mark as Important</a></li>
+                                <li><a class="dropdown-item text-danger" href="#"><i class="fas fa-trash"></i> Delete</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .notifications-section {
+        padding: 1rem 0;
+    }
+
+    .notification-item {
+        transition: all 0.2s ease;
+    }
+
+    .notification-item.unread {
+        background-color: #f8fafc;
+        border-left: 3px solid var(--primary-color);
+    }
+
+    .notification-item.important {
+        border-left: 3px solid var(--warning-color);
+    }
+
+    .notification-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .bg-primary-light {
+        background-color: rgba(37, 99, 235, 0.1);
+        color: var(--primary-color);
+    }
+
+    .bg-success-light {
+        background-color: rgba(34, 197, 94, 0.1);
+        color: var(--success-color);
+    }
+
+    .bg-warning-light {
+        background-color: rgba(245, 158, 11, 0.1);
+        color: var(--warning-color);
+    }
+
+    .bg-info-light {
+        background-color: rgba(6, 182, 212, 0.1);
+        color: #06b6d4;
+    }
+
+    .bg-danger-light {
+        background-color: rgba(239, 68, 68, 0.1);
+        color: var(--danger-color);
+    }
+
+    .btn-icon {
+        width: 32px;
+        height: 32px;
+        padding: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        background: none;
+        color: var(--secondary-color);
+        border: none;
+    }
+
+    .btn-icon:hover {
+        background-color: #f1f5f9;
+    }
+
+    .dropdown-item i {
+        width: 18px;
+        margin-right: 8px;
+    }
+</style>
+{% endblock %} 
