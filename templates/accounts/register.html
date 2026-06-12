@@ -1,0 +1,1404 @@
+{% extends 'home/base.html' %} {% load static %} {% block title %} Register{% endblock %} {% block css %}
+<style>
+  /* Reset and base styles */
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: "Arial", sans-serif;
+  }
+
+  /* Main container styles */
+  .register-page {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    position: relative;
+    overflow: hidden;
+    padding-top: 70px;
+    /* Add padding for the navbar */
+  }
+
+  /* Register container */
+  .register-container {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    margin-top: 3%;
+    margin-bottom: 3%;
+    -webkit-backdrop-filter: blur(10px);
+    padding: 2.5rem;
+    border-radius: 15px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    width: 100%;
+    max-width: 500px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    animation: popup 0.5s ease-out;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* Animation for register container */
+  @keyframes popup {
+    0% {
+      transform: scale(0.8);
+      opacity: 0;
+    }
+
+    100% {
+      transform: scale(1);
+      opacity: 1;
+    }
+  }
+
+  /* Mobile-specific styles for file inputs */
+  @media (max-width: 768px) {
+    input[type="file"] {
+      font-size: 14px;
+      padding: 8px;
+      width: 100%;
+    }
+    
+    .file-requirements {
+      font-size: 12px;
+      line-height: 1.3;
+    }
+    
+    /* Make file inputs more touch-friendly */
+    .input-container input[type="file"] {
+      padding: 10px;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 8px;
+      height: auto;
+      min-height: 44px; /* Minimum touch target size */
+    }
+    
+    /* Fix for iOS Safari file input issues */
+    input[type="file"]::-webkit-file-upload-button {
+      padding: 8px 12px;
+      height: auto;
+      font-size: 14px;
+      margin-right: 8px;
+      border-radius: 4px;
+      background: rgba(33, 150, 243, 0.9);
+    }
+    
+    /* Fix for older Android browsers */
+    input[type="file"]::-ms-browse {
+      padding: 8px 12px;
+      height: auto;
+      font-size: 14px;
+      margin-right: 8px;
+      border-radius: 4px;
+      background: rgba(33, 150, 243, 0.9);
+    }
+    
+    /* Required badge styling */
+    .required-badge {
+      background-color: #dc3545;
+      color: white;
+      padding: 3px 8px;
+      border-radius: 4px;
+      font-size: 12px;
+      margin-left: 8px;
+    }
+    
+    /* Make form elements larger for better touch targets */
+    .form-control, .btn {
+      min-height: 44px;
+    }
+    
+    /* Improve visibility of validation messages */
+    .validation-message {
+      font-size: 14px;
+      padding: 8px;
+      margin-top: 5px;
+      border-radius: 4px;
+      background-color: rgba(255, 255, 255, 0.1);
+    }
+  }
+
+  /* Header styles */
+  .register-header {
+    text-align: center;
+    margin-bottom: 2rem;
+  }
+
+  .register-header h1 {
+    color: white;
+    font-size: 2.2rem;
+    margin-bottom: 0.5rem;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+  }
+
+  .register-header p {
+    color: rgba(255, 255, 255, 0.8);
+  }
+
+  /* Form styles */
+  .form-group {
+    margin-bottom: 1.5rem;
+  }
+
+  .form-row {
+    display: flex;
+    gap: 15px;
+  }
+
+  .form-row .form-group {
+    flex: 1;
+  }
+
+  .form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    color: white;
+    font-weight: 500;
+  }
+
+  .form-group input,
+  .form-group select {
+    width: 100%;
+    padding: 0.8rem 1rem;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 8px;
+    font-size: 1rem;
+    color: white;
+    transition: all 0.3s ease;
+  }
+
+  .form-group input::placeholder {
+    color: rgba(255, 255, 255, 0.6);
+  }
+
+  .form-group input:focus,
+  .form-group select:focus {
+    outline: none;
+    background: rgba(255, 255, 255, 0.15);
+    border-color: rgba(255, 255, 255, 0.4);
+    box-shadow: 0 0 10px rgba(255, 255, 255, 0.2);
+  }
+
+  /* Button styles */
+  .register-button {
+    width: 100%;
+    padding: 1rem;
+    background: linear-gradient(45deg, #2196f3, #1976d2);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .register-button::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg,
+      transparent,
+      rgba(255, 255, 255, 0.2),
+        transparent);
+    transition: 0.5s;
+  }
+
+  .register-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+  }
+
+  .register-button:hover::before {
+    left: 100%;
+  }
+
+  /* Login link styles */
+  .login-link {
+    text-align: center;
+    margin-top: 1.5rem;
+    color: rgba(255, 255, 255, 0.8);
+  }
+
+  .login-link a {
+    color: white;
+    text-decoration: none;
+    font-weight: 500;
+    transition: color 0.3s;
+  }
+
+  .login-link a:hover {
+    color: #2196f3;
+    text-decoration: underline;
+  }
+
+  /* Alert styles */
+  .alert {
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+    padding: 1rem;
+    border-radius: 8px;
+    margin-bottom: 1.5rem;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    animation: slideIn 0.3s ease;
+  }
+
+  @keyframes slideIn {
+    from {
+      transform: translateY(-10px);
+      opacity: 0;
+    }
+
+    to {
+      transform: translateY(0);
+      opacity: 1;
+    }
+  }
+
+  /* Validation icon styles */
+  .input-container {
+    position: relative;
+  }
+
+  .validation-message {
+    color: #ff4d4f;
+    font-size: 0.8rem;
+    margin-top: 0.3rem;
+    display: none;
+    animation: fadeIn 0.2s ease;
+  }
+
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+    }
+
+    to {
+      opacity: 1;
+    }
+  }
+
+  .validation-icon {
+    position: absolute;
+    right: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 20px;
+    height: 20px;
+    background-size: contain;
+    background-repeat: no-repeat;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+
+  .input-container.valid .validation-icon {
+    opacity: 1;
+    background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%2340C057"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/></svg>');
+  }
+
+  .input-container.invalid .validation-icon {
+    opacity: 1;
+    background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%23FF4D4F"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z"/></svg>');
+  }
+
+  .input-container.invalid .validation-message {
+    display: block;
+  }
+
+  /* File upload styling */
+  input[type="file"] {
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+    padding: 0.6rem;
+    border-radius: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    width: 100%;
+    cursor: pointer;
+    max-width: 100%;
+    box-sizing: border-box;
+  }
+
+  input[type="file"]::-webkit-file-upload-button {
+    background: rgba(33, 150, 243, 0.8);
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    margin-right: 1rem;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background 0.3s;
+  }
+
+  input[type="file"]::-webkit-file-upload-button:hover {
+    background: rgba(33, 150, 243, 1);
+  }
+  
+  /* Firefox file input styling */
+  input[type="file"]::-moz-file-upload-button {
+    background: rgba(33, 150, 243, 0.8);
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    margin-right: 1rem;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+
+  .file-requirements {
+    font-size: 0.75rem;
+    color: rgba(255, 255, 255, 0.7);
+    margin-top: 0.3rem;
+  }
+
+  /* Mobile file upload styling */
+  @media (max-width: 480px) {
+    input[type="file"] {
+      padding: 0.5rem;
+      font-size: 0.9rem;
+    }
+
+    input[type="file"]::-webkit-file-upload-button {
+      padding: 0.4rem 0.8rem;
+      font-size: 0.8rem;
+      margin-right: 0.5rem;
+    }
+
+    .file-requirements {
+      font-size: 0.7rem;
+    }
+  }
+
+  /* Password visibility styles */
+  .password-container {
+    position: relative;
+  }
+
+  .password-container input {
+    padding-right: 2.5rem;
+  }
+
+  /* Hover approach for password visibility */
+  .password-container:hover input[type="password"] {
+    -webkit-text-security: none !important;
+    font-size: inherit;
+    color: inherit;
+  }
+
+  /* Validation icon adjustment for password containers */
+  .password-container .validation-icon {
+    right: 1rem;
+  }
+
+  /* WhatsApp Support */
+  .whatsapp-support {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 1rem;
+    padding: 0.8rem;
+    background: rgba(37, 211, 102, 0.1);
+    border-radius: 8px;
+    border: 1px solid rgba(37, 211, 102, 0.3);
+    transition: all 0.3s;
+  }
+
+  .whatsapp-support:hover {
+    background: rgba(37, 211, 102, 0.2);
+  }
+
+  .whatsapp-support a {
+    display: flex;
+    align-items: center;
+    color: white;
+    text-decoration: none;
+    font-weight: 500;
+  }
+
+  .whatsapp-icon {
+    width: 24px;
+    height: 24px;
+    margin-right: 10px;
+    background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%2325D366"><path d="M17.498 14.382c-.301-.15-1.767-.867-2.04-.966-.273-.101-.473-.15-.673.15-.197.295-.771.964-.944 1.162-.175.195-.349.21-.646.075-.3-.15-1.263-.465-2.403-1.485-.888-.795-1.484-1.77-1.66-2.07-.174-.3-.019-.465.13-.615.136-.135.301-.345.451-.523.146-.181.194-.301.297-.496.1-.21.049-.39-.025-.54-.075-.15-.672-1.62-.922-2.206-.24-.584-.487-.51-.672-.51-.172-.015-.371-.015-.571-.015-.2 0-.523.074-.797.359-.273.3-1.045 1.02-1.045 2.475s1.07 2.865 1.219 3.075c.149.195 2.105 3.195 5.1 4.485.714.3 1.27.48 1.704.629.714.227 1.365.195 1.88.121.574-.091 1.767-.721 2.016-1.426.255-.705.255-1.29.18-1.425-.074-.135-.27-.21-.57-.345m-5.446 7.443h-.016c-1.77 0-3.524-.48-5.055-1.38l-.36-.214-3.75.975 1.005-3.645-.239-.375c-.99-1.576-1.516-3.391-1.516-5.26 0-5.445 4.455-9.885 9.942-9.885 2.654 0 5.145 1.035 7.021 2.91 1.875 1.859 2.909 4.35 2.909 6.99-.004 5.444-4.46 9.885-9.935 9.885M20.52 3.449C18.24 1.245 15.24 0 12.045 0 5.463 0 .104 5.334.101 11.893c0 2.096.549 4.14 1.595 5.945L0 24l6.335-1.652c1.746.943 3.71 1.444 5.71 1.447h.006c6.585 0 11.946-5.336 11.949-11.896 0-3.176-1.24-6.165-3.495-8.411"/></svg>');
+    background-size: contain;
+    background-repeat: no-repeat;
+  }
+
+  /* Password requirements indicator */
+  .password-requirements {
+    margin-top: 0.5rem;
+    font-size: 0.8rem;
+    color: rgba(255, 255, 255, 0.7);
+  }
+
+  .req-item {
+    display: flex;
+    align-items: center;
+    margin-bottom: 0.2rem;
+    color: rgba(255, 255, 255, 0.7);
+    transition: color 0.3s;
+  }
+
+  .req-item:before {
+    content: "";
+    display: inline-block;
+    width: 12px;
+    height: 12px;
+    margin-right: 8px;
+    border-radius: 50%;
+    background-color: rgba(255, 255, 255, 0.3);
+    transition: all 0.3s;
+  }
+
+  .req-item.valid {
+    color: #40c057;
+  }
+
+  .req-item.valid:before {
+    background-color: #40c057;
+    background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/></svg>');
+    background-size: 8px;
+    background-position: center;
+    background-repeat: no-repeat;
+  }
+
+  /* Security notice */
+  .security-notice {
+    font-size: 0.8rem;
+    color: rgba(255, 255, 255, 0.6);
+    margin-top: 0.5rem;
+    text-align: center;
+  }
+
+  /* Terms and conditions checkbox */
+  .terms-checkbox {
+    margin-bottom: 1.5rem;
+  }
+
+  .checkbox-container {
+    display: flex;
+    align-items: center;
+  }
+
+  .checkbox-container input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    margin-right: 10px;
+    cursor: pointer;
+    accent-color: #2196f3;
+  }
+
+  .checkbox-container label {
+    color: white;
+    font-size: 0.9rem;
+    margin-bottom: 0;
+    cursor: pointer;
+  }
+
+  .checkbox-container a {
+    color: #2196f3;
+    text-decoration: none;
+    transition: color 0.3s;
+  }
+
+  .checkbox-container a:hover {
+    text-decoration: underline;
+  }
+
+  /* Responsive styles */
+  @media (max-width: 768px) {
+    .register-container {
+      padding: 2rem;
+      margin: 1rem;
+      max-width: 90%;
+    }
+
+    .register-header h1 {
+      font-size: 1.8rem;
+    }
+
+    .form-row {
+      gap: 10px;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .register-page {
+      padding-top: 80px;
+    }
+
+    .register-container {
+      padding: 1.5rem;
+      margin: 0.5rem;
+      width: 95%;
+    }
+
+    .register-header h1 {
+      font-size: 1.5rem;
+    }
+
+    .register-header p {
+      font-size: 0.9rem;
+    }
+
+    .form-row {
+      flex-direction: column;
+      gap: 0;
+    }
+
+    .password-requirements {
+      font-size: 0.7rem;
+    }
+
+    .whatsapp-support a span {
+      font-size: 0.9rem;
+    }
+
+    .validation-message {
+      font-size: 0.7rem;
+    }
+  }
+
+  /* Small phones */
+  @media (max-width: 350px) {
+    .register-page {
+      padding-top: 90px;
+    }
+
+    .register-container {
+      padding: 1rem;
+    }
+
+    .form-group label,
+    .form-group input,
+    .form-group select {
+      font-size: 0.9rem;
+    }
+
+    .register-button {
+      padding: 0.8rem;
+      font-size: 0.9rem;
+    }
+
+    .whatsapp-support a span {
+      font-size: 0.8rem;
+    }
+
+    /* Smaller file input for very small screens */
+    input[type="file"] {
+      font-size: 0.8rem;
+      padding: 0.4rem;
+    }
+
+    input[type="file"]::-webkit-file-upload-button {
+      padding: 0.3rem 0.6rem;
+      font-size: 0.75rem;
+      margin-right: 0.4rem;
+    }
+
+    .file-requirements {
+      font-size: 0.65rem;
+    }
+  }
+</style>
+{% endblock %} {% block body %}
+<div class="register-page">
+  <div class="register-container">
+    <div class="register-header">
+      <h1>Create Account</h1>
+      <p>Join us to get started</p>
+    </div>
+
+    {% if messages %}
+    {% for message in messages %}
+    <div class="alert alert-{% if message.tags == 'error' %}danger{% else %}{{ message.tags }}{% endif %}">
+      {{ message }}
+      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    {% endfor %}
+    {% endif %}
+
+    <form role="form" method="post" id="registerForm" enctype="multipart/form-data">
+      {% csrf_token %}
+
+      <!-- First Name and Last Name in one line -->
+      <div class="form-row">
+        <div class="form-group">
+          <label for="first_name">First Name</label>
+          <div class="input-container">
+            <input type="text" id="first_name" name="first_name" placeholder="Enter your first name" pattern="[A-Za-z]+"
+              title="Please enter alphabets only" required />
+            <div class="validation-icon"></div>
+            <div class="validation-message">
+              First name should contain only alphabets
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="last_name">Last Name</label>
+          <div class="input-container">
+            <input type="text" id="last_name" name="last_name" placeholder="Enter your last name" pattern="[A-Za-z]+"
+              title="Please enter alphabets only" required />
+            <div class="validation-icon"></div>
+            <div class="validation-message">
+              Last name should contain only alphabets
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Email and Mobile Number in one line -->
+      <div class="form-row">
+        <div class="form-group">
+          <label for="email">Email</label>
+          <div class="input-container">
+            <input type="email" id="email" name="email" placeholder="Enter your email"
+              pattern="[a-zA-Z0-9._%+-]+@(gmail\.com|gla\.ac\.in)$"
+              title="Please enter an email ending with @gmail.com or @gla.ac.in" required />
+            <div class="validation-icon"></div>
+            <div class="validation-message">
+              Only @gmail.com or @gla.ac.in emails are allowed
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="mobile_number">Mobile Number</label>
+          <div class="input-container">
+            <input type="tel" id="mobile_number" name="mobile_number" placeholder="10-digit mobile number"
+              pattern="[0-9]{10}" title="Please enter a valid 10-digit mobile number" required />
+            <div class="validation-icon"></div>
+            <div class="validation-message">
+              Please enter a valid 10-digit mobile number
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Password and Confirm Password in one line -->
+      <div class="form-row">
+        <div class="form-group">
+          <label for="password">Password</label>
+          <div class="password-container input-container">
+            <input type="password" id="password" name="password" placeholder="Enter your password"
+              pattern="^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$"
+              title="Password must contain at least 8 characters, one uppercase letter, one lowercase letter, one number and one special character"
+              required />
+            <div class="validation-icon"></div>
+          </div>
+          <div class="password-requirements">
+            <div class="req-item" id="length">At least 8 characters</div>
+            <div class="req-item" id="lowercase">One lowercase letter</div>
+            <div class="req-item" id="uppercase">One uppercase letter</div>
+            <div class="req-item" id="number">One number</div>
+            <div class="req-item" id="special">One special character</div>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="confirm_password">Confirm Password</label>
+          <div class="password-container input-container">
+            <input type="password" id="confirm_password" name="confirm_password" placeholder="Confirm your password"
+              required />
+            <div class="validation-icon"></div>
+            <div class="validation-message">Passwords do not match</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Resume Upload Field (Mandatory) -->
+      <div class="form-group">
+        <label for="resume">Resume <span class="required-badge">Required</span></label>
+        <div class="input-container">
+          <input type="file" id="resume" name="resume" accept=".pdf" required />
+          <div class="validation-icon"></div>
+          <div class="validation-message"></div>
+        </div>
+        <p class="file-requirements">PDF only, max 5MB</p>
+      </div>
+      
+      <!-- Profile Photo Upload Field (Optional) -->
+      <div class="form-group">
+        <label for="profile_pic">Profile Photo <small>(Optional)</small></label>
+        <div class="input-container">
+          <input type="file" id="profile_pic" name="profile_pic" accept="image/*" />
+          <div class="validation-icon"></div>
+          <div class="validation-message">Please upload a valid image file</div>
+        </div>
+        <p class="file-requirements">Upload a clear photo of yourself (JPEG, PNG, up to 2MB)</p>
+      </div>
+
+      <div class="form-group terms-checkbox">
+        <div class="checkbox-container">
+          <input type="checkbox" id="terms" name="terms" required />
+          <label for="terms">I agree to the
+            <a href="{% url 'terms' %}" target="_blank">Terms and Conditions</a></label>
+        </div>
+      </div>
+
+      <button type="submit" class="register-button">Register</button>
+      <p class="security-notice">
+        Your security is our priority. All data is encrypted.
+      </p>
+    </form>
+
+    <!-- WhatsApp Support -->
+    <div class="whatsapp-support">
+      <a href="https://wa.me/919305188260?text=Hello%2C%20I%20need%20assistance%20with%20Glance%20registration"
+        target="_blank">
+        <div class="whatsapp-icon"></div>
+        <span>Need help? Connect with our technical team</span>
+      </a>
+    </div>
+
+    <div class="login-link">
+      Already have an account? <a href="{% url 'login' %}">Login</a>
+    </div>
+  </div>
+</div>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    // Get form elements
+    const form = document.getElementById("registerForm");
+    const password = document.getElementById("password");
+    const confirmPassword = document.getElementById("confirm_password");
+    const termsCheckbox = document.getElementById("terms");
+    const emailInput = document.getElementById("email");
+    const mobileInput = document.getElementById("mobile_number");
+    const firstNameInput = document.getElementById("first_name");
+    const lastNameInput = document.getElementById("last_name");
+    const registerButton = document.querySelector(".register-button");
+
+    // Timeout variables for debouncing
+    let emailTimeout;
+    let mobileTimeout;
+
+    // Get password requirement elements
+    const passReqs = {
+      length: document.getElementById("length"),
+      lowercase: document.getElementById("lowercase"),
+      uppercase: document.getElementById("uppercase"),
+      number: document.getElementById("number"),
+      special: document.getElementById("special")
+    };
+
+    // Get all text/email/password inputs for validation
+    const inputs = [
+      firstNameInput,
+      lastNameInput,
+      emailInput,
+      mobileInput,
+      password,
+      confirmPassword
+    ];
+
+    // Basic real-time validation
+    inputs.forEach((input) => {
+      input.addEventListener("input", function () {
+        validateInput(this);
+      });
+    });
+
+    // Simple validation function
+    function validateInput(input) {
+      const container = input.parentElement;
+      const validationMessage = container.querySelector('.validation-message');
+      const isValid = input.checkValidity() && input.value.trim() !== "";
+
+      if (isValid) {
+        container.classList.add("valid");
+        container.classList.remove("invalid");
+        validationMessage.style.display = 'none';
+      } else {
+        container.classList.remove("valid");
+        if (input.value.trim() !== "") {
+          container.classList.add("invalid");
+          validationMessage.style.display = 'block';
+        } else {
+          container.classList.remove("invalid");
+          validationMessage.style.display = 'none';
+        }
+      }
+    }
+
+    // First name validation - letters only
+    firstNameInput.addEventListener('input', function () {
+      validateInput(this);
+    });
+
+    // Last name validation - letters only
+    lastNameInput.addEventListener('input', function () {
+      validateInput(this);
+    });
+
+    // Email validation
+    emailInput.addEventListener('input', function () {
+      clearTimeout(emailTimeout);
+      const container = this.parentElement;
+      const validationMessage = container.querySelector('.validation-message');
+
+      if (this.value) {
+        // Check for valid domain (@gmail.com or @gla.ac.in)
+        if (!this.checkValidity()) {
+          container.classList.add('invalid');
+          container.classList.remove('valid');
+          validationMessage.textContent = "Only @gmail.com or @gla.ac.in emails are allowed";
+          validationMessage.style.display = 'block';
+          return;
+        }
+
+        // Check email availability
+        emailTimeout = setTimeout(function () {
+          fetch(`/accounts/check_username_availability/?username=${encodeURIComponent(emailInput.value)}`)
+            .then(response => response.json())
+            .then(data => {
+              if (!data.is_available) {
+                container.classList.add('invalid');
+                container.classList.remove('valid');
+                validationMessage.textContent = "This email is already registered. Please use a different email.";
+                validationMessage.style.display = 'block';
+              } else {
+                container.classList.add('valid');
+                container.classList.remove('invalid');
+                validationMessage.style.display = 'none';
+              }
+            })
+            .catch(error => {
+              console.error('Error checking email availability:', error);
+              container.classList.remove('valid', 'invalid');
+              validationMessage.style.display = 'none';
+            });
+        }, 500);
+      } else {
+        container.classList.remove('valid', 'invalid');
+        validationMessage.style.display = 'none';
+      }
+    });
+
+    // Mobile validation
+    mobileInput.addEventListener('input', function () {
+      clearTimeout(mobileTimeout);
+      const container = this.parentElement;
+      const validationMessage = container.querySelector('.validation-message');
+
+      if (this.value) {
+        // Check for valid mobile number format
+        if (!this.checkValidity()) {
+          container.classList.add('invalid');
+          container.classList.remove('valid');
+          validationMessage.textContent = "Please enter a valid 10-digit mobile number";
+          validationMessage.style.display = 'block';
+          return;
+        }
+
+        // Check mobile availability
+        mobileTimeout = setTimeout(function () {
+          fetch(`/accounts/check_mobile_availability/?mobile=${encodeURIComponent(mobileInput.value)}`)
+            .then(response => response.json())
+            .then(data => {
+              if (!data.is_available) {
+                container.classList.add('invalid');
+                container.classList.remove('valid');
+                validationMessage.textContent = "This mobile number is already registered";
+                validationMessage.style.display = 'block';
+              } else {
+                container.classList.add('valid');
+                container.classList.remove('invalid');
+                validationMessage.style.display = 'none';
+              }
+            })
+            .catch(error => {
+              console.error('Error checking mobile availability:', error);
+              container.classList.remove('valid', 'invalid');
+              validationMessage.style.display = 'none';
+            });
+        }, 500);
+      } else {
+        container.classList.remove('valid', 'invalid');
+        validationMessage.style.display = 'none';
+      }
+    });
+
+    // Profile photo validation on change
+    const profilePicInput = document.getElementById('profile_pic');
+    const resumeInput = document.getElementById('resume');
+
+    // Comprehensive device detection and fixes for file inputs
+    function enhanceFileInputsForAllDevices() {
+      // Get all file inputs
+      const fileInputs = document.querySelectorAll('input[type="file"]');
+      
+      // Detect device type
+      const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+      const isOldAndroid = /Android\s[23]/.test(navigator.userAgent);
+      const isWindowsPhone = /Windows Phone/.test(navigator.userAgent);
+      const isMobile = isIOS || /Android/.test(navigator.userAgent) || isWindowsPhone;
+      
+      // Apply appropriate fixes based on device
+      fileInputs.forEach(input => {
+        // Add data attribute for debugging
+        input.setAttribute('data-device-type', 
+          isIOS ? 'ios' : (isOldAndroid ? 'old-android' : (isMobile ? 'mobile' : 'desktop')));
+        
+        // iOS specific fixes
+        if (isIOS) {
+          // Remove accept attribute which can cause issues on some iOS versions
+          const acceptValue = input.getAttribute('accept');
+          input.setAttribute('data-original-accept', acceptValue);
+          
+          // For iOS 13+ we keep the accept attribute but add capture
+          if (parseInt((navigator.appVersion).match(/OS (\d+)_(\d+)_?(\d+)?/)[1], 10) >= 13) {
+            input.setAttribute('capture', 'camera');
+          } else {
+            // For older iOS we remove accept which can be problematic
+            input.removeAttribute('accept');
+          }
+          
+          // Prevent zoom issues on focus
+          input.addEventListener('touchstart', function(e) {
+            // Only prevent default if it's not the actual input
+            if (e.target !== this) {
+              e.preventDefault();
+            }
+            // Trigger click after a small delay
+            setTimeout(() => {
+              this.click();
+            }, 100);
+          });
+          
+          // Add click handler to parent container for better touch area
+          const container = input.closest('.input-container');
+          if (container) {
+            container.style.cursor = 'pointer';
+            container.addEventListener('click', function(e) {
+              // Only trigger if the click wasn't directly on the input
+              if (e.target !== input) {
+                input.click();
+              }
+            });
+          }
+        }
+        
+        // Old Android fixes
+        if (isOldAndroid) {
+          // Simplify file input for older Android browsers
+          input.style.padding = '12px';
+          input.style.fontSize = '16px';
+          
+          // Make the clickable area larger
+          const container = input.closest('.input-container');
+          if (container) {
+            container.style.cursor = 'pointer';
+            container.addEventListener('click', function(e) {
+              if (e.target !== input) {
+                input.click();
+              }
+            });
+          }
+        }
+        
+        // General mobile improvements
+        if (isMobile) {
+          // Ensure proper sizing and visibility
+          input.style.opacity = '1';
+          input.style.height = 'auto';
+          input.style.minHeight = '44px';
+          
+          // Add touch feedback
+          input.addEventListener('touchstart', function() {
+            this.style.backgroundColor = 'rgba(255, 255, 255, 0.2)';
+          });
+          
+          input.addEventListener('touchend', function() {
+            this.style.backgroundColor = 'rgba(255, 255, 255, 0.1)';
+          });
+        }
+      });
+      
+      // Add a hidden field to track device info for server-side handling
+      const form = document.querySelector('form');
+      if (form) {
+        const deviceInfoInput = document.createElement('input');
+        deviceInfoInput.type = 'hidden';
+        deviceInfoInput.name = 'device_info';
+        deviceInfoInput.value = navigator.userAgent;
+        form.appendChild(deviceInfoInput);
+      }
+    }
+    
+    // Call the device enhancement function on page load
+    document.addEventListener('DOMContentLoaded', enhanceFileInputsForAllDevices);
+    
+    // Resume validation - required and must be PDF
+    if (resumeInput) {
+      resumeInput.addEventListener('change', function() {
+        const container = this.parentElement;
+        const validationMessage = container.querySelector('.validation-message');
+        
+        try {
+          if (this.files && this.files.length > 0) {
+            const file = this.files[0];
+            const fileSize = file.size / 1024 / 1024; // Convert to MB
+            const fileType = file.type;
+            const fileName = file.name.toLowerCase();
+            
+            // Check file type
+            if (fileType !== 'application/pdf' && !fileName.endsWith('.pdf')) {
+              container.classList.add('invalid');
+              validationMessage.textContent = 'Please upload a PDF file';
+              validationMessage.style.display = 'block';
+              this.value = ''; // Clear the file input
+              return;
+            }
+            
+            // Check file size (max 5MB)
+            if (fileSize > 5) {
+              container.classList.add('invalid');
+              validationMessage.textContent = 'File size exceeds 5MB limit';
+              validationMessage.style.display = 'block';
+              this.value = ''; // Clear the file input
+              return;
+            }
+            
+            container.classList.remove('invalid');
+            container.classList.add('valid');
+            validationMessage.style.display = 'none';
+          } else {
+            container.classList.add('invalid');
+            validationMessage.textContent = 'Resume is required';
+            validationMessage.style.display = 'block';
+          }
+        } catch (error) {
+          console.error('Error validating resume:', error);
+          // Fallback to basic validation if error occurs
+          if (!this.value) {
+            container.classList.add('invalid');
+            validationMessage.textContent = 'Resume is required';
+            validationMessage.style.display = 'block';
+          } else {
+            container.classList.remove('invalid');
+            container.classList.add('valid');
+            validationMessage.style.display = 'none';
+          }
+        }
+      });
+    }
+
+    // Profile pic validation (optional)
+    if (profilePicInput) {
+      profilePicInput.addEventListener('change', function () {
+        const container = this.parentElement;
+        const validationMessage = container.querySelector('.validation-message');
+
+        try {
+          if (this.files && this.files.length > 0) {
+            const file = this.files[0];
+            const fileSize = file.size / 1024 / 1024; // in MB
+            const fileType = file.type;
+
+            if (fileType.startsWith('image/') && fileSize <= 2) {
+              container.classList.add('valid');
+              container.classList.remove('invalid');
+              validationMessage.style.display = 'none';
+            } else {
+              container.classList.add('invalid');
+              container.classList.remove('valid');
+
+              if (!fileType.startsWith('image/')) {
+                validationMessage.textContent = "Please upload a valid image file (JPEG, PNG, etc.)";
+                validationMessage.style.display = 'block';
+
+                // For desktop, also show alert for better visibility
+                if (window.innerWidth > 480) {
+                  alert("Please upload a valid image file (JPEG, PNG, etc.)");
+                }
+              } else if (fileSize > 2) {
+                validationMessage.textContent = "Profile photo must be less than 2MB in size";
+                validationMessage.style.display = 'block';
+
+                // For desktop, also show alert for better visibility
+                if (window.innerWidth > 480) {
+                  alert("Profile photo must be less than 2MB in size");
+                }
+              }
+
+              // Reset the input
+              this.value = '';
+            }
+          } else {
+            // Profile pic is optional, so no validation needed if empty
+            container.classList.remove('valid');
+            container.classList.remove('invalid');
+            validationMessage.style.display = 'none';
+          }
+        } catch (error) {
+          console.error('Error validating profile picture:', error);
+          // Since profile pic is optional, just remove validation if there's an error
+          container.classList.remove('valid');
+          container.classList.remove('invalid');
+          validationMessage.style.display = 'none';
+        }
+      });
+    }
+
+    // Password requirements validation
+    password.addEventListener("input", function () {
+      const val = this.value;
+      const container = this.parentElement;
+
+      // Check each requirement and apply the valid class
+      if (val.length >= 8) {
+        passReqs.length.classList.add("valid");
+      } else {
+        passReqs.length.classList.remove("valid");
+      }
+
+      if (/[a-z]/.test(val)) {
+        passReqs.lowercase.classList.add("valid");
+      } else {
+        passReqs.lowercase.classList.remove("valid");
+      }
+
+      if (/[A-Z]/.test(val)) {
+        passReqs.uppercase.classList.add("valid");
+      } else {
+        passReqs.uppercase.classList.remove("valid");
+      }
+
+      if (/[0-9]/.test(val)) {
+        passReqs.number.classList.add("valid");
+      } else {
+        passReqs.number.classList.remove("valid");
+      }
+
+      if (/[@$!%*?&]/.test(val)) {
+        passReqs.special.classList.add("valid");
+      } else {
+        passReqs.special.classList.remove("valid");
+      }
+
+      // Validate password input
+      if (val.length >= 8 && /[a-z]/.test(val) && /[A-Z]/.test(val) && /[0-9]/.test(val) && /[@$!%*?&]/.test(val)) {
+        container.classList.add("valid");
+        container.classList.remove("invalid");
+      } else {
+        container.classList.remove("valid");
+        if (val.length > 0) {
+          container.classList.add("invalid");
+        } else {
+          container.classList.remove("invalid");
+        }
+      }
+
+      // Also validate confirm password if it has a value
+      if (confirmPassword.value) {
+        validatePasswordMatch();
+      }
+    });
+
+    // Password matching validation
+    function validatePasswordMatch() {
+      const container = confirmPassword.parentElement;
+      const validationMessage = container.querySelector('.validation-message');
+
+      if (confirmPassword.value === "") {
+        container.classList.remove("valid", "invalid");
+        validationMessage.style.display = 'none';
+      } else if (confirmPassword.value !== password.value) {
+        container.classList.add("invalid");
+        container.classList.remove("valid");
+        validationMessage.style.display = 'block';
+      } else {
+        container.classList.add("valid");
+        container.classList.remove("invalid");
+        validationMessage.style.display = 'none';
+      }
+    }
+
+    confirmPassword.addEventListener("input", validatePasswordMatch);
+
+    // Validate resume on form submission
+    function validateResume() {
+      if (resumeInput) {
+        const container = resumeInput.parentElement;
+        const validationMessage = container.querySelector('.validation-message');
+        
+        try {
+          if (!resumeInput.files || resumeInput.files.length === 0) {
+            container.classList.add('invalid');
+            validationMessage.textContent = 'Resume is required';
+            validationMessage.style.display = 'block';
+            
+            // Scroll to the resume input for better visibility
+            resumeInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            return false;
+          }
+          
+          // Additional validation for file type and size
+          const file = resumeInput.files[0];
+          const fileSize = file.size / 1024 / 1024; // Convert to MB
+          const fileType = file.type;
+          const fileName = file.name.toLowerCase();
+          
+          // Check file type
+          if (fileType !== 'application/pdf' && !fileName.endsWith('.pdf')) {
+            container.classList.add('invalid');
+            validationMessage.textContent = 'Please upload a PDF file';
+            validationMessage.style.display = 'block';
+            resumeInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            return false;
+          }
+          
+          // Check file size (max 5MB)
+          if (fileSize > 5) {
+            container.classList.add('invalid');
+            validationMessage.textContent = 'File size exceeds 5MB limit';
+            validationMessage.style.display = 'block';
+            resumeInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            return false;
+          }
+        } catch (error) {
+          console.error('Error in validateResume:', error);
+          // Fallback validation if error occurs
+          if (!resumeInput.value) {
+            container.classList.add('invalid');
+            validationMessage.textContent = 'Resume is required';
+            validationMessage.style.display = 'block';
+            return false;
+          }
+        }
+      }
+      return true;
+    }
+
+    // Handle form submission
+    form.addEventListener("submit", function (e) {
+      // Validate resume first (it's mandatory)
+      if (!validateResume()) {
+        e.preventDefault();
+        // Show a clear message about the resume requirement
+        if (window.innerWidth > 480) {
+          alert("Please upload your resume in PDF format (max 5MB). This is required to complete your registration.");
+        }
+        return false;
+      }
+      let hasError = false;
+      let errorMessages = [];
+
+      // Validate all inputs
+      inputs.forEach((input) => {
+        if (!input.checkValidity() || input.value.trim() === "") {
+          input.parentElement.classList.add("invalid");
+          hasError = true;
+          errorMessages.push(`${input.name} is required`);
+        }
+      });
+
+      // Additional validation for first name
+      if (!/^[A-Za-z]+$/.test(firstNameInput.value)) {
+        firstNameInput.parentElement.classList.add("invalid");
+        firstNameInput.parentElement.querySelector('.validation-message').style.display = 'block';
+        hasError = true;
+      }
+
+      // Additional validation for last name
+      if (!/^[A-Za-z]+$/.test(lastNameInput.value)) {
+        lastNameInput.parentElement.classList.add("invalid");
+        lastNameInput.parentElement.querySelector('.validation-message').style.display = 'block';
+        hasError = true;
+      }
+
+      // Additional validation for email domain
+      if (emailInput.value) {
+        const emailValue = emailInput.value.toLowerCase();
+        if (!emailValue.endsWith('@gmail.com') && !emailValue.endsWith('@gla.ac.in')) {
+          emailInput.parentElement.classList.add("invalid");
+          emailInput.parentElement.querySelector('.validation-message').textContent = "Only @gmail.com or @gla.ac.in emails are allowed";
+          emailInput.parentElement.querySelector('.validation-message').style.display = 'block';
+          hasError = true;
+        }
+      }
+
+      // Check if email has validation errors
+      const emailContainer = emailInput.parentElement;
+      if (emailContainer.classList.contains('invalid')) {
+        hasError = true;
+      }
+      
+      // Check if mobile has validation errors
+      const mobileContainer = mobileInput.parentElement;
+      if (mobileContainer.classList.contains('invalid')) {
+        hasError = true;
+      }
+      
+      // Validate password match
+      if (password.value !== confirmPassword.value) {
+        confirmPassword.parentElement.classList.add("invalid");
+        hasError = true;
+      }
+      
+      // Check terms
+      if (!termsCheckbox.checked) {
+        // Create a custom validation message for terms
+        const termsContainer = termsCheckbox.closest('.form-group');
+        const termsMessage = document.createElement('div');
+        termsMessage.className = 'validation-message';
+        termsMessage.textContent = 'You must agree to the Terms and Conditions';
+        termsMessage.style.display = 'block';
+        termsMessage.style.marginTop = '0.5rem';
+
+        // Remove any existing message
+        const existingMessage = termsContainer.querySelector('.validation-message');
+        if (existingMessage) {
+          existingMessage.remove();
+        }
+
+        termsContainer.appendChild(termsMessage);
+
+        // Only show alert on desktop
+        if (window.innerWidth > 480) {
+        alert("You must agree to the Terms and Conditions");
+        }
+        hasError = true;
+      }
+
+      // Log validation state for debugging
+      console.log("Form validation error:", hasError);
+      console.log("Error messages:", errorMessages);
+      
+      // Prevent submission if there are errors
+      if (hasError) {
+        e.preventDefault();
+        // Show all error messages
+        if (errorMessages.length > 0 && window.innerWidth > 480) {
+          alert(errorMessages.join('\n'));
+        }
+      } else {
+        registerButton.textContent = "Registering...";
+        registerButton.disabled = true;
+
+        // Debug form data
+        console.log("Form is valid, submitting...");
+        const formData = new FormData(form);
+        for (let [key, value] of formData.entries()) {
+          console.log(key + ': ' + value);
+        }
+      }
+    });
+
+    // Debug issue where form might be valid but not submitting
+    form.addEventListener("submit", function (e) {
+      if (!e.defaultPrevented) {
+        console.log("Form is being submitted!");
+      }
+    });
+  });
+</script>
+{% endblock %}
