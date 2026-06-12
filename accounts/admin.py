@@ -1,18 +1,95 @@
 from django.contrib import admin
-from django.contrib.auth.admin import UserAdmin
-from django.contrib.auth.models import User
-from .models import Student, Recruiter, Administrator, Volunteer
+from import_export.admin import ImportExportModelAdmin
+from .resources import CompanyResource, JobResource, StudentResource, ApplicationResource
+from .models import Company, Job, Student, Application, Notification, Administrator, AlumniRegistration, Volunteer, Attendance
 
-# Register profile models directly for better admin interface
-@admin.register(Student)
-class StudentAdmin(admin.ModelAdmin):
-    list_display = ('username', 'current_year', 'graduation_year', 'is_final_year')
-    list_filter = ('current_year', 'graduation_year', 'is_final_year', 'gender')
-    exclude = ('password', 'groups', 'user_permissions', 'is_staff', 'is_active', 'is_superuser', 'last_login')
-    search_fields = ('username', 'email', 'high_school')
-    list_per_page = 25
 
-@admin.register(Administrator)
+# Customize the admin site header, title, and index title
+admin.site.site_header = "GLANCE Job Fair Admin"
+admin.site.site_title = "GLANCE Admin Portal"
+admin.site.index_title = "Welcome to GLANCE Admin Portal"
+
+
+class StudentAdmin(ImportExportModelAdmin):
+    resource_class = StudentResource
+    list_display = ('username', 'year', 'cgpa', "no_of_companies_left")
+    list_filter = ('year', "no_of_companies_left")
+    search_fields = ('username', 'first_name', 'last_name', 'email', 'course')
+    actions = ['update_company_limit']
+    
+    def update_company_limit(self, request, queryset):
+        # Update all selected students
+        updated = queryset.update(no_of_companies_left=10)
+        
+        # Show a success message
+        if updated == 1:
+            message = "1 student was updated to have 10 company limit"
+        else:
+            message = f"{updated} students were updated to have 10 company limit"
+        
+        self.message_user(request, message)
+    
+    update_company_limit.short_description = "Update selected students to 10 company limit"
+
 class AdministratorAdmin(admin.ModelAdmin):
-    list_display = ('username', "first_name", "last_name")
-    exclude = ('password', 'groups', 'user_permissions', 'is_staff', 'is_active', 'is_superuser', 'last_login')
+    list_display = ('username', 'first_name', 'last_name', 'email', 'phone_number')
+    search_fields = ('username', 'first_name', 'last_name', 'email', 'phone_number')
+
+class NotificationAdmin(admin.ModelAdmin):
+    list_display = ('title', 'timeStamp')
+    search_fields = ('title', 'description')
+    list_filter = ('timeStamp',)
+
+class CompanyAdmin(ImportExportModelAdmin):
+    resource_class = CompanyResource
+    list_display = ('name', 'location', 'size', 'website')
+    search_fields = ('name', 'location', 'description')
+    list_filter = ('size',)
+
+class JobAdmin(ImportExportModelAdmin):
+    resource_class = JobResource
+    list_display = ('title', 'company', 'interview_date', 'interview_mode',
+                    'deadline', 'cgpa_criteria', 'no_of_openings', 'job_type')
+    search_fields = ('title', 'company__name', 'role', 'description')
+    list_filter = ('interview_date', 'job_type', 'company')
+
+
+class ApplicationAdmin(ImportExportModelAdmin):
+    resource_class = ApplicationResource
+    list_display = ('student', 'job', 'application_date', 'status')
+    search_fields = ('student__first_name', 'student__last_name',
+                     'student__email', 'job__title', 'job__company__name')
+    list_filter = ('status', 'job__interview_date', 'job__company')
+    
+    list_per_page = 3000
+
+
+class VolunteerAdmin(admin.ModelAdmin):
+    list_display = ('username', 'first_name', 'last_name', 'email', 'phone_number')
+    search_fields = ('username', 'first_name', 'last_name', 'email', 'phone_number')
+
+
+class AttendanceAdmin(admin.ModelAdmin):
+    list_display = ('application', 'is_present', 'marked_by', 'marked_at')
+    search_fields = ('application__student__first_name', 'application__student__last_name',
+                     'application__job__company__name', 'application__job__title')
+    list_filter = ('is_present', 'marked_at', 'application__job__interview_date')
+
+
+class AlumniRegistrationAdmin(admin.ModelAdmin):
+    list_display = ('name', 'email', 'phone_number',
+                    'company', 'designation', 'passout_year')
+    search_fields = ('name', 'email', 'phone_number',
+                     'company', 'designation')
+    list_filter = ('passout_year',)
+
+
+admin.site.register(Company, CompanyAdmin)
+admin.site.register(Job, JobAdmin)
+admin.site.register(Student, StudentAdmin)
+admin.site.register(Administrator, AdministratorAdmin)
+admin.site.register(Application, ApplicationAdmin)
+admin.site.register(Volunteer, VolunteerAdmin)
+admin.site.register(Attendance, AttendanceAdmin)
+admin.site.register(AlumniRegistration, AlumniRegistrationAdmin)
+admin.site.register(Notification, NotificationAdmin)
