@@ -1,0 +1,216 @@
+{% extends "student/base.html" %}
+{% load static %}
+
+{% block title %}
+Student -> All Jobs
+{% endblock %}
+
+{% block extra_css %}
+<style>
+  .card-expired {
+    opacity: 0.8;
+    border: 1px solid #ffc107;
+  }
+  
+  .expired-badge {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background-color: #dc3545;
+    color: white;
+    padding: 5px 10px;
+    border-radius: 5px;
+    font-weight: bold;
+    z-index: 2;
+    transform: rotate(10deg);
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+  }
+  
+  /* Rest of your existing CSS */
+  .job-header {
+    margin-bottom: 25px;
+  }
+  
+  .job-search-box {
+    border: none;
+    padding: 10px 15px;
+    border-radius: 4px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+    transition: all 0.3s ease;
+  }
+</style>
+{% endblock %}
+
+{% block body %}
+<!-- 
+<div class="container-fluid">
+  <div class="card">
+    <div class="card-body">
+      <h5 class="card-title fw-semibold mb-3">All Courses</h5>
+      <p class="mb-0">Visit More Courses!</p>
+    </div>
+  </div>
+  <div class="row row-cols-1 row-cols-md-3 g-4">
+    <div class="col-md-3">
+      <h5 class="card-title fw-semibold mb-3">Recorded + Live</h5>
+      <div class="card">
+        <img src="{% static 'img/dashboard/images/products/s1.jpg' %}" class="card-img-top" alt="...">
+        <div class="card-body">
+          <h5 class="card-title">Class 9th Course</h5>
+          <p class="card-text">Keep your study ongoing with us.</p>
+          <a href="#" class="btn btn-primary">Enroll Now!</a>
+        </div>
+      </div>
+    </div>  
+    <div class="col-md-3">
+      <h5 class="card-title fw-semibold mb-3">Recorded + Live</h5>
+      <div class="card">
+        <img src="{% static 'img/dashboard/images/products/s4.jpg' %}" class="card-img-top" alt="...">
+        <div class="card-body">
+          <h5 class="card-title">Class 10th (Board Special)</h5>
+          <p class="card-text">Keep your study ongoing with us.</p>
+          <a href="#" class="btn btn-primary">Enroll Now!</a>
+        </div>
+      </div>
+    </div>  
+    <div class="col-md-3">
+      <h5 class="card-title fw-semibold mb-3">Recorded + Live</h5>
+      <div class="card">
+        <img src="{% static 'img/dashboard/images/products/s5.jpg' %}" class="card-img-top" alt="...">
+        <div class="card-body">
+          <h5 class="card-title">Class 11th Course</h5>
+          <p class="card-text">Keep your study ongoing with us.</p>
+          <a href="#" class="btn btn-primary">Enroll Now!</a>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <h5 class="card-title fw-semibold mb-3">Recorded + Live</h5>
+      <div class="card">
+        <img src="{% static 'img/dashboard/images/products/s7.jpg' %}" class="card-img-top" alt="...">
+        <div class="card-body">
+          <h5 class="card-title">Class 11th + Neet</h5>
+          <p class="card-text">Keep your study ongoing with us.</p>
+          <a href="#" class="btn btn-primary">Enroll Now!</a>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <h5 class="card-title fw-semibold mb-3">Recorded + Live</h5>
+      <div class="card">
+        <img src="{% static 'img/dashboard/images/products/s4.jpg' %}" class="card-img-top" alt="...">
+        <div class="card-body">
+          <h5 class="card-title">Class 11th + Jee</h5>
+          <p class="card-text">Keep your study ongoing with us.</p>
+          <a href="#" class="btn btn-primary">Enroll Now!</a>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <h5 class="card-title fw-semibold mb-3">Recorded + Live</h5>
+      <div class="card">
+        <img src="{% static 'img/dashboard/images/products/s1.jpg' %}" class="card-img-top" alt="...">
+        <div class="card-body">
+          <h5 class="card-title">Class 12th (Board Special)</h5>
+          <p class="card-text">Keep your study ongoing with us.</p>
+          <a href="#" class="btn btn-primary">Enroll Now!</a>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <h5 class="card-title fw-semibold mb-3">Recorded + Live</h5>
+      <div class="card">
+        <img src="{% static 'img/dashboard/images/products/s5.jpg' %}" class="card-img-top" alt="...">
+        <div class="card-body">
+          <h5 class="card-title">Class 12th + Neet</h5>
+          <p class="card-text">Keep your study ongoing with us.</p>
+          <a href="#" class="btn btn-primary">Enroll Now!</a>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <h5 class="card-title fw-semibold mb-3">Recorded + Live</h5>
+      <div class="card">
+        <img src="{% static 'img/dashboard/images/products/s7.jpg' %}" class="card-img-top" alt="...">
+        <div class="card-body">
+          <h5 class="card-title">Class 12th + Jee</h5>
+          <p class="card-text">Keep your study ongoing with us.</p>
+          <a href="#" class="btn btn-primary">Enroll Now!</a>
+        </div>
+      </div>
+    </div>
+  </div>   
+</div> -->
+
+<div class="container-fluid">
+  <div class="card mb-4">
+    <div class="card-body">
+      <h5 class="card-title fw-semibold mb-3">Lots of Opportunities!</h5>
+      <p class="mb-0">The Place Where You Unlock Your Potential🔥!</p>
+      <p class="mt-2 text-primary">Showing {{ active_jobs_count }} active jobs and {{ expired_jobs_count }} expired jobs ({{ total_jobs }} total)</p>
+    </div>
+  </div>
+
+  <!-- Filter section removed as we're showing all jobs by default -->
+
+  <div class="row g-4">
+    {% for job in jobs %}
+    <div class="col-sm-6 col-md-4 col-xl-3">
+      <div class="card h-100 overflow-hidden rounded-2 {% if job.is_expired %}card-expired{% endif %} {% if job.has_applied %}border border-success{% endif %}">
+        <div class="position-relative text-center p-3 bg-dark">
+          {% if job.is_expired %}
+          <div class="expired-badge">EXPIRED</div>
+          {% endif %}
+          {% if job.has_applied %}
+          <div class="position-absolute top-0 end-0 m-2">
+            <span class="badge bg-success">Applied</span>
+          </div>
+          {% endif %}
+          <a href="{% url 'student_job_details' job.slug %}">
+            {% if job.company.logo %}
+            <img src="{{ job.company.logo.url }}" class="card-img-top rounded-0 img-fluid" 
+              style="max-height: 120px; width: auto; max-width: 100%;" alt="{{ job.company.name }} logo" />
+            {% else %}
+            <img src="{% static 'img/user.jpg' %}" class="card-img-top rounded-0 img-fluid" 
+              style="max-height: 120px; width: auto; max-width: 100%;" alt="{{ job.company.name }} logo" />
+            {% endif %}
+          </a>
+        </div>
+        <div class="card-body pt-3 p-4">
+          <h6 class="fw-semibold fs-4 mb-3">{{ job.company.name|title|truncatechars:25 }}</h6>
+          <div class="d-flex align-items-center justify-content-between mb-2">
+            <h6 class="fw-semibold fs-4 mb-0">
+              Openings: <span class="badge bg-success">{{ job.no_of_openings }}</span>
+            </h6>
+          </div>
+          <div class="mb-2">
+            <span class="badge bg-dark text-white me-1">
+              {% if job.salary_range %}
+              {{ job.salary_range|truncatechars:15 }}
+              {% endif %}
+            </span>
+            <span class="badge bg-danger text-white me-1">{{ job.job_type|title|truncatechars:10 }}</span>
+            <span class="badge bg-primary text-white">{{ job.location_flexibility|title|truncatechars:10 }}</span>
+            {% if job.is_expired %}
+            <span class="badge bg-warning text-dark mt-1">Deadline Passed</span>
+            {% endif %}
+          </div>
+          <div>
+            <p class="text-muted mb-2">{{ job.description|truncatechars:100 }}</p>
+          </div>
+          <a href="{% url 'student_job_details' job.slug %}" class="btn btn-sm btn-primary mt-2 w-100">View Details</a>
+        </div>
+      </div>
+    </div>
+    {% empty %}
+    <div class="col-12">
+      <div class="alert alert-info">
+        <i class="ti ti-search-off me-2"></i>
+        No jobs found matching your criteria. Please try different filters or clear the search.
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+
+{% endblock %}

@@ -1,0 +1,490 @@
+{% extends "administration/base.html" %}
+{% load static %}
+
+{% block title %}
+Administration -> Students
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    @media (max-width: 768px) {
+
+        /* Adjustments for mobile devices */
+        #pdfContainer {
+            height: 400px;
+        }
+    }
+    
+    .action-buttons {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin: 10px;
+    }
+    
+    .action-buttons .btn {
+        flex: 1;
+        min-width: 180px;
+    }
+    
+    .modal-header {
+        background: linear-gradient(135deg, #4e73df 0%, #224abe 100%);
+        color: white;
+    }
+</style>
+{% endblock %}
+
+{% block body %}
+
+<div class="container-fluid">
+    <div class="card">
+        <div class="card-body">
+            <h3 class="heading">
+                <span class="fw-semibold">Students &nbsp;({{ students.count }})</span>
+                <span class="fs-4"> | GLANCE &nbsp; Job &nbsp; Fair</span>
+            </h3>
+        </div>
+        <div class="action-buttons">
+            <a href="{% url 'export_unapplied_students_csv' %}" class="btn btn-outline-success mb-1">Download Unapplied Students</a>
+            <a href="{% url 'export_uneligible_students' %}" class="btn btn-outline-primary">Download Uneligible Students</a>
+            <button type="button" class="btn btn-outline-warning" data-bs-toggle="modal" data-bs-target="#companyLimitModal">
+                <i class="fas fa-building me-1"></i> Update Company Limits
+            </button>
+            <button type="button" class="btn btn-outline-danger" data-bs-toggle="modal" data-bs-target="#bypassCGPAModal">
+                <i class="fas fa-graduation-cap me-1"></i> Toggle Academic Requirements
+            </button>
+        </div>
+    </div>
+
+    <!-- Company Limit Modal -->
+    <div class="modal fade" id="companyLimitModal" tabindex="-1" aria-labelledby="companyLimitModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="companyLimitModalLabel">Update Company Limits</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form action="{% url 'update_company_limit' %}" method="post">
+                    {% csrf_token %}
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label for="limitInput" class="form-label">New Company Limit</label>
+                            <input type="number" class="form-control" id="limitInput" name="limit" min="1" max="100" value="10">
+                            <div class="form-text">Set the number of companies students can apply to</div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="filterSelect" class="form-label">Apply To</label>
+                            <select class="form-select" id="filterSelect" name="filter">
+                                <option value="all">All Students</option>
+                                <option value="selected">Selected Students</option>
+                                <option value="zero">Students with 0 Companies Left</option>
+                                <option value="less_than_limit">Students with Less Than New Limit</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Update Limits</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- CGPA Bypass Modal -->
+    <div class="modal fade" id="bypassCGPAModal" tabindex="-1" aria-labelledby="bypassCGPAModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="bypassCGPAModalLabel">Toggle Academic Requirements</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form action="{% url 'bypass_cgpa_validation' %}" method="post">
+                    {% csrf_token %}
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label for="actionSelect" class="form-label">Action</label>
+                            <select class="form-select" id="actionSelect" name="action">
+                                <option value="enable">Enable Academic Bypass</option>
+                                <option value="disable">Disable Academic Bypass</option>
+                            </select>
+                            <div class="form-text">This will bypass all academic requirements (10th/12th/UG CGPA) for job eligibility</div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="filterSelectCGPA" class="form-label">Apply To</label>
+                            <select class="form-select" id="filterSelectCGPA" name="filter">
+                                <option value="all">All Students</option>
+                                <option value="selected">Selected Students</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Apply Changes</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    {% for message in messages %}
+
+    <div class="alert {{ message.tags }} alert-dismissible fade show" role="alert">
+        <strong>{{ message.tag }}</strong> {{ message }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+
+    {% endfor %}
+
+    <!-- create a search bar -->
+
+    <div class="card w-100">
+        <div class="card-body p-4">
+            <!-- <h5 class="card-title fw-semibold mb-4">Search Applicants 🔍</h5> -->
+            <form method="post">
+
+                {% csrf_token %}
+
+                <div class="input-group">
+                    <input type="text" class="form-control" placeholder="Search by Name, Year, Academic Score"
+                        aria-label="Search by Name, Year, Academic Score" aria-describedby="button-addon2" name="query">
+                    <button class="btn btn-outline-secondary" type="submit" id="button-addon2">Search</button>
+                    <!-- make a button to clear the search -->
+                    <a href="{% url 'all_students' %}" class="btn btn-outline-danger">Clear</a>
+                </div>
+
+                <!-- search on the basis of tags -->
+
+
+
+            </form>
+        </div>
+
+
+    </div>
+
+
+    <div class="card w-100">
+        <div class="card-body p-4">
+            <h5 class="card-title fw-semibold mb-4">Our Students 🔥
+                {% if query %}
+                <span class="fs-6"> | Search Results for "{{ query }}"</span>
+                {% endif %}
+            </h5>
+            <div class="table-responsive">
+                <table class="table text-nowrap mb-0 align-middle">
+                    <thead class="text-dark fs-4">
+
+                        <tr>
+                            <th class="border-bottom-0">
+                                <h6 class="fw-semibold mb-0">
+                                    <input type="checkbox" id="select-all-students">
+                                </h6>
+                            </th>
+                            <th class="border-bottom-0">
+                                <h6 class="fw-semibold mb-0">
+                                    #
+                                </h6>
+                            </th>
+                            <th class="border-bottom-0">
+                                <h6 class="fw-semibold mb-0">
+                                    Name
+                                </h6>
+                            </th>
+                            <th class="border-bottom-0">
+                                <h6 class="fw-semibold mb-0">
+                                    Academic Details
+                                </h6>
+                            </th>
+                            <th class="border-bottom-0">
+                                <h6 class="fw-semibold mb-0">
+                                    Companies Applied
+                                </h6>
+                            </th>
+                            <th class="border-bottom-0">
+                                <h6 class="fw-semibold mb-0">
+                                    CGPA Bypass
+                                </h6>
+                            </th>
+                            <th class="border-bottom-0">
+                                <h6 class="fw-semibold mb-0">
+                                    Social Links
+                                </h6>
+                            </th>
+                            <th class="border-bottom-0 justify-content-center">
+                                <h6 class="fw-semibold mb-0">
+                                    Contacts
+                                </h6>
+                            </th>
+                            <th class="border-bottom-0 justify-content-center">
+                                <h6 class="fw-semibold mb-0">
+                                    Action#2
+                                </h6>
+                            </th>
+
+                        </tr>
+                    </thead>
+
+                    <tbody>
+
+                        {% for student in students %}
+
+                        <tr>
+                            <td class="border-bottom-0">
+                                <input type="checkbox" class="student-checkbox" data-student-id="{{ student.id }}">
+                            </td>
+                            <td class="border-bottom-0">
+                                <h6 class="fw-semibold mb-0">{{ forloop.counter }}</h6>
+                            </td>
+                            <td class="border-bottom-0">
+                                <h6 class="fw-semibold mb-1">{{ student.first_name }} {{student.last_name }}</h6>
+                                <span class="fw-normal">{{ student.course }}</span>
+                                <br>
+                                <span class="fw-normal">{{ student.year }}</span>
+
+                            </td>
+
+                            <td class="border-bottom-0">
+                                <p class="fw-semibold mb-0">
+                                    Highschool: <span style="font-weight: bold; color: black;"> {{student.tenth }}%
+                                    </span>
+                                    <br>
+                                    Intermediate: <span style="font-weight: bold; color: black;"> {{student.twelfth }}%
+                                    </span>
+                                    <br>
+                                    UG: <span style="font-weight: bold; color: black;"> {{ student.cgpa }}</span>
+                                    <br>
+
+                                    {% if student.backlog != 0 %}
+                                    <br>
+                                    <span style="font-weight: bold; color: rgb(254, 59, 59);">Backlogs:
+                                        {{student.backlog }}</span>
+                                    {% endif %}
+                                </p>
+                            </td>
+
+                            <td class="border-bottom-0 ">
+                                <p class="fw-semibold mb-0">
+                                   {{ student.application_set.count }}
+                                </p>
+                            </td>
+
+                            <td class="border-bottom-0">
+                                {% if student.bypass_eligibility %}
+                                <span class="badge bg-success">Enabled</span>
+                                {% else %}
+                                <span class="badge bg-danger">Disabled</span>
+                                {% endif %}
+                                <p class="fw-normal mt-1 mb-0">
+                                    <small>Companies Left: {{ student.no_of_companies_left }}</small>
+                                </p>
+                            </td>
+
+                            <td class="border-bottom-0">
+
+                                <div class="d-flex align-items-center gap-2">
+
+                                    <a href="{{ student.linkedin_id }}" target="_blank"
+                                        class="btn btn-outline-warning text-red float-end">LinkedIn</a>
+
+                                    <a href="{{ student.github_id }}" target="_blank"
+                                        class="btn btn-outline-primary text-green float-end">GitHub</a>
+                                </div>
+                            </td>
+
+                            <td class="border-bottom-0">
+                                <div class="d-flex align-items-center gap-2">
+
+                                    <a href="mailto:{{ student.username }}"
+                                        class="btn btn-outline-warning text-red float-end">Mail</a>
+
+                                    <a href="tel:{{ student.phone_number }}"
+                                        class="btn btn-outline-primary text-green float-end">Call</a>
+                                </div>
+            </div>
+            </td>
+            <td class="border-bottom-0">
+                <div class="d-flex align-items-center gap-2">
+
+                    {% if student.resume %}
+                    <a href="{{ student.resume.url }}" target="_blank"
+                        class="btn btn-outline-success text-red float-end">Open Resume</a>
+                        {% else %}
+                    <a style="pointer-events: none;"
+                        class="btn btn-outline-dark text-red float-end">No Resume</a>
+                        {% endif %}
+
+                </div>
+            </td>
+
+            {% endfor %}
+            </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+
+</div>
+
+<!-- Pagination Section -->
+<div class="card-footer">
+    <div class="row">
+        <div class="col-md-6">
+            <p>Showing {{ students.start_index }} to {{ students.end_index }} of {{ total_count }} entries</p>
+        </div>
+        <div class="col-md-6">
+            <nav aria-label="Page navigation">
+                <ul class="pagination justify-content-end">
+                    {% if students.has_previous %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page=1{% if query %}&query={{ query }}{% endif %}" aria-label="First">
+                                <span aria-hidden="true">&laquo;&laquo;</span>
+                            </a>
+                        </li>
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ students.previous_page_number }}{% if query %}&query={{ query }}{% endif %}" aria-label="Previous">
+                                <span aria-hidden="true">&laquo;</span>
+                            </a>
+                        </li>
+                    {% else %}
+                        <li class="page-item disabled">
+                            <a class="page-link" href="#" tabindex="-1" aria-disabled="true">&laquo;&laquo;</a>
+                        </li>
+                        <li class="page-item disabled">
+                            <a class="page-link" href="#" tabindex="-1" aria-disabled="true">&laquo;</a>
+                        </li>
+                    {% endif %}
+                    
+                    {% for i in students.paginator.page_range %}
+                        {% if students.number == i %}
+                            <li class="page-item active"><a class="page-link" href="#">{{ i }}</a></li>
+                        {% elif i > students.number|add:'-3' and i < students.number|add:'3' %}
+                            <li class="page-item"><a class="page-link" href="?page={{ i }}{% if query %}&query={{ query }}{% endif %}">{{ i }}</a></li>
+                        {% endif %}
+                    {% endfor %}
+                    
+                    {% if students.has_next %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ students.next_page_number }}{% if query %}&query={{ query }}{% endif %}" aria-label="Next">
+                                <span aria-hidden="true">&raquo;</span>
+                            </a>
+                        </li>
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ students.paginator.num_pages }}{% if query %}&query={{ query }}{% endif %}" aria-label="Last">
+                                <span aria-hidden="true">&raquo;&raquo;</span>
+                            </a>
+                        </li>
+                    {% else %}
+                        <li class="page-item disabled">
+                            <a class="page-link" href="#" tabindex="-1" aria-disabled="true">&raquo;</a>
+                        </li>
+                        <li class="page-item disabled">
+                            <a class="page-link" href="#" tabindex="-1" aria-disabled="true">&raquo;&raquo;</a>
+                        </li>
+                    {% endif %}
+                </ul>
+            </nav>
+        </div>
+    </div>
+</div>
+<!-- End Pagination Section -->
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Select/deselect all students
+    document.getElementById('select-all-students').addEventListener('change', function() {
+        const studentCheckboxes = document.querySelectorAll('.student-checkbox');
+        studentCheckboxes.forEach(checkbox => {
+            checkbox.checked = this.checked;
+        });
+    });
+    
+    // Collect and submit selected student IDs
+    document.addEventListener('DOMContentLoaded', function() {
+        const companyLimitForm = document.querySelector('#companyLimitModal form');
+        const bypassCGPAForm = document.querySelector('#bypassCGPAModal form');
+        
+        const addSelectedStudentIds = function(form) {
+            // Remove any previously added hidden fields
+            const existingHiddenFields = form.querySelectorAll('input[name="student_ids"]');
+            existingHiddenFields.forEach(field => field.remove());
+            
+            // Add selected student IDs if "selected" filter is chosen
+            const filterSelect = form.querySelector('select[name="filter"]');
+            if (filterSelect.value === 'selected') {
+                const selectedCheckboxes = document.querySelectorAll('.student-checkbox:checked');
+                
+                if (selectedCheckboxes.length === 0) {
+                    alert('Please select at least one student first');
+                    event.preventDefault();
+                    return false;
+                }
+                
+                selectedCheckboxes.forEach(checkbox => {
+                    const studentId = checkbox.getAttribute('data-student-id');
+                    const hiddenField = document.createElement('input');
+                    hiddenField.type = 'hidden';
+                    hiddenField.name = 'student_ids';
+                    hiddenField.value = studentId;
+                    form.appendChild(hiddenField);
+                });
+            }
+            return true;
+        };
+        
+        companyLimitForm.addEventListener('submit', function(event) {
+            if (!addSelectedStudentIds(this)) {
+                event.preventDefault();
+            }
+        });
+        
+        bypassCGPAForm.addEventListener('submit', function(event) {
+            if (!addSelectedStudentIds(this)) {
+                event.preventDefault();
+            }
+        });
+        
+        // Show/hide alert about selecting students
+        const companyFilterSelect = document.getElementById('filterSelect');
+        const cgpaFilterSelect = document.getElementById('filterSelectCGPA');
+        
+        const updateSelectionAlert = function(select, alertId) {
+            const alert = document.getElementById(alertId);
+            if (select.value === 'selected') {
+                alert.style.display = 'block';
+            } else {
+                alert.style.display = 'none';
+            }
+        };
+        
+        // Add selection alerts to the modals
+        const companyModalBody = companyLimitForm.querySelector('.modal-body');
+        const cgpaModalBody = bypassCGPAForm.querySelector('.modal-body');
+        
+        const companySelectionAlert = document.createElement('div');
+        companySelectionAlert.id = 'companySelectionAlert';
+        companySelectionAlert.className = 'alert alert-info mt-2';
+        companySelectionAlert.style.display = 'none';
+        companySelectionAlert.textContent = 'Please select students from the table first';
+        companyModalBody.appendChild(companySelectionAlert);
+        
+        const cgpaSelectionAlert = document.createElement('div');
+        cgpaSelectionAlert.id = 'cgpaSelectionAlert';
+        cgpaSelectionAlert.className = 'alert alert-info mt-2';
+        cgpaSelectionAlert.style.display = 'none';
+        cgpaSelectionAlert.textContent = 'Please select students from the table first';
+        cgpaModalBody.appendChild(cgpaSelectionAlert);
+        
+        companyFilterSelect.addEventListener('change', function() {
+            updateSelectionAlert(this, 'companySelectionAlert');
+        });
+        
+        cgpaFilterSelect.addEventListener('change', function() {
+            updateSelectionAlert(this, 'cgpaSelectionAlert');
+        });
+    });
+</script>
+{% endblock %}

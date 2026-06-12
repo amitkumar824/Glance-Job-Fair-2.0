@@ -1,0 +1,628 @@
+{% extends 'volunteer/base.html' %} {% load static %} {% block volunteer_content %}
+<!-- Dashboard Header with Quick Stats -->
+<div class="row mb-4">
+  <div class="col-12">
+    <div class="card border-0 shadow-sm bg-white">
+      <div class="card-body p-4">
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center">
+          <div class="mb-3 mb-md-0">
+            <h2 class="display-6 fw-bold mb-1">Welcome, {{ user.first_name }}!</h2>
+            <p class="text-muted lead mb-0">Here's your job fair dashboard overview</p>
+          </div>
+          <div class="d-flex align-items-center">
+            <span class="badge bg-primary p-2 me-2 d-flex align-items-center">
+              <i class="fas fa-calendar-day me-1"></i> {% now "F j, Y" %}
+            </span>
+            <a href="{% url 'volunteer_applications' %}?attendance=pending" class="btn btn-primary ms-2 px-3 py-2">
+              <i class="fas fa-user-check me-1"></i> Mark Attendance
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Dashboard Banner Image -->
+<div class="row mb-4">
+  <div class="col-12">
+    <div class="card border-0 shadow-sm overflow-hidden">
+      <img src="{% static 'img/dashboard-banner.svg' %}" alt="Welcome to GLANCE 2.0 Dashboard" class="img-fluid">
+    </div>
+  </div>
+</div>
+
+{% if not has_data %}
+<!-- No Data Alert -->
+<div class="row mb-4">
+  <div class="col-12">
+    <div class="alert alert-info border-0 shadow-sm rounded-4" role="alert">
+      <div class="d-flex flex-column flex-md-row">
+        <div class="me-md-3 mb-3 mb-md-0 text-center text-md-start">
+          <i class="fas fa-info-circle fa-3x text-info"></i>
+        </div>
+        <div>
+          <h4 class="alert-heading fw-bold">No Applications Found</h4>
+          <p>There are currently no applications in the system. This could be due to:</p>
+          <ul>
+            <li>The job fair registration period has not started yet</li>
+            <li>No students have applied for jobs yet</li>
+            <li>Data is still being processed</li>
+          </ul>
+          <hr>
+          <div class="d-grid gap-2 d-md-flex justify-content-md-start">
+            <a href="{% url 'volunteer_applications' %}" class="btn btn-outline-info">
+              <i class="fas fa-clipboard-list me-1"></i> Check Applications
+            </a>
+            <button type="button" class="btn btn-outline-secondary" onclick="window.location.reload();">
+              <i class="fas fa-sync-alt me-1"></i> Refresh Dashboard
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endif %}
+
+<!-- Stats Cards -->
+<div class="row mb-4">
+  <!-- Total Applications -->
+  <div class="col-md-6 col-lg-3 mb-3">
+    <div class="card stats-card h-100 border-0 shadow-sm">
+      <div class="card-body p-4">
+        <div class="d-flex align-items-center mb-3">
+          <div class="stats-icon bg-primary text-white me-3">
+            <i class="fas fa-clipboard-list"></i>
+          </div>
+          <h6 class="card-title fw-bold mb-0">Total Applications</h6>
+        </div>
+        <h3 class="mb-0 fw-bold text-primary">{{ total_applications }}</h3>
+        <div class="mt-3">
+          <a href="{% url 'volunteer_applications' %}" class="btn btn-sm btn-outline-primary w-100">
+            <i class="fas fa-eye me-1"></i> View All Applications
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Attendance Marked -->
+  <div class="col-md-6 col-lg-3 mb-3">
+    <div class="card stats-card h-100 border-0 shadow-sm">
+      <div class="card-body p-4">
+        <div class="d-flex align-items-center mb-3">
+          <div class="stats-icon bg-success text-white me-3">
+            <i class="fas fa-user-check"></i>
+          </div>
+          <h6 class="card-title fw-bold mb-0">Attendance Marked</h6>
+        </div>
+        <h3 class="mb-0 fw-bold text-success">{{ total_attendance_marked }}</h3>
+        <div class="progress mt-3" style="height: 8px; border-radius: 4px;">
+          <div class="progress-bar bg-success" role="progressbar" 
+               style="width: {% if total_applications > 0 %}{{ total_attendance_marked|floatformat:0 }}%{% else %}0%{% endif %};" 
+               aria-valuenow="{{ total_attendance_marked }}" aria-valuemin="0" aria-valuemax="{{ total_applications }}"></div>
+        </div>
+        <small class="text-muted mt-2 d-block">
+          {% if total_applications > 0 %}
+            {{ total_attendance_marked|floatformat:0 }}% of total applications
+          {% else %}
+            0% of applications
+          {% endif %}
+        </small>
+        <div class="mt-3">
+          <a href="{% url 'volunteer_applications' %}?attendance=marked" class="btn btn-sm btn-outline-success w-100">
+            <i class="fas fa-eye me-1"></i> View Marked Attendance
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Students Present -->
+  <div class="col-md-6 col-lg-3 mb-3">
+    <div class="card stats-card h-100 border-0 shadow-sm">
+      <div class="card-body p-4">
+        <div class="d-flex align-items-center mb-3">
+          <div class="stats-icon bg-info text-white me-3">
+            <i class="fas fa-users"></i>
+          </div>
+          <h6 class="card-title fw-bold mb-0">Students Present</h6>
+        </div>
+        <h3 class="mb-0 fw-bold text-info">{{ students_present }}</h3>
+        <div class="d-flex justify-content-between align-items-center mt-3">
+          <div class="w-75">
+            <div class="progress" style="height: 8px; border-radius: 4px;">
+              <div class="progress-bar bg-info" role="progressbar" 
+                   style="width: {% if total_attendance_marked > 0 %}{{ attendance_rate }}%{% else %}0%{% endif %};" 
+                   aria-valuenow="{{ students_present }}" aria-valuemin="0" aria-valuemax="{{ total_attendance_marked }}"></div>
+            </div>
+          </div>
+          <div class="attendance-percentage">
+            <span class="badge bg-info rounded-pill">
+              {% if total_attendance_marked > 0 %}
+                {{ attendance_rate }}%
+              {% else %}
+                0%
+              {% endif %}
+            </span>
+          </div>
+        </div>
+        <small class="text-muted mt-2 d-block">Attendance rate</small>
+        <div class="mt-3">
+          <a href="{% url 'volunteer_applications' %}?attendance=present" class="btn btn-sm btn-outline-info w-100">
+            <i class="fas fa-eye me-1"></i> View Present Students
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Attendance Pending -->
+  <div class="col-md-6 col-lg-3 mb-3">
+    <div class="card stats-card h-100 border-0 shadow-sm">
+      <div class="card-body p-4">
+        <div class="d-flex align-items-center mb-3">
+          <div class="stats-icon bg-warning text-white me-3">
+            <i class="fas fa-clock"></i>
+          </div>
+          <h6 class="card-title fw-bold mb-0">Pending Attendance</h6>
+        </div>
+        <h3 class="mb-0 fw-bold text-warning">{{ attendance_pending }}</h3>
+        <div class="mt-3">
+          {% if attendance_pending > 0 %}
+          <div class="d-grid">
+            <a href="{% url 'volunteer_applications' %}?attendance=pending" class="btn btn-warning btn-sm">
+              <i class="fas fa-check-circle me-1"></i> Mark Attendance Now
+            </a>
+          </div>
+          {% else %}
+          <div class="alert alert-success py-1 px-2 mb-0 small">
+            <i class="fas fa-check-circle me-1"></i> All attendance marked!
+          </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Students Absent -->
+  <div class="col-md-6 col-lg-3 mb-3">
+    <div class="card stats-card h-100 border-0 shadow-sm">
+      <div class="card-body p-4">
+        <div class="d-flex align-items-center mb-3">
+          <div class="stats-icon bg-danger text-white me-3">
+            <i class="fas fa-user-times"></i>
+          </div>
+          <h6 class="card-title fw-bold mb-0">Students Absent</h6>
+        </div>
+        <h3 class="mb-0 fw-bold text-danger">{{ students_absent }}</h3>
+        <div class="d-flex justify-content-between align-items-center mt-3">
+          <div class="w-75">
+            <div class="progress" style="height: 8px; border-radius: 4px;">
+              <div class="progress-bar bg-danger" role="progressbar" 
+                   style="width: {% if total_attendance_marked > 0 %}{{ students_absent|floatformat:0 }}%{% else %}0%{% endif %};" 
+                   aria-valuenow="{{ students_absent }}" aria-valuemin="0" aria-valuemax="{{ total_attendance_marked }}"></div>
+            </div>
+          </div>
+          <div class="attendance-percentage">
+            <span class="badge bg-danger rounded-pill">
+              {% if total_attendance_marked > 0 %}
+                {{ 100|add:"-"|add:attendance_rate }}%
+              {% else %}
+                0%
+              {% endif %}
+            </span>
+          </div>
+        </div>
+        <small class="text-muted mt-2 d-block">Absence rate</small>
+        <div class="mt-3">
+          <a href="{% url 'volunteer_applications' %}?attendance=absent" class="btn btn-sm btn-outline-danger w-100">
+            <i class="fas fa-eye me-1"></i> View Absent Students
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Attendance Summary Chart -->
+<div class="row mb-4">
+  <div class="col-12">
+    <div class="card border-0 shadow-sm">
+      <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+        <h5 class="card-title mb-0 fw-bold"><i class="fas fa-chart-pie me-2 text-primary"></i>Attendance Summary</h5>
+        <span class="badge bg-light text-dark px-3 py-2 rounded-pill">
+          <i class="fas fa-sync-alt me-1"></i> Updated {% now "F j, Y" %}
+        </span>
+      </div>
+      <div class="card-body p-4">
+        <div class="row">
+          <div class="col-md-4 text-center">
+            <div class="attendance-chart-container mb-3">
+              <canvas id="attendanceChart" width="200" height="200"></canvas>
+            </div>
+          </div>
+          <div class="col-md-8">
+            <div class="row">
+              <div class="col-md-6 mb-3">
+                <div class="p-3 rounded-4 bg-light">
+                  <h6 class="fw-bold text-primary mb-2">Present Rate</h6>
+                  <div class="d-flex justify-content-between align-items-center">
+                    <h4 class="mb-0 fw-bold">
+                      {% if total_attendance_marked > 0 %}
+                        {{ students_present|floatformat:0 }}%
+                      {% else %}
+                        0%
+                      {% endif %}
+                    </h4>
+                    <span class="badge bg-success p-2 rounded-pill">
+                      <i class="fas fa-user-check me-1"></i> {{ students_present }} Students
+                    </span>
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-6 mb-3">
+                <div class="p-3 rounded-4 bg-light">
+                  <h6 class="fw-bold text-danger mb-2">Absent Rate</h6>
+                  <div class="d-flex justify-content-between align-items-center">
+                    <h4 class="mb-0 fw-bold">
+                      {% if total_attendance_marked > 0 %}
+                        {% with absent_count=total_attendance_marked|add:"-"|add:students_present %}
+                          {{ absent_count|floatformat:0 }}%
+                        {% endwith %}
+                      {% else %}
+                        0%
+                      {% endif %}
+                    </h4>
+                    <span class="badge bg-danger p-2 rounded-pill">
+                      <i class="fas fa-user-times me-1"></i> 
+                      {% with absent_count=total_attendance_marked|add:"-"|add:students_present %}
+                        {{ absent_count }} Students
+                      {% endwith %}
+                    </span>
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-6 mb-3">
+                <div class="p-3 rounded-4 bg-light">
+                  <h6 class="fw-bold text-warning mb-2">Pending</h6>
+                  <div class="d-flex justify-content-between align-items-center">
+                    <h4 class="mb-0 fw-bold">
+                      {% if total_applications > 0 %}
+                        {% widthratio attendance_pending total_applications 100 %}%
+                      {% else %}
+                        0%
+                      {% endif %}
+                    </h4>
+                    <span class="badge bg-warning p-2 rounded-pill">
+                      <i class="fas fa-clock me-1"></i> {{ attendance_pending }} Applications
+                    </span>
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="p-3 rounded-4 bg-light">
+                  <h6 class="fw-bold text-info mb-2">Overall Completion</h6>
+                  <div class="progress mb-2" style="height: 10px; border-radius: 5px;">
+                    <div class="progress-bar bg-info" role="progressbar" 
+                         style="width: {% if total_applications > 0 %}{{ total_attendance_marked|floatformat:0 }}%{% else %}0%{% endif %};" 
+                         aria-valuenow="{{ total_attendance_marked }}" aria-valuemin="0" aria-valuemax="{{ total_applications }}"></div>
+                  </div>
+                  <div class="d-flex justify-content-between align-items-center small">
+                    <span>{{ total_attendance_marked }} Marked</span>
+                    <span>{{ total_applications }} Total</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Interview Dates Cards -->
+{% if interview_dates %}
+<div class="row mb-4">
+  <div class="col-12 mb-3">
+    <div class="card border-0 shadow-sm">
+      <div class="card-body p-3">
+        <div class="d-flex justify-content-between align-items-center">
+          <h5 class="mb-0 fw-bold"><i class="fas fa-calendar-alt me-2 text-primary"></i>Interviews by Date</h5>
+          <span class="badge bg-primary rounded-pill px-3 py-2">{{ interview_dates|length }} dates</span>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <div class="col-12">
+    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-3">
+      {% for date, count in interview_dates.items %}
+      <div class="col">
+        <div class="card h-100 border-0 shadow-sm hover-card">
+          <div class="card-body p-4">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+              <h6 class="card-title mb-0 fw-bold">
+                <i class="far fa-calendar-check me-2 text-primary"></i>{{ date }}
+              </h6>
+              <span class="badge bg-primary rounded-pill px-3">{{ count }}</span>
+            </div>
+            <div class="progress mb-3" style="height: 6px; border-radius: 3px;">
+              <div class="progress-bar bg-primary" role="progressbar" 
+                   style="width: {% widthratio count total_applications 100 %}%;" 
+                   aria-valuenow="{{ count }}" aria-valuemin="0" aria-valuemax="{{ total_applications }}"></div>
+            </div>
+            <div class="d-grid">
+              <a href="{% url 'volunteer_applications' %}?date={{ date }}" class="btn btn-outline-primary">
+                <i class="fas fa-eye me-1"></i> View Applications
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+{% endif %}
+
+<!-- Recent Attendance -->
+<div class="row">
+  <div class="col-12 mb-3">
+    <div class="card border-0 shadow-sm">
+      <div class="card-body p-3">
+        <div class="d-flex justify-content-between align-items-center">
+          <h5 class="mb-0 fw-bold"><i class="fas fa-history me-2 text-primary"></i>Recent Activity</h5>
+          <a href="{% url 'volunteer_attendance' %}" class="btn btn-sm btn-primary rounded-pill px-3">
+            <i class="fas fa-list me-1"></i> View All
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="col-12">
+    <div class="card border-0 shadow-sm">
+      <div class="card-body p-0">
+        <div class="table-responsive">
+          <table class="table table-hover align-middle mb-0">
+            <thead>
+              <tr class="bg-light">
+                <th class="py-3">Student</th>
+                <th class="py-3">Company</th>
+                <th class="py-3">Job Role</th>
+                <th class="py-3">Status</th>
+                <th class="py-3">Marked On</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for attendance in recent_attendance %}
+              <tr>
+                <td>
+                  <div class="d-flex align-items-center">
+                    <div class="avatar-circle me-2 border {% if attendance.is_present %}border-success{% else %}border-danger{% endif %}">
+                      <img src="{{ attendance.application.student.profile_pic.url }}" alt="Profile" class="rounded-circle" width="40" height="40">
+                    </div>
+                    <div>
+                      <span class="fw-bold">{{ attendance.application.student.first_name }} {{ attendance.application.student.last_name }}</span>
+                      <small class="text-muted d-block">{{ attendance.application.student.username }}</small>
+                    </div>
+                  </div>
+                </td>
+                <td>
+                  <span class="fw-medium">{{ attendance.application.job.company.name }}</span>
+                </td>
+                <td>{{ attendance.application.job.role }}</td>
+                <td>
+                  {% if attendance.is_present %}
+                  <span class="badge bg-success rounded-pill px-3 py-2">
+                    <i class="fas fa-user-check me-1"></i> Present
+                  </span>
+                  {% else %}
+                  <span class="badge bg-danger rounded-pill px-3 py-2">
+                    <i class="fas fa-user-times me-1"></i> Absent
+                  </span>
+                  {% endif %}
+                </td>
+                <td>
+                  <span class="text-muted">
+                    <i class="far fa-clock me-1"></i>{{ attendance.marked_at|date:"M d, Y H:i" }}
+                  </span>
+                </td>
+              </tr>
+              {% empty %}
+              <tr>
+                <td colspan="5" class="text-center py-5">
+                  <div class="py-4">
+                    <div class="empty-state-icon mb-3">
+                      <i class="fas fa-clipboard-check fa-4x text-muted"></i>
+                    </div>
+                    <h5 class="fw-bold">No attendance records found</h5>
+                    <p class="text-muted mb-3">Start marking attendance to see activity here</p>
+                    <a href="{% url 'volunteer_applications' %}" class="btn btn-primary">
+                      <i class="fas fa-user-check me-1"></i> Start Marking Attendance
+                    </a>
+                  </div>
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Quick Action Floating Button -->
+<div class="position-fixed bottom-0 end-0 p-3" style="z-index: 1030;">
+  <div class="dropdown">
+    <button class="btn btn-primary btn-lg rounded-circle shadow-lg" type="button" id="quickActionButton" data-bs-toggle="dropdown" aria-expanded="false" style="width: 60px; height: 60px;">
+      <i class="fas fa-plus"></i>
+    </button>
+    <ul class="dropdown-menu dropdown-menu-end shadow border-0" aria-labelledby="quickActionButton" style="border-radius: 0.75rem;">
+      <li><h6 class="dropdown-header">Quick Actions</h6></li>
+      <li>
+        <a class="dropdown-item d-flex align-items-center py-2" href="{% url 'volunteer_applications' %}?attendance=pending">
+          <i class="fas fa-user-check me-2 text-success"></i> Mark Attendance
+        </a>
+      </li>
+      <li>
+        <a class="dropdown-item d-flex align-items-center py-2" href="{% url 'volunteer_applications' %}">
+          <i class="fas fa-clipboard-list me-2 text-primary"></i> View Applications
+        </a>
+      </li>
+      <li>
+        <a class="dropdown-item d-flex align-items-center py-2" href="{% url 'volunteer_attendance' %}">
+          <i class="fas fa-history me-2 text-info"></i> View Attendance History
+        </a>
+      </li>
+      <li><hr class="dropdown-divider"></li>
+      <li>
+        <a class="dropdown-item d-flex align-items-center py-2" href="{% url 'logout' %}">
+          <i class="fas fa-sign-out-alt me-2 text-danger"></i> Logout
+        </a>
+      </li>
+    </ul>
+  </div>
+</div>
+
+<style>
+  .stats-icon {
+    width: 55px;
+    height: 55px;
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+  }
+  
+  .stats-card {
+    transition: transform 0.3s, box-shadow 0.3s;
+    border-radius: 16px;
+    overflow: hidden;
+  }
+  
+  .stats-card:hover {
+    transform: translateY(-7px);
+    box-shadow: 0 10px 20px rgba(15, 23, 42, 0.1) !important;
+  }
+  
+  .hover-card {
+    transition: transform 0.3s, box-shadow 0.3s;
+    border-radius: 16px;
+  }
+  
+  .hover-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 0.75rem 1.5rem rgba(15, 23, 42, 0.1) !important;
+  }
+  
+  .attendance-chart-container {
+    position: relative;
+    height: 220px;
+    width: 220px;
+    margin: 0 auto;
+  }
+  
+  .avatar-circle {
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    overflow: hidden;
+    padding: 2px;
+  }
+  
+  .empty-state-icon {
+    border-radius: 50%;
+    width: 80px;
+    height: 80px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto;
+    background-color: rgba(0,0,0,0.03);
+  }
+  
+  @media (max-width: 768px) {
+    .stats-card {
+      margin-bottom: 1rem;
+    }
+    
+    .attendance-chart-container {
+      margin-bottom: 2rem;
+    }
+  }
+</style>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+  // Initialize attendance chart
+  document.addEventListener('DOMContentLoaded', function() {
+    const presentCount = {{ students_present }};
+    const absentCount = {{ total_attendance_marked }} - {{ students_present }};
+    const pendingCount = {{ attendance_pending }};
+    
+    const ctx = document.getElementById('attendanceChart').getContext('2d');
+    const myChart = new Chart(ctx, {
+      type: 'doughnut',
+      data: {
+        labels: ['Present', 'Absent', 'Pending'],
+        datasets: [{
+          data: [presentCount, absentCount, pendingCount],
+          backgroundColor: [
+            '#10b981',
+            '#ef4444',
+            '#f59e0b'
+          ],
+          borderWidth: 0,
+          hoverOffset: 6
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        cutout: '70%',
+        plugins: {
+          legend: {
+            position: 'bottom',
+            labels: {
+              usePointStyle: true,
+              padding: 20,
+              font: {
+                family: "'Inter', sans-serif",
+                size: 12
+              }
+            }
+          },
+          tooltip: {
+            backgroundColor: 'rgba(15, 23, 42, 0.8)',
+            padding: 15,
+            cornerRadius: 8,
+            titleFont: {
+              size: 16,
+              weight: 'bold',
+              family: "'Inter', sans-serif"
+            },
+            bodyFont: {
+              size: 14,
+              family: "'Inter', sans-serif"
+            },
+            callbacks: {
+              label: function(context) {
+                const label = context.label || '';
+                const value = context.formattedValue;
+                const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                const percentage = Math.round((context.raw / total) * 100);
+                return `${label}: ${value} (${percentage}%)`;
+              }
+            }
+          }
+        }
+      }
+    });
+  });
+</script>
+{% endblock %} 

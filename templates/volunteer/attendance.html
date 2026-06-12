@@ -1,0 +1,464 @@
+{% extends 'volunteer/base.html' %} {% load static %} {% block volunteer_content %}
+<div class="row mb-4">
+  <div class="col-12">
+    <div class="d-sm-flex justify-content-between align-items-center">
+      <div>
+        <h2 class="mb-1">Attendance Records</h2>
+        <p class="text-muted">Track and manage interview attendance</p>
+      </div>
+      <div class="d-flex gap-2 mt-3 mt-sm-0">
+        <button class="btn btn-sm btn-outline-secondary" type="button" data-bs-toggle="collapse" data-bs-target="#filtersCollapse" aria-expanded="false" aria-controls="filtersCollapse">
+          <i class="fas fa-filter me-1"></i> Filters
+        </button>
+        <a href="{% url 'export_attendance_csv' %}" class="btn btn-sm btn-success">
+          <i class="fas fa-file-export me-1"></i> Export CSV
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Attendance Statistics -->
+<div class="row mb-4">
+  <!-- Present Stats -->
+  <div class="col-md-4 mb-3">
+    <div class="card border-0 shadow-sm h-100">
+      <div class="card-body">
+        <div class="d-flex align-items-center mb-3">
+          <div class="stats-icon bg-success text-white me-3">
+            <i class="fas fa-check"></i>
+          </div>
+          <h6 class="card-title mb-0">Present</h6>
+        </div>
+        <h3 class="mb-1 text-success">{{ present_count }}</h3>
+        <div class="progress" style="height: 5px;">
+          <div class="progress-bar bg-success" role="progressbar" 
+               style="width: {% if present_count > 0 or absent_count > 0 %}{{ attendance_rate }}%{% else %}0%{% endif %};" 
+               aria-valuenow="{{ attendance_rate }}" aria-valuemin="0" aria-valuemax="100"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Absent Stats -->
+  <div class="col-md-4 mb-3">
+    <div class="card border-0 shadow-sm h-100">
+      <div class="card-body">
+        <div class="d-flex align-items-center mb-3">
+          <div class="stats-icon bg-danger text-white me-3">
+            <i class="fas fa-times"></i>
+          </div>
+          <h6 class="card-title mb-0">Absent</h6>
+        </div>
+        <h3 class="mb-1 text-danger">{{ absent_count }}</h3>
+        <div class="progress" style="height: 5px;">
+          <div class="progress-bar bg-danger" role="progressbar" 
+               style="width: {% if present_count > 0 or absent_count > 0 %}{{ 100|add:'-'|add:attendance_rate }}%{% else %}0%{% endif %};" 
+               aria-valuenow="{{ 100|add:'-'|add:attendance_rate }}" aria-valuemin="0" aria-valuemax="100"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Attendance Rate -->
+  <div class="col-md-4 mb-3">
+    <div class="card border-0 shadow-sm h-100">
+      <div class="card-body">
+        <div class="d-flex align-items-center mb-3">
+          <div class="stats-icon bg-primary text-white me-3">
+            <i class="fas fa-chart-pie"></i>
+          </div>
+          <h6 class="card-title mb-0">Attendance Rate</h6>
+        </div>
+        <div class="d-flex align-items-baseline">
+          <h3 class="mb-1 text-primary">{{ attendance_rate }}%</h3>
+          <div class="ms-auto">
+            <div class="d-flex align-items-center gap-3">
+              <div class="d-flex align-items-center">
+                <span class="badge bg-success rounded-circle p-1 me-1"></span>
+                <small class="text-muted">Present</small>
+              </div>
+              <div class="d-flex align-items-center">
+                <span class="badge bg-danger rounded-circle p-1 me-1"></span>
+                <small class="text-muted">Absent</small>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div id="attendance-chart" class="mt-3" style="height: 60px;"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Filters Section -->
+<div class="row mb-4">
+  <div class="col-12">
+    <div class="card border-0 shadow-sm collapse {% if selected_date or selected_company or status_filter or search_query %}show{% endif %}" id="filtersCollapse">
+      <div class="card-body">
+        <h5 class="card-title mb-3">
+          <i class="fas fa-filter me-2 text-primary"></i>Filter Records
+        </h5>
+        <form method="GET" class="row g-3">
+          <div class="col-md-6 col-lg-3">
+            <div class="form-floating">
+              <select class="form-select" id="date" name="date">
+                <option value="">All Dates</option>
+                {% for date in interview_dates %}
+                <option value="{{ date }}" {% if selected_date == date %}selected{% endif %}>{{ date }}</option>
+                {% endfor %}
+              </select>
+              <label for="date">Interview Date</label>
+            </div>
+          </div>
+          
+          <div class="col-md-6 col-lg-3">
+            <div class="form-floating">
+              <select class="form-select" id="company" name="company">
+                <option value="">All Companies</option>
+                {% for company in companies %}
+                <option value="{{ company.id }}" {% if selected_company == company.id %}selected{% endif %}>{{ company.name }}</option>
+                {% endfor %}
+              </select>
+              <label for="company">Company</label>
+            </div>
+          </div>
+          
+          <div class="col-md-6 col-lg-3">
+            <div class="form-floating">
+              <select class="form-select" id="status" name="status">
+                <option value="">All Status</option>
+                <option value="present" {% if status_filter == 'present' %}selected{% endif %}>Present</option>
+                <option value="absent" {% if status_filter == 'absent' %}selected{% endif %}>Absent</option>
+              </select>
+              <label for="status">Attendance Status</label>
+            </div>
+          </div>
+          
+          <div class="col-md-6 col-lg-3">
+            <div class="form-floating">
+              <input type="text" class="form-control" id="search" name="search" placeholder="Name or Roll No" value="{{ search_query }}">
+              <label for="search">Search Student</label>
+            </div>
+          </div>
+          
+          <div class="col-12 d-flex justify-content-end">
+            <button type="submit" class="btn btn-primary me-2">
+              <i class="fas fa-search me-1"></i> Apply Filters
+            </button>
+            <a href="{% url 'volunteer_attendance' %}" class="btn btn-outline-secondary">
+              <i class="fas fa-redo me-1"></i> Reset
+            </a>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Active Filters -->
+{% if selected_date or selected_company or status_filter or search_query %}
+<div class="row mb-3">
+  <div class="col-12">
+    <div class="d-flex flex-wrap gap-2 align-items-center">
+      <span class="text-muted me-2">Active filters:</span>
+      
+      {% if selected_date %}
+      <span class="badge bg-info rounded-pill">
+        <i class="fas fa-calendar-day me-1"></i> {{ selected_date }}
+        <a href="{% url 'volunteer_attendance' %}?{% if selected_company %}company={{ selected_company }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if search_query %}&search={{ search_query }}{% endif %}" class="text-white ms-1"><i class="fas fa-times-circle"></i></a>
+      </span>
+      {% endif %}
+      
+      {% if selected_company %}
+      <span class="badge bg-info rounded-pill">
+        <i class="fas fa-building me-1"></i> 
+        {% for company in companies %}
+          {% if company.id == selected_company %}{{ company.name }}{% endif %}
+        {% endfor %}
+        <a href="{% url 'volunteer_attendance' %}?{% if selected_date %}date={{ selected_date }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if search_query %}&search={{ search_query }}{% endif %}" class="text-white ms-1"><i class="fas fa-times-circle"></i></a>
+      </span>
+      {% endif %}
+      
+      {% if status_filter %}
+      <span class="badge bg-info rounded-pill">
+        <i class="fas fa-clipboard-check me-1"></i> 
+        {% if status_filter == 'present' %}Present
+        {% elif status_filter == 'absent' %}Absent
+        {% endif %}
+        <a href="{% url 'volunteer_attendance' %}?{% if selected_date %}date={{ selected_date }}{% endif %}{% if selected_company %}&company={{ selected_company }}{% endif %}{% if search_query %}&search={{ search_query }}{% endif %}" class="text-white ms-1"><i class="fas fa-times-circle"></i></a>
+      </span>
+      {% endif %}
+      
+      {% if search_query %}
+      <span class="badge bg-info rounded-pill">
+        <i class="fas fa-search me-1"></i> "{{ search_query }}"
+        <a href="{% url 'volunteer_attendance' %}?{% if selected_date %}date={{ selected_date }}{% endif %}{% if selected_company %}&company={{ selected_company }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}" class="text-white ms-1"><i class="fas fa-times-circle"></i></a>
+      </span>
+      {% endif %}
+      
+      <a href="{% url 'volunteer_attendance' %}" class="ms-2 btn btn-sm btn-outline-secondary">
+        <i class="fas fa-times me-1"></i> Clear All
+      </a>
+    </div>
+  </div>
+</div>
+{% endif %}
+
+<!-- Attendance List -->
+<div class="row">
+  <div class="col-12">
+    <div class="card border-0 shadow-sm">
+      <div class="card-header bg-white py-3">
+        <div class="d-flex justify-content-between align-items-center">
+          <h5 class="mb-0">
+            <i class="fas fa-clipboard-check me-2 text-primary"></i>Attendance Records
+          </h5>
+          <span class="badge bg-primary rounded-pill px-3 py-2">{{ attendance_records|length }} records</span>
+        </div>
+      </div>
+      <div class="card-body p-0">
+        {% if attendance_records %}
+        <div class="table-responsive">
+          <table class="table table-hover align-middle mb-0">
+            <thead class="table-light">
+              <tr>
+                <th>Student</th>
+                <th>University ID</th>
+                <th>Company</th>
+                <th>Position</th>
+                <th>Interview Date</th>
+                <th>Status</th>
+                <th>Marked By</th>
+                <th>Marked On</th>
+                <th class="text-center">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for record in attendance_records %}
+              <tr>
+                <td>
+                  <div class="d-flex align-items-center">
+                    <img src="{{ record.application.student.profile_pic.url }}" alt="Profile" class="rounded-circle me-2" width="40" height="40">
+                    <div>
+                      <div class="fw-bold">{{ record.application.student.first_name }} {{ record.application.student.last_name }}</div>
+                      <small class="text-muted">{{ record.application.student.course }} - {{ record.application.student.year }}</small>
+                    </div>
+                  </div>
+                </td>
+                <td>{{ record.application.student.university_roll_no }}</td>
+                <td>
+                  <div class="d-flex align-items-center">
+                    {% if record.application.job.company.logo %}
+                    <img src="{{ record.application.job.company.logo.url }}" alt="{{ record.application.job.company.name }}" class="me-2" width="24" height="24">
+                    {% else %}
+                    <span class="me-2 text-muted"><i class="fas fa-building"></i></span>
+                    {% endif %}
+                    {{ record.application.job.company.name }}
+                  </div>
+                </td>
+                <td>{{ record.application.job.role }}</td>
+                <td><span class="badge bg-light text-dark">{{ record.application.job.interview_date }}</span></td>
+                <td>
+                  {% if record.is_present %}
+                    <span class="badge bg-success"><i class="fas fa-check me-1"></i>Present</span>
+                  {% else %}
+                    <span class="badge bg-danger"><i class="fas fa-times me-1"></i>Absent</span>
+                  {% endif %}
+                </td>
+                <td>
+                  <div class="d-flex align-items-center">
+                    <img src="{{ record.marked_by.profile_pic.url }}" alt="Volunteer" class="rounded-circle me-2" width="24" height="24">
+                    <span>{{ record.marked_by.first_name }} {{ record.marked_by.last_name }}</span>
+                  </div>
+                </td>
+                <td><small class="text-muted"><i class="far fa-clock me-1"></i>{{ record.marked_at|date:"M d, Y H:i" }}</small></td>
+                <td class="text-center">
+                  <a href="{% url 'change_attendance' attendance_id=record.id %}" class="btn btn-sm btn-outline-primary" data-bs-toggle="tooltip" title="Change Attendance Status">
+                    <i class="fas fa-exchange-alt"></i>
+                  </a>
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+        
+        <!-- Pagination Section -->
+        <div class="card-footer">
+            <div class="row">
+                <div class="col-md-6">
+                    <p>Showing {{ attendance_records.start_index }} to {{ attendance_records.end_index }} of {{ attendance_records.paginator.count }} entries</p>
+                </div>
+                <div class="col-md-6">
+                    <nav aria-label="Page navigation">
+                        <ul class="pagination justify-content-end">
+                            {% if attendance_records.has_previous %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?page=1{% if date %}&date={{ date }}{% endif %}{% if company %}&company={{ company }}{% endif %}{% if status %}&status={{ status }}{% endif %}{% if search %}&search={{ search }}{% endif %}" aria-label="First">
+                                        <span aria-hidden="true">&laquo;&laquo;</span>
+                                    </a>
+                                </li>
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ attendance_records.previous_page_number }}{% if date %}&date={{ date }}{% endif %}{% if company %}&company={{ company }}{% endif %}{% if status %}&status={{ status }}{% endif %}{% if search %}&search={{ search }}{% endif %}" aria-label="Previous">
+                                        <span aria-hidden="true">&laquo;</span>
+                                    </a>
+                                </li>
+                            {% else %}
+                                <li class="page-item disabled">
+                                    <a class="page-link" href="#" tabindex="-1" aria-disabled="true">&laquo;&laquo;</a>
+                                </li>
+                                <li class="page-item disabled">
+                                    <a class="page-link" href="#" tabindex="-1" aria-disabled="true">&laquo;</a>
+                                </li>
+                            {% endif %}
+                            
+                            {% for i in attendance_records.paginator.page_range %}
+                                {% if attendance_records.number == i %}
+                                    <li class="page-item active"><a class="page-link" href="#">{{ i }}</a></li>
+                                {% elif i > attendance_records.number|add:'-3' and i < attendance_records.number|add:'3' %}
+                                    <li class="page-item"><a class="page-link" href="?page={{ i }}{% if date %}&date={{ date }}{% endif %}{% if company %}&company={{ company }}{% endif %}{% if status %}&status={{ status }}{% endif %}{% if search %}&search={{ search }}{% endif %}">{{ i }}</a></li>
+                                {% endif %}
+                            {% endfor %}
+                            
+                            {% if attendance_records.has_next %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ attendance_records.next_page_number }}{% if date %}&date={{ date }}{% endif %}{% if company %}&company={{ company }}{% endif %}{% if status %}&status={{ status }}{% endif %}{% if search %}&search={{ search }}{% endif %}" aria-label="Next">
+                                        <span aria-hidden="true">&raquo;</span>
+                                    </a>
+                                </li>
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ attendance_records.paginator.num_pages }}{% if date %}&date={{ date }}{% endif %}{% if company %}&company={{ company }}{% endif %}{% if status %}&status={{ status }}{% endif %}{% if search %}&search={{ search }}{% endif %}" aria-label="Last">
+                                        <span aria-hidden="true">&raquo;&raquo;</span>
+                                    </a>
+                                </li>
+                            {% else %}
+                                <li class="page-item disabled">
+                                    <a class="page-link" href="#" tabindex="-1" aria-disabled="true">&raquo;</a>
+                                </li>
+                                <li class="page-item disabled">
+                                    <a class="page-link" href="#" tabindex="-1" aria-disabled="true">&raquo;&raquo;</a>
+                                </li>
+                            {% endif %}
+                        </ul>
+                    </nav>
+                </div>
+            </div>
+        </div>
+        <!-- End Pagination Section -->
+        {% else %}
+        <div class="text-center py-5">
+          <img src="{% static 'img/no-data.svg' %}" alt="No Data" class="img-fluid mb-3" style="max-width: 180px;">
+          <h5>No Attendance Records Found</h5>
+          <p class="text-muted px-4">We couldn't find any attendance records matching your current filters.</p>
+          <div class="mt-3">
+            <p class="mb-3">What would you like to do?</p>
+            <div class="d-flex flex-column flex-md-row justify-content-center gap-3 mb-3">
+              <a href="{% url 'volunteer_applications' %}?attendance=pending" class="btn btn-primary">
+                <i class="fas fa-clipboard-list me-1"></i> Mark Attendance
+              </a>
+              <a href="{% url 'volunteer_attendance' %}" class="btn btn-outline-secondary">
+                <i class="fas fa-filter me-1"></i> Reset Filters
+              </a>
+              <a href="{% url 'volunteer_dashboard' %}" class="btn btn-outline-secondary">
+                <i class="fas fa-tachometer-alt me-1"></i> Go to Dashboard
+              </a>
+            </div>
+          </div>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+  .stats-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.25rem;
+  }
+  
+  .form-floating > .form-control {
+    height: calc(3.5rem + 2px);
+    padding: 1rem 0.75rem;
+  }
+  
+  .form-floating > label {
+    padding: 1rem 0.75rem;
+  }
+  
+  .table tr:last-child td {
+    border-bottom: none;
+  }
+</style>
+
+<!-- Chart container -->
+<div class="card">
+    <div class="card-header bg-primary text-white">
+        <h5 class="card-title mb-0">Attendance Statistics</h5>
+    </div>
+    <div class="card-body">
+        <div id="attendance-chart" data-present="{{ present_count }}" data-absent="{{ absent_count }}"></div>
+    </div>
+</div>
+
+<script src="{% static 'js/dashboard/libs/apexcharts/dist/apexcharts.min.js' %}"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Wait a bit for libraries to fully load
+        setTimeout(function() {
+            initializeAttendanceChart();
+        }, 300);
+    });
+
+    function initializeAttendanceChart() {
+        if (typeof ApexCharts === 'undefined') {
+            console.error('ApexCharts library not loaded. Charts may not render correctly.');
+            return;
+        }
+
+        try {
+            var chartElement = document.querySelector("#attendance-chart");
+            if (!chartElement) {
+                console.error('Chart container element not found');
+                return;
+            }
+            
+            // Get data from data attributes
+            var presentCount = parseInt(chartElement.getAttribute('data-present') || 0);
+            var absentCount = parseInt(chartElement.getAttribute('data-absent') || 0);
+
+            var options = {
+                series: [presentCount, absentCount],
+                chart: {
+                    type: 'pie',
+                    height: 350
+                },
+                labels: ['Present', 'Absent'],
+                colors: ['#28a745', '#dc3545'],
+                responsive: [{
+                    breakpoint: 480,
+                    options: {
+                        chart: {
+                            width: 200
+                        },
+                        legend: {
+                            position: 'bottom'
+                        }
+                    }
+                }]
+            };
+
+            var chart = new ApexCharts(chartElement, options);
+            chart.render();
+        } catch (error) {
+            console.error('Error initializing attendance chart:', error);
+        }
+    }
+</script>
+{% endblock %} 

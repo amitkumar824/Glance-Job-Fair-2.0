@@ -1,0 +1,934 @@
+{% extends "student/base.html" %} {% load static %} 
+
+{% block title %} Student -> Upload Documents {% endblock %} 
+
+{% block extra_css %}
+<style>
+    /* Document section styling */
+    .document-section {
+        background-color: #f8f9fa;
+        border-left: 5px solid #0d6efd;
+        padding: 15px;
+        margin-bottom: 20px;
+        border-radius: 5px;
+    }
+    
+    .document-title {
+        font-weight: 600;
+        color: #0d6efd;
+        margin-bottom: 10px;
+        display: flex;
+        align-items: center;
+    }
+    
+    .document-title i {
+        margin-right: 8px;
+    }
+    
+    .document-instructions {
+        background-color: #fff;
+        padding: 10px;
+        border-radius: 5px;
+        margin-bottom: 10px;
+        border: 1px solid #dee2e6;
+    }
+    
+    .document-instructions h6 {
+        font-weight: 600;
+        margin-bottom: 10px;
+        color: #495057;
+    }
+    
+    .document-instructions ul {
+        padding-left: 20px;
+        margin-bottom: 0;
+    }
+    
+    .document-instructions ul li {
+        margin-bottom: 5px;
+    }
+    
+    .required-badge {
+        background-color: #dc3545;
+        color: white;
+        padding: 3px 8px;
+        border-radius: 4px;
+        font-size: 12px;
+        margin-left: 8px;
+    }
+    
+    /* Mobile-specific styles */
+    @media (max-width: 768px) {
+        .input-group {
+            flex-wrap: nowrap;
+        }
+        
+        input[type="file"] {
+            font-size: 14px;
+            padding: 8px;
+        }
+        
+        .alert {
+            padding: 0.75rem;
+        }
+        
+        .card {
+            margin-bottom: 1rem;
+        }
+        
+        .form-text {
+            font-size: 12px; 
+            line-height: 1.3;
+        }
+        
+        /* Make file inputs more touch-friendly */
+        .input-group-text {
+            padding: 10px 15px;
+        }
+        
+        /* Make buttons larger for touch */
+        #uploadBtn {
+            padding: 12px;
+            font-size: 16px;
+        }
+        
+        /* Improve PDF viewer on mobile */
+        embed[type="application/pdf"] {
+            height: 300px !important;
+        }
+    }
+    
+    /* Success feedback styling */
+    .valid-feedback {
+        display: none;
+        color: #198754;
+        margin-top: 0.25rem;
+    }
+    
+    /* Improve form elements */
+    .form-control:focus {
+        box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+    }
+    
+    /* Highlight the file inputs */
+    input[type="file"] {
+        border: 1px dashed #ccc;
+        transition: all 0.3s ease;
+    }
+    
+    input[type="file"]:hover,
+    input[type="file"]:focus {
+        border-color: var(--bs-primary);
+    }
+    
+    /* Make badges more visible */
+    .badge.bg-info {
+        background-color: #0dcaf0 !important;
+        color: #000 !important;
+    }
+    
+    /* Documents summary section */
+    .documents-summary {
+        background-color: #e9f7fe;
+        border-radius: 5px;
+        padding: 15px;
+        margin-bottom: 20px;
+    }
+    
+    .documents-summary h5 {
+        color: #0d6efd;
+        border-bottom: 1px solid #bee5eb;
+        padding-bottom: 10px;
+        margin-bottom: 15px;
+    }
+    
+    .documents-summary ul {
+        margin-bottom: 0;
+    }
+    
+    .documents-summary li {
+        margin-bottom: 8px;
+    }
+    
+    .document-status {
+        display: inline-block;
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        margin-right: 8px;
+        vertical-align: middle;
+    }
+    
+    .status-uploaded {
+        background-color: #28a745;
+    }
+    
+    .status-missing {
+        background-color: #6c757d;
+    }
+    
+    /* Only resume missing should be red */
+    li:first-child .status-missing {
+        background-color: #dc3545;
+    }
+</style>
+{% endblock %}
+
+{% block body %}
+
+<div class="container-fluid">
+    <div class="card">
+        <div class="card-body">
+            {% if student.resume %}
+            <h5 class="card-title fw-semibold mb-4">Update Documents</h5>
+            {% else %}
+            <h5 class="card-title fw-semibold mb-4">Upload Documents</h5>
+            {% endif %}
+
+            <p class="mb-0">Remember! This is a crucial step towards your success</p>
+        </div>
+    </div>
+
+    {% for message in messages %}
+    <div class="alert {{ message.tags }} alert-dismissible fade show" role="alert">
+      <strong>{{ message.tag }}</strong> {{ message }}
+      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    {% endfor %}
+
+    <!-- Documents Summary Section -->
+    <div class="documents-summary">
+        <h5><i class="ti ti-files me-2"></i>Documents Status</h5>
+        <ul class="list-unstyled">
+            <li>
+                <span class="document-status {% if student.resume %}status-uploaded{% else %}status-missing{% endif %}"></span>
+                Resume 
+                {% if student.resume %}<span class="badge bg-success">Uploaded</span>{% else %}<span class="badge bg-danger">Required</span>{% endif %}
+            </li>
+            <li>
+                <span class="document-status {% if student.tenth_marksheet %}status-uploaded{% else %}status-missing{% endif %}"></span>
+                Highschool Marksheet
+                {% if student.tenth_marksheet %}<span class="badge bg-success">Uploaded</span>{% else %}<span class="badge bg-secondary">Optional</span>{% endif %}
+            </li>
+            <li>
+                <span class="document-status {% if student.twelfth_marksheet %}status-uploaded{% else %}status-missing{% endif %}"></span>
+                Intermediate Marksheet
+                {% if student.twelfth_marksheet %}<span class="badge bg-success">Uploaded</span>{% else %}<span class="badge bg-secondary">Optional</span>{% endif %}
+            </li>
+            <li>
+                <span class="document-status {% if student.college_profile_print %}status-uploaded{% else %}status-missing{% endif %}"></span>
+                College Profile
+                {% if student.college_profile_print %}<span class="badge bg-success">Uploaded</span>{% else %}<span class="badge bg-secondary">Optional</span>{% endif %}
+            </li>
+        </ul>
+    </div>
+
+    <div class="card">
+        <div class="card-body">
+            <div class="row flex-row">
+                <div class="mb-3 col-md-6">
+                    <label for="exampleInputEmail1" class="form-label">Name</label>
+
+                    {% if student.gender == "Male" %}
+
+                    <input type="email" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp"
+                        value="Mr. {{ student.first_name }} {{ student.last_name }}" disabled />
+
+                    {% else %}
+
+                    <input type="email" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp"
+                        value="Ms. {{ student.first_name }} {{ student.last_name }}" disabled />
+
+                    {% endif %}
+                </div>
+
+                <div class="mb-3 col-md-6">
+                    <label for="exampleInputEmail1" class="form-label">Email address</label>
+                    <input type="email" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp"
+                        value="{{ student.username }}" disabled />
+                </div>
+
+            </div>
+
+            <div class="row flex-row">
+                <div class="mb-3 col-md-6">
+                    <label for="exampleInputEmail1" class="form-label">Mobile Number</label>
+                    <input type="email" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp"
+                        value="+91 {{ student.phone_number }}" disabled />
+                </div>
+                <div class="mb-3 col-md-6">
+                    <label for="exampleInputEmail1" class="form-label">Gender</label>
+                    <input type="email" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp"
+                        value="{{ student.gender }}" disabled />
+                </div>
+
+            </div>
+
+            <div class="row flex-row">
+                
+                <div class="mb-3 col-md-4">
+                    <label for="exampleInputEmail1" class="form-label">Highschool</label>
+                    <input type="email" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp"
+                        value="{{ student.tenth }}%" disabled />
+                </div>
+
+                <div class="mb-3 col-md-4">
+                    <label for="exampleInputEmail1" class="form-label">Intermediate</label>
+                    <input type="email" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp"
+                        value="{{ student.twelfth }}%" disabled />
+                </div>
+
+                <div class="mb-3 col-md-4">
+                    <label for="exampleInputEmail1" class="form-label">CGPA (Out of 10)</label>
+                    <input type="email" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp"
+                        value="{{ student.cgpa }}" disabled />
+                </div>
+            </div>
+
+            {% if student.resume %}
+
+            <div class="card" id="card-title-2">
+                <div class="card-header">
+                    <h5 class="card-title">My Resume</h5>
+                </div>
+                <div class="card-footer d-sm-flex justify-content-between align-items-center">
+                    <div class="card-footer-link mb-4 mb-sm-0">
+                        <p class="card-text d-inline">
+                            - {{ student.first_name }} {{ student.last_name }}
+                        </p>
+                    </div>
+
+                    <div class="d-inline-flex">
+                        <a href="{{ student.resume.url }}" download
+                            class="btn btn-outline-primary text-blue mx-1">Download</a>
+
+                        <a class="btn btn-outline-primary text-blue float-end" id="viewbtn"
+                            onclick="return myf();">
+                            View
+                        </a>
+                    </div>
+                </div>
+                <embed id="pdfContainer" style="display: none; border-radius: 10px; margin: 3%;"
+                    src="{{ student.resume.url }}" type="application/pdf" width="94%" height="400px" />
+            </div>
+
+            {% endif %}
+
+            {% if student.tenth_marksheet %}
+
+            <div class="card" id="card-title-2">
+                <div class="card-header">
+                    <h5 class="card-title">My Highschool Marksheet</h5>
+                </div>
+                <div class="card-footer d-sm-flex justify-content-between align-items-center">
+                    <div class="card-footer-link mb-4 mb-sm-0">
+                        <p class="card-text d-inline">
+                            - {{ student.first_name }} {{ student.last_name }}
+                        </p>
+                    </div>
+
+                    <div class="d-inline-flex">
+                        <a href="{{ student.tenth_marksheet.url }}" download
+                            class="btn btn-outline-primary text-blue mx-1">Download</a>
+
+                        <a class="btn btn-outline-primary text-blue float-end" id="viewbtn2"
+                            onclick="return myf2();">
+                            View
+                        </a>
+                    </div>
+                </div>
+                <embed id="pdfContainer2" style="display: none; border-radius: 10px; margin: 3%;"
+                    src="{{ student.tenth_marksheet.url }}" type="application/pdf" width="94%" height="400px" />
+            </div>
+
+            {% endif %}
+
+            {% if student.twelfth_marksheet %}
+
+            <div class="card" id="card-title-2">
+                <div class="card-header">
+                    <h5 class="card-title">My Intermediate Marksheet</h5>
+                </div>
+                <div class="card-footer d-sm-flex justify-content-between align-items-center">
+                    <div class="card-footer-link mb-4 mb-sm-0">
+                        <p class="card-text d-inline">
+                            - {{ student.first_name }} {{ student.last_name }}
+                        </p>
+                    </div>
+
+                    <div class="d-inline-flex">
+                        <a href="{{ student.twelfth_marksheet.url }}" download
+                            class="btn btn-outline-primary text-blue mx-1">Download</a>
+
+                        <a class="btn btn-outline-primary text-blue float-end" id="viewbtn3"
+                            onclick="return myf3();">
+                            View
+                        </a>
+                    </div>
+                </div>
+                <embed id="pdfContainer3" style="display: none; border-radius: 10px; margin: 3%;"
+                    src="{{ student.twelfth_marksheet.url }}" type="application/pdf" width="94%" height="400px" />
+            </div>
+
+            {% endif %}
+
+
+            {% if student.college_profile_print %}
+
+            <div class="card" id="card-title-2">
+                <div class="card-header">
+                    <h5 class="card-title">College Profile</h5>
+                </div>
+                <div class="card-footer d-sm-flex justify-content-between align-items-center">
+                    <div class="card-footer-link mb-4 mb-sm-0">
+                        <p class="card-text d-inline">
+                            - {{ student.first_name }} {{ student.last_name }}
+                        </p>
+                    </div>
+
+                    <div class="d-inline-flex">
+                        <a href="{{ student.college_profile_print.url }}" download
+                            class="btn btn-outline-primary text-blue mx-1">Download</a>
+
+                        <a class="btn btn-outline-primary text-blue float-end" id="viewbtn4"
+                            onclick="return myf4();">
+                            View
+                        </a>
+                    </div>
+                </div>
+                <embed id="pdfContainer4" style="display: none; border-radius: 10px; margin: 3%;"
+                    src="{{ student.college_profile_print.url }}" type="application/pdf" width="94%" height="400px" />
+            </div>
+
+            {% endif %}
+
+            <form method="post" enctype="multipart/form-data" id="uploadForm">
+                {% csrf_token %}
+
+                <!-- Resume Section -->
+                <div class="document-section">
+                    <div class="document-title">
+                        <i class="ti ti-file-text"></i> Resume <span class="required-badge">Required</span>
+                    </div>
+                    
+                    <div class="document-instructions">
+                        <h6>What to include:</h6>
+                        <ul>
+                            <li>Personal details and contact information</li>
+                            <li>Educational background</li>
+                            <li>Skills and technical competencies</li>
+                            <li>Projects and work experience</li>
+                            <li>Achievements and extracurricular activities</li>
+                        </ul>
+                    </div>
+
+                <div class="mb-4">
+                        <label for="resumeFile" class="form-label">Upload Resume <small class="text-muted">(PDF only, max 5MB)</small></label>
+                        <div class="input-group">
+                            <input class="form-control" type="file" id="resumeFile" name="resume" accept="application/pdf,.pdf"/>
+                            <span class="input-group-text">
+                                <i class="ti ti-file-upload"></i>
+                            </span>
+                        </div>
+                        <div class="form-text">
+                            <span class="badge bg-info me-1"><i class="ti ti-device-mobile me-1"></i>Mobile users</span>
+                            Take a clear photo or use a document scanning app (like Adobe Scan or CamScanner)
+                        </div>
+                        <div class="invalid-feedback">
+                            Please select a valid PDF file less than 5MB in size.
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Highschool Marksheet Section -->
+                <div class="document-section">
+                    <div class="document-title">
+                        <i class="ti ti-certificate"></i> Highschool Marksheet <span class="badge bg-secondary">Optional</span>
+                    </div>
+                    
+                    <div class="document-instructions">
+                        <h6>Important notes:</h6>
+                        <ul>
+                            <li>Upload your Class 10th/SSC final marksheet</li>
+                            <li>Make sure all subjects and percentages are clearly visible</li>
+                            <li>The document should include your name and registration number</li>
+                        </ul>
+                </div>
+
+                <div class="mb-4">
+                        <label for="tenthFile" class="form-label">Highschool Marksheet <small class="text-muted">(PDF only, max 5MB)</small></label>
+                        <div class="input-group">
+                            <input class="form-control" type="file" id="tenthFile" name="tenth_marksheet" accept="application/pdf,.pdf"/>
+                            <span class="input-group-text">
+                                <i class="ti ti-file-upload"></i>
+                            </span>
+                        </div>
+                        <div class="form-text">
+                            <span class="badge bg-info me-1"><i class="ti ti-device-mobile me-1"></i>Mobile users</span>
+                            Place document on a flat surface with good lighting for best results
+                        </div>
+                        <div class="invalid-feedback">
+                            Please select a valid PDF file less than 5MB in size.
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Intermediate Marksheet Section -->
+                <div class="document-section">
+                    <div class="document-title">
+                        <i class="ti ti-certificate"></i> Intermediate Marksheet <span class="badge bg-secondary">Optional</span>
+                    </div>
+                    
+                    <div class="document-instructions">
+                        <h6>Important notes:</h6>
+                        <ul>
+                            <li>Upload your Class 12th/HSC final marksheet</li>
+                            <li>Ensure your percentage/CGPA is clearly visible</li>
+                            <li>All subjects and marks should be legible</li>
+                        </ul>
+                </div>
+
+                <div class="mb-4">
+                        <label for="twelfthFile" class="form-label">Intermediate Marksheet <small class="text-muted">(PDF only, max 5MB)</small></label>
+                        <div class="input-group">
+                            <input class="form-control" type="file" id="twelfthFile" name="twelfth_marksheet" accept="application/pdf,.pdf"/>
+                            <span class="input-group-text">
+                                <i class="ti ti-file-upload"></i>
+                            </span>
+                        </div>
+                        <div class="form-text">
+                            <span class="badge bg-info me-1"><i class="ti ti-device-mobile me-1"></i>Mobile users</span>
+                            Use PDF converter apps if you have image files
+                        </div>
+                        <div class="invalid-feedback">
+                            Please select a valid PDF file less than 5MB in size.
+                        </div>
+                    </div>
+                </div>
+
+                <!-- College Profile Section -->
+                <div class="document-section">
+                    <div class="document-title">
+                        <i class="ti ti-school"></i> College Profile <span class="badge bg-secondary">Optional</span>
+                    </div>
+                    
+                    <div class="document-instructions">
+                        <h6>How to obtain your College Profile Print:</h6>
+                        <ol>
+                            <li>Go to <a href="https://glauniversity.in:8085" target="_blank">glauniversity.in:8085</a></li>                            
+                            <li>Click on 'Main Account' section</li>
+                            <li>Click on <b>'Profile Print'</b></li>
+                            <li>Click on <b>'Print'</b> button and save as PDF</li>
+                            <li><b>On mobile:</b> Use "Save as PDF" option in the share menu or take screenshots and convert to PDF</li>
+                        </ol>
+                </div>
+
+                <div class="mb-4">
+                        <label for="profileFile" class="form-label">College Profile Print <small class="text-muted">(PDF only, max 5MB)</small></label>
+                        <div class="input-group">
+                            <input class="form-control" type="file" id="profileFile" name="college_profile_print" accept="application/pdf,.pdf"/>
+                            <span class="input-group-text">
+                                <i class="ti ti-file-upload"></i>
+                            </span>
+                        </div>
+                        <div class="form-text">
+                            <span class="badge bg-info me-1"><i class="ti ti-device-mobile me-1"></i>Mobile users</span>
+                            If saving as PDF doesn't work, use screenshot and convert to PDF
+                        </div>
+                        <div class="invalid-feedback">
+                            Please select a valid PDF file less than 5MB in size.
+                        </div>
+                    </div>
+                </div>
+
+                <div class="alert alert-info" role="alert">
+                    <h5><i class="ti ti-device-mobile me-2"></i>Mobile Upload Tips</h5>
+                    <ol class="mb-0">
+                        <li>Use a document scanning app like Adobe Scan, Microsoft Lens, or CamScanner to convert photos to PDF</li>
+                        <li>Ensure good lighting when taking photos of documents</li>
+                        <li>If you're having trouble, try using a different browser or the latest Chrome version</li>
+                        <li>Make sure your PDF files are less than 5MB in size</li>
+                    </ol>
+                </div>
+
+                <div id="uploadStatus" class="alert alert-info d-none">
+                    <div class="d-flex align-items-center">
+                        <div class="spinner-border spinner-border-sm me-2" role="status"></div>
+                        <span>Uploading files, please wait...</span>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn btn-primary btn-lg w-100 mb-3" id="uploadBtn">
+                    <i class="ti ti-upload me-2"></i>Upload Documents
+                </button>
+                
+                <div class="text-center mb-3">
+                    <small class="text-muted">Having trouble uploading from mobile? Try using a PDF converter app or contact support.</small>
+                </div>
+            </form>
+
+        </div>
+    </div>
+</div>
+
+<script>
+    // File size validation - maximum 5MB
+    function validateFileSize(inputElement) {
+        try {
+            const maxSizeInBytes = 5 * 1024 * 1024; // 5MB
+            const file = inputElement.files[0];
+            
+            if (file) {
+                // Log file info for debugging
+                console.log('Validating file:', {
+                    name: file.name,
+                    type: file.type,
+                    size: file.size,
+                    device: inputElement.getAttribute('data-device-type')
+                });
+                
+                // Check file size
+                if (file.size > maxSizeInBytes) {
+                    showError(inputElement, `File "${file.name}" is too large (${(file.size/1024/1024).toFixed(1)}MB). Maximum size is 5MB.`);
+                    return false;
+                } 
+                
+                // Enhanced PDF detection
+                const fileType = file.type;
+                const fileName = file.name.toLowerCase();
+                
+                // Multiple checks for PDF format
+                const isPdf = 
+                    fileType === 'application/pdf' || 
+                    fileType === 'application/x-pdf' || 
+                    fileType === 'application/acrobat' || 
+                    fileType === 'applications/vnd.pdf' || 
+                    fileName.endsWith('.pdf');
+                
+                if (!isPdf) {
+                    showError(inputElement, `File "${file.name}" is not a PDF. Only PDF files are allowed.`);
+                    return false;
+                } 
+                
+                // All checks passed
+                clearError(inputElement);
+                showSuccess(inputElement, `File "${file.name}" ready to upload.`);
+                return true;
+            } else {
+                clearError(inputElement);
+                return true;
+            }
+        } catch (error) {
+            console.error('Error in validateFileSize:', error);
+            // Fallback validation for error cases
+            if (inputElement.value) {
+                // If there's a value but we couldn't validate properly, assume it's OK
+                // Server-side validation will catch any issues
+                clearError(inputElement);
+                return true;
+            } else {
+                // No file selected
+                clearError(inputElement);
+                return true;
+            }
+        }
+    }
+    
+    function showError(element, message) {
+        element.setCustomValidity(message);
+        element.classList.add('is-invalid');
+        element.classList.remove('is-valid');
+        
+        // Find the invalid feedback element and update its text
+        const feedbackElement = element.closest('.mb-4').querySelector('.invalid-feedback');
+        if (feedbackElement) {
+            feedbackElement.textContent = message;
+            feedbackElement.style.display = 'block';
+        }
+    }
+    
+    function showSuccess(element, message) {
+        element.setCustomValidity("");
+        element.classList.add('is-valid');
+        element.classList.remove('is-invalid');
+        
+        // Add success message
+        let successDiv = element.closest('.mb-4').querySelector('.valid-feedback');
+        if (!successDiv) {
+            successDiv = document.createElement('div');
+            successDiv.className = 'valid-feedback';
+            element.closest('.input-group').insertAdjacentElement('afterend', successDiv);
+        }
+        successDiv.textContent = message;
+        successDiv.style.display = 'block';
+    }
+    
+    function clearError(element) {
+        element.setCustomValidity("");
+        element.classList.remove('is-invalid');
+    }
+    
+    // Enhanced file input handling for all devices
+    function enhanceFileInputsForAllDevices() {
+        // Get all file inputs
+        const fileInputs = document.querySelectorAll('input[type="file"]');
+        
+        // Detect device type
+        const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+        const isOldAndroid = /Android\s[23]/.test(navigator.userAgent);
+        const isWindowsPhone = /Windows Phone/.test(navigator.userAgent);
+        const isMobile = isIOS || /Android/.test(navigator.userAgent) || isWindowsPhone;
+        
+        console.log('Device detection:', { isIOS, isOldAndroid, isWindowsPhone, isMobile });
+        
+        // Apply appropriate fixes based on device
+        fileInputs.forEach(input => {
+            // Add data attribute for debugging
+            input.setAttribute('data-device-type', 
+                isIOS ? 'ios' : (isOldAndroid ? 'old-android' : (isMobile ? 'mobile' : 'desktop')));
+            
+            // iOS specific fixes
+            if (isIOS) {
+                // Store original accept attribute
+                const acceptValue = input.getAttribute('accept');
+                input.setAttribute('data-original-accept', acceptValue || '');
+                
+                try {
+                    // For iOS 13+ we keep the accept attribute but add capture
+                    const iosVersion = parseInt((navigator.appVersion).match(/OS (\d+)_(\d+)_?(\d+)?/)?.[1] || '0', 10);
+                    console.log('iOS version detected:', iosVersion);
+                    
+                    if (iosVersion >= 13) {
+                        input.setAttribute('capture', 'camera');
+                    } else {
+                        // For older iOS we remove accept which can be problematic
+                        input.removeAttribute('accept');
+                    }
+                } catch (e) {
+                    console.error('Error detecting iOS version:', e);
+                    // Fallback for any parsing errors
+                    input.setAttribute('capture', 'camera');
+                }
+                
+                // Make parent container clickable for better touch area
+                const inputGroup = input.closest('.input-group');
+                if (inputGroup) {
+                    inputGroup.style.cursor = 'pointer';
+                    inputGroup.style.position = 'relative';
+                    
+                    // Add click handler to the entire input group
+                    inputGroup.addEventListener('click', function(e) {
+                        // Only trigger if the click wasn't directly on the input
+                        if (e.target !== input) {
+                            input.click();
+                        }
+                    });
+                }
+            }
+            
+            // Old Android fixes
+            if (isOldAndroid) {
+                console.log('Applying old Android fixes');
+                // Simplify file input for older Android browsers
+                input.style.padding = '12px';
+                input.style.fontSize = '16px';
+                
+                // Make the clickable area larger
+                const inputGroup = input.closest('.input-group');
+                if (inputGroup) {
+                    inputGroup.style.cursor = 'pointer';
+                    
+                    // Add click handler to the entire input group
+                    inputGroup.addEventListener('click', function(e) {
+                        if (e.target !== input) {
+                            input.click();
+                        }
+                    });
+                }
+            }
+            
+            // General mobile improvements
+            if (isMobile) {
+                // Ensure proper sizing and visibility
+                input.style.opacity = '1';
+                input.style.height = 'auto';
+                input.style.minHeight = '44px';
+                
+                // Add visual feedback for touch
+                input.addEventListener('touchstart', function() {
+                    this.style.backgroundColor = 'rgba(13, 110, 253, 0.1)';
+                });
+                
+                input.addEventListener('touchend', function() {
+                    this.style.backgroundColor = '';
+                });
+            }
+            
+            // Add fallback validation for all devices
+            input.addEventListener('change', function() {
+                // Store file info for debugging
+                if (this.files && this.files[0]) {
+                    const file = this.files[0];
+                    console.log('File selected:', {
+                        name: file.name,
+                        type: file.type,
+                        size: file.size,
+                        device: input.getAttribute('data-device-type')
+                    });
+                }
+            });
+        });
+        
+        // Add a hidden field to track device info for server-side handling
+        const form = document.getElementById('uploadForm');
+        if (form) {
+            let deviceInfoInput = document.getElementById('device_info_input');
+            if (!deviceInfoInput) {
+                deviceInfoInput = document.createElement('input');
+                deviceInfoInput.type = 'hidden';
+                deviceInfoInput.id = 'device_info_input';
+                deviceInfoInput.name = 'device_info';
+                deviceInfoInput.value = navigator.userAgent;
+                form.appendChild(deviceInfoInput);
+            }
+        }
+    }
+    
+    // Add event listeners to all file inputs
+    document.addEventListener('DOMContentLoaded', function() {
+        // Apply device-specific enhancements
+        enhanceFileInputsForAllDevices();
+        
+        const fileInputs = [
+            document.getElementById('resumeFile'),
+            document.getElementById('tenthFile'),
+            document.getElementById('twelfthFile'),
+            document.getElementById('profileFile')
+        ];
+        
+        fileInputs.forEach(input => {
+            if (input) {
+                input.addEventListener('change', function() {
+                    validateFileSize(this);
+                });
+            }
+        });
+        
+        // Form submission handling
+        const form = document.getElementById('uploadForm');
+        if (form) {
+            form.addEventListener('submit', function(e) {
+                let hasValidFiles = false;
+                let allFilesValid = true;
+                let errorMessages = [];
+                
+                // Check if at least one file is selected and all selected files are valid
+                fileInputs.forEach(input => {
+                    if (input && input.files.length > 0) {
+                        hasValidFiles = true;
+                        if (!validateFileSize(input)) {
+                            allFilesValid = false;
+                            errorMessages.push(`Issue with ${input.name}: ${input.validationMessage}`);
+                        }
+                    }
+                });
+                
+                // Check if there are no files selected
+                if (!hasValidFiles) {
+                    alert("Please select at least one document to upload");
+                    e.preventDefault();
+                    return false;
+                }
+                
+                // Check if all files are valid
+                if (!allFilesValid) {
+                    alert("Please fix the following issues:\n" + errorMessages.join("\n"));
+                    e.preventDefault();
+                    return false;
+                }
+                
+                // Show the loading status and disable the button
+                const uploadStatus = document.getElementById('uploadStatus');
+                const uploadBtn = document.getElementById('uploadBtn');
+                
+                if (uploadStatus) {
+                    uploadStatus.classList.remove('d-none');
+                }
+                
+                if (uploadBtn) {
+                    uploadBtn.disabled = true;
+                    uploadBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Uploading...';
+                }
+                
+                return true;
+            });
+        }
+    });
+    
+    // PDF viewer functions
+    function myf(pdfId) {
+        var x = document.getElementById("pdfContainer");
+        var btn = document.getElementById("viewbtn");
+        var card = btn.closest('.card');
+
+        if (x.style.display === "none") {
+            btn.innerHTML = "Close";
+            x.style.display = "block";
+            if (card) card.style.height = "600px";
+        } else {
+            btn.innerHTML = "View";
+            x.style.display = "none";
+            if (card) card.style.height = "auto";
+        }
+    }
+
+    function myf2(pdfId) {
+        var x = document.getElementById("pdfContainer2");
+        var btn = document.getElementById("viewbtn2");
+        var card = btn.closest('.card');
+
+        if (x.style.display === "none") {
+            btn.innerHTML = "Close";
+            x.style.display = "block";
+            if (card) card.style.height = "600px";
+        } else {
+            btn.innerHTML = "View";
+            x.style.display = "none";
+            if (card) card.style.height = "auto";
+        }
+    }
+
+    function myf3(pdfId) {
+        var x = document.getElementById("pdfContainer3");
+        var btn = document.getElementById("viewbtn3");
+        var card = btn.closest('.card');
+
+        if (x.style.display === "none") {
+            btn.innerHTML = "Close";
+            x.style.display = "block";
+            if (card) card.style.height = "600px";
+        } else {
+            btn.innerHTML = "View";
+            x.style.display = "none";
+            if (card) card.style.height = "auto";
+        }
+    }
+
+    function myf4(pdfId) {
+        var x = document.getElementById("pdfContainer4");
+        var btn = document.getElementById("viewbtn4");
+        var card = btn.closest('.card');
+
+        if (x.style.display === "none") {
+            btn.innerHTML = "Close";
+            x.style.display = "block";
+            if (card) card.style.height = "600px";
+        } else {
+            btn.innerHTML = "View";
+            x.style.display = "none";
+            if (card) card.style.height = "auto";
+        }
+    }
+</script>
+
+{% endblock %}

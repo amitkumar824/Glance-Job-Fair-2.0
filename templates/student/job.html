@@ -1,0 +1,201 @@
+{% extends "student/base.html" %}
+{% load static %}
+
+{% block title %}
+Job Details
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .job-header {
+        background: linear-gradient(135deg, #5d87ff 0%, #3f66cc 100%);
+        color: white;
+        padding: 2rem;
+        border-radius: 12px;
+        margin-bottom: 2rem;
+    }
+    
+    .company-logo {
+        max-width: 150px;
+        max-height: 150px;
+        object-fit: contain;
+        background: white;
+        padding: 1rem;
+        border-radius: 8px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+    
+    .job-details {
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        padding: 2rem;
+        margin-bottom: 2rem;
+    }
+    
+    .detail-item {
+        margin-bottom: 1rem;
+        padding-bottom: 1rem;
+        border-bottom: 1px solid #eee;
+    }
+    
+    .detail-item:last-child {
+        border-bottom: none;
+    }
+    
+    .detail-label {
+        font-weight: 600;
+        color: #666;
+        margin-bottom: 0.5rem;
+    }
+    
+    .detail-value {
+        color: #333;
+        font-size: 1.1rem;
+    }
+    
+    .action-buttons {
+        text-align: center;
+        margin-top: 2rem;
+    }
+    
+    .action-btn {
+        padding: 0.75rem 2rem;
+        font-size: 1.1rem;
+        border-radius: 8px;
+        transition: all 0.3s ease;
+    }
+    
+    .action-btn:hover {
+        transform: translateY(-2px);
+    }
+    
+    .eligibility-badge {
+        display: inline-block;
+        padding: 0.5rem 1rem;
+        border-radius: 20px;
+        font-weight: 600;
+        margin-bottom: 1rem;
+    }
+    
+    .eligible {
+        background-color: #d1fae5;
+        color: #065f46;
+    }
+    
+    .not-eligible {
+        background-color: #fee2e2;
+        color: #991b1b;
+    }
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="container-fluid">
+    <div class="job-header">
+        <div class="row align-items-center">
+                <div class="col-md-8">
+                <h2 class="mb-2">{{ job.title|title }}</h2>
+                <h4 class="mb-0">{{ job.company.name|title }}</h4>
+            </div>
+            <div class="col-md-4 text-center">
+                {% if job.company.logo %}
+                <img src="{{ job.company.logo.url }}" class="company-logo" alt="{{ job.company.name }} logo">
+                {% else %}
+                <img src="{% static 'img/user.jpg' %}" class="company-logo" alt="{{ job.company.name }} logo">
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <div class="job-details">
+        {% if is_eligible %}
+        <div class="eligibility-badge eligible">
+            <i class="ti ti-check me-2"></i>You are eligible for this position
+        </div>
+            {% else %}
+        <div class="eligibility-badge not-eligible">
+            <i class="ti ti-x me-2"></i>You are not eligible for this position
+        </div>
+            {% endif %}
+    
+        <div class="row">
+            <div class="col-md-6">
+                <div class="detail-item">
+                    <div class="detail-label">Job Description</div>
+                    <div class="detail-value">{{ job.description|linebreaks }}</div>
+        </div>
+
+                <div class="detail-item">
+                    <div class="detail-label">Role</div>
+                    <div class="detail-value">{{ job.role|title }}</div>
+                        </div>
+                
+                <div class="detail-item">
+                    <div class="detail-label">Job Type</div>
+                    <div class="detail-value">{{ job.job_type|title }}</div>
+                </div>
+
+                <div class="detail-item">
+                    <div class="detail-label">Salary Range</div>
+                    <div class="detail-value">{{ job.salary_range }}</div>
+                </div>
+            </div>
+
+            <div class="col-md-6">
+                <div class="detail-item">
+                    <div class="detail-label">Interview Date</div>
+                    <div class="detail-value text-primary">{{ job.interview_date }}</div>
+            </div>
+                
+                <div class="detail-item">
+                    <div class="detail-label">Interview Mode</div>
+                    <div class="detail-value">{{ job.interview_mode|title }}</div>
+            </div>
+                
+                <div class="detail-item">
+                    <div class="detail-label">Location Flexibility</div>
+                    <div class="detail-value">{{ job.location_flexibility|title }}</div>
+                    </div>
+                
+                <div class="detail-item">
+                    <div class="detail-label">Training Period</div>
+                    <div class="detail-value">{{ job.training_period }}</div>
+                    </div>
+                
+                <div class="detail-item">
+                    <div class="detail-label">Bond Duration</div>
+                    <div class="detail-value">{{ job.bond_timing }}</div>
+                    </div>
+                
+                <div class="detail-item">
+                    <div class="detail-label">Application Deadline</div>
+                    <div class="detail-value text-danger">{{ job.deadline }}</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+    <div class="action-buttons">
+        {% if has_applied %}
+        <a href="{% url 'withdraw_application' job.slug %}" class="btn btn-danger action-btn">
+            <i class="ti ti-trash me-2"></i>Withdraw Application
+        </a>
+        {% else %}
+            {% if student.resume and student.tenth_marksheet and student.twelfth_marksheet and student.college_profile_print and student.no_of_companies_left != 0 and is_eligible %}
+            <a href="{% url 'confirm_application' job.slug %}" class="btn btn-success action-btn">
+                <i class="ti ti-check me-2"></i>Apply Now
+            </a>
+            {% elif student.no_of_companies_left == 0 %}
+            <a href="#" class="btn btn-dark action-btn">
+                <i class="ti ti-x me-2"></i>Max. Applications Reached!
+            </a>
+            {% else %}
+            <a href="{% url 'upload_resume' %}" class="btn btn-danger action-btn">
+                <i class="ti ti-upload me-2"></i>Upload Documents First
+            </a>
+            {% endif %}
+        {% endif %}
+    </div>
+</div>
+    {% endblock %}

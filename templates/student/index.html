@@ -1,680 +1,641 @@
 {% extends 'student/base.html' %}
 {% load static %}
 
-{% block title %}Dashboard - Glance 2.0{% endblock %}
+{% block title %}
+Student -> Home
+{% endblock %}
 
-{% block content %}
-<div class="dashboard-summary">
-    <!-- Welcome Section -->
-    <div class="welcome-section mb-4">
-        <div class="card">
-            <div class="card-body">
-                <div class="row align-items-center">
-                    <div class="col-md-8">
-                        <h4 class="welcome-title">Welcome back, {{ user.get_full_name|default:user.username }}! <span class="wave-emoji">👋</span></h4>
-                        <p class="text-muted">
-                            {% if user.is_placed %}
-                            Congratulations on your placement! Your next steps are available in your profile.
-                            {% else %}
-                            Complete your profile to improve your chances of landing your dream job.
-                            {% endif %}
-                        </p>
-                        <div class="mt-3 action-buttons">
-                            <a href="{% url 'myProfile' %}" class="btn btn-primary">
-                                <i class="fas fa-user-edit"></i> Update Profile
-                            </a>
-                            {% if not user.resume %}
-                            <a href="{% url 'myProfile' %}" class="btn btn-outline-primary">
-                                <i class="fas fa-file-upload"></i> Upload Resume
-                            </a>
-                            {% endif %}
+{% block extra_css %}
+
+<style>
+    /* Modern dashboard styles */
+    .dashboard-card {
+        border-radius: 12px;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.15);
+        transition: all 0.3s ease;
+        border: none;
+        overflow: hidden;
+        cursor: pointer;
+    }
+    
+    .dashboard-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+    }
+    
+    .stat-card {
+        position: relative;
+        z-index: 1;
+    }
+    
+    .stat-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        left: 0;
+        z-index: -1;
+        border-radius: 12px;
+        opacity: 0.15;
+        background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+    }
+    
+    .card-header-bg-primary {
+        background: linear-gradient(135deg, #5d87ff 0%, #3f66cc 100%);
+        color: white;
+        padding: 15px 20px;
+        border-radius: 12px 12px 0 0;
+    }
+    
+    .card-header-bg-success {
+        background: linear-gradient(135deg, #2ec779 0%, #1a9c5a 100%);
+        color: white;
+        padding: 15px 20px;
+        border-radius: 12px 12px 0 0;
+    }
+    
+    .card-header-bg-danger {
+        background: linear-gradient(135deg, #e53935 0%, #c62828 100%);
+        color: white;
+        padding: 15px 20px;
+        border-radius: 12px 12px 0 0;
+    }
+    
+    /* Circular progress indicators */
+    @property --progress-value {
+        syntax: "<integer>";
+        inherits: false;
+        initial-value: 0;
+    }
+
+    @keyframes html-progress {
+        to {
+            --progress-value: {{eligible_companies_count}};
+        }
+    }
+
+    @keyframes css-progress {
+        to {
+            --progress-value: {{no_of_companies_applied_in_percentage}};
+        }
+    }
+
+    @keyframes js-progress {
+        to {
+            --progress-value: {{student.get_profile_score}};
+        }
+    }
+
+    .progress-bar {
+        width: 100px;
+        height: 100px;
+        border-radius: 50%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-weight: bold;
+        box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        position: relative;
+    }
+
+    .progress-bar::before {
+        content: attr(data-progress) '%';
+        position: absolute;
+        font-size: 1.2rem;
+        font-weight: 600;
+        color: #333;
+    }
+
+    .html {
+        background: conic-gradient(#5d87ff calc(var(--progress) * 1%), #ecf2ff 0);
+    }
+
+    .css {
+        background: conic-gradient(#2ec779 calc(var(--progress) * 1%), #e6f7ef 0);
+    }
+
+    .js {
+        background: conic-gradient(#5d87ff calc(var(--progress) * 1%), #ecf2ff 0);
+    }
+
+    progress {
+        visibility: hidden;
+        width: 0;
+        height: 0;
+    }
+    
+    /* Timeline styling */
+    .timeline-item {
+        padding: 14px 0;
+        border-left: none !important;
+    }
+    
+    .timeline-badge {
+        width: 12px;
+        height: 12px;
+    }
+    
+    .timeline-time {
+        font-weight: 600;
+        color: #5d87ff;
+    }
+    
+    /* Table styling */
+    .table-container {
+        border-radius: 8px;
+        overflow: hidden;
+    }
+    
+    .custom-table th {
+        background-color: rgba(93, 135, 255, 0.1);
+        font-weight: 600;
+        text-transform: uppercase;
+        font-size: 0.75rem;
+        color: #5d87ff;
+    }
+    
+    .custom-table td {
+        vertical-align: middle;
+    }
+    
+    .company-logo {
+        width: 90px;
+        height: 90px;
+        object-fit: contain;
+        border-radius: 8px;
+        padding: 5px;
+        background-color: white;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        transition: transform 0.3s ease;
+    }
+    
+    .company-logo:hover {
+        transform: scale(1.05);
+    }
+    
+    .action-btn {
+        border-radius: 20px;
+        padding: 6px 16px;
+        font-weight: 500;
+        transition: all 0.3s ease;
+    }
+    
+    .action-btn:hover {
+        transform: translateY(-2px);
+    }
+    
+    .section-title {
+        position: relative;
+        margin-bottom: 25px;
+        padding-bottom: 10px;
+    }
+    
+    .section-title::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 50px;
+        height: 3px;
+        background-color: #5d87ff;
+    }
+    
+    /* Status indicators */
+    .status-indicator {
+        display: inline-block;
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        margin-right: 6px;
+    }
+    
+    .status-applied {
+        background-color: #5d87ff;
+    }
+    
+    .status-pending {
+        background-color: #ffa755;
+    }
+    
+    .status-accepted {
+        background-color: #2ec779;
+    }
+    
+    .status-rejected {
+        background-color: #e53935;
+    }
+
+    /* Dashboard banner */
+    .dashboard-banner {
+        width: 100%;
+        height: auto;
+        border-radius: 12px;
+        margin-bottom: 25px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+    }
+    
+    .dashboard-banner img {
+        width: 100%;
+        max-height: 200px;
+        object-fit: cover;
+    }
+</style>
+
+
+{% endblock %}
+
+{% block body %}
+
+<div class="container-fluid">
+    <!-- Welcome Banner with Dashboard Image -->
+    <div class="card dashboard-banner">
+        <img src="{% static 'img/dashboard-banner.svg' %}" alt="Welcome to GLANCE 2.0 Dashboard">
+    </div>
+
+    {% for message in messages %}
+    <div class="alert {{ message.tags }} alert-dismissible fade show" role="alert">
+        <strong>{{ message.tag }}</strong> {{ message }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    {% endfor %}
+
+    <!--  Row 1 - Key Metrics -->
+    <div class="row mb-4">
+        <div class="col-lg-4 mb-4">
+            <div class="card dashboard-card stat-card">
+                <div class="card-header-bg-primary">
+                    <h5 class="mb-0"><i class="ti ti-building me-2"></i>Eligible Companies</h5>
+                </div>
+                <div class="card-body p-4">
+                    <div class="row align-items-center">
+                        <div class="col-8">
+                            <h3 class="fw-bold mb-3">{{ all_eligible_jobs.count }}</h3>
+                            <div class="d-flex align-items-center">
+                                <span class="status-indicator status-applied"></span>
+                                <span class="fs-5">Match Ratio</span>
+                            </div>
                         </div>
-                    </div>
-                    <div class="col-md-4 text-center">
-                        <div class="progress-circle" style="--percentage: {{ profile_completion|default:30 }};">
-                            <div class="progress-circle-inner">
-                                <strong>{{ profile_completion|default:30 }}%</strong>
-                                <span>Profile Completed</span>
+                        <div class="col-4">
+                            <div class="d-flex justify-content-center">
+                                <div class="progress-bar html" style="--progress: {{eligible_companies_count}}" data-progress="{{eligible_companies_count}}">
+                                    <progress id="html" min="0" max="100" value="{{eligible_companies_count}}"></progress>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
-
-    <!-- Statistics Row -->
-    <div class="row mb-4">
-        <!-- Jobs Stats -->
-        <div class="col-md-3">
-            <div class="card stat-card">
-                <div class="card-body">
-                    <div class="stat-icon bg-primary-light">
-                        <i class="fas fa-briefcase"></i>
-                    </div>
-                    <h5 class="stat-title">Open Jobs</h5>
-                    <h2 class="stat-value">{{ job_count }}</h2>
-                    <div class="stat-link">
-                        <a href="{% url 'all_companies' %}">Browse Jobs <i class="fas fa-arrow-right"></i></a>
-                    </div>
+        
+        <div class="col-lg-4 mb-4">
+            <div class="card dashboard-card stat-card">
+                <div class="card-header-bg-success">
+                    <h5 class="mb-0"><i class="ti ti-checkbox me-2"></i>Applications</h5>
                 </div>
-            </div>
-        </div>
-
-        <!-- Applications Stats -->
-        <div class="col-md-3">
-            <div class="card stat-card">
-                <div class="card-body">
-                    <div class="stat-icon bg-success-light">
-                        <i class="fas fa-file-alt"></i>
-                    </div>
-                    <h5 class="stat-title">Applications</h5>
-                    <h2 class="stat-value">{{ application_count }}</h2>
-                    <div class="stat-link">
-                        <a href="{% url 'my_applications' %}">View Applications <i class="fas fa-arrow-right"></i></a>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Profile Views Stats -->
-        <div class="col-md-3">
-            <div class="card stat-card">
-                <div class="card-body">
-                    <div class="stat-icon bg-warning-light">
-                        <i class="fas fa-eye"></i>
-                    </div>
-                    <h5 class="stat-title">Profile Views</h5>
-                    <h2 class="stat-value">24</h2>
-                    <div class="stat-link">
-                        <a href="{% url 'myProfile' %}">Improve Profile <i class="fas fa-arrow-right"></i></a>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Shortlists Stats -->
-        <div class="col-md-3">
-            <div class="card stat-card">
-                <div class="card-body">
-                    <div class="stat-icon bg-info-light">
-                        <i class="fas fa-check-circle"></i>
-                    </div>
-                    <h5 class="stat-title">Shortlisted</h5>
-                    <h2 class="stat-value">{{ user.is_shortlisted|yesno:"1,0" }}</h2>
-                    <div class="stat-link">
-                        <a href="{% url 'my_applications' %}">Check Status <i class="fas fa-arrow-right"></i></a>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Upcoming Events and Notifications Row -->
-    <div class="row mb-4">
-        <div class="col-md-8">
-            <div class="card">
-                <div class="card-header d-flex justify-content-between align-items-center">
-                    <h5 class="card-title mb-0">Upcoming Events</h5>
-                    <span class="badge rounded-pill bg-primary">{{ upcoming_events|length }} Events</span>
-                </div>
-                <div class="card-body">
-                    {% if upcoming_events %}
-                        <div class="table-responsive">
-                            <table class="table table-hover">
-                                <thead>
-                                    <tr>
-                                        <th>Event</th>
-                                        <th>Date</th>
-                                        <th>Location</th>
-                                        <th>Action</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {% for event in upcoming_events %}
-                                    <tr>
-                                        <td>
-                                            <div class="d-flex align-items-center">
-                                                <div class="event-icon">
-                                                    <i class="fas fa-calendar-alt"></i>
-                                                </div>
-                                                <span>{{ event.name }}</span>
-                                            </div>
-                                        </td>
-                                        <td>{{ event.date }}</td>
-                                        <td>{{ event.location }}</td>
-                                        <td>
-                                            <a href="#" class="btn btn-sm btn-outline-primary">Register</a>
-                                        </td>
-                                    </tr>
-                                    {% endfor %}
-                                </tbody>
-                            </table>
-                        </div>
-                    {% else %}
-                        <div class="empty-state">
-                            <div class="empty-state-icon">
-                                <i class="fas fa-calendar-times"></i>
+                <div class="card-body p-4">
+                    <div class="row align-items-center">
+                        <div class="col-8">
+                            <h3 class="fw-bold mb-3">{{ no_of_companies_applied }}</h3>
+                            <div class="d-flex align-items-center mb-2">
+                                <p class="fs-5 mb-0">Left: {{ student.no_of_companies_left }} more</p>
                             </div>
-                            <p class="empty-state-text">No upcoming events at the moment.</p>
+                            {% if student.bypass_eligibility %}
+                            <div class="d-flex align-items-center mb-2">
+                                <span class="badge bg-success">Academic Bypass Enabled</span>
+                            </div>
+                            {% endif %}
+                            <div class="d-flex align-items-center">
+                                <span class="status-indicator status-accepted"></span>
+                                <span class="fs-5">This Week</span>
+                            </div>
                         </div>
+                        <div class="col-4">
+                            <div class="d-flex justify-content-center">
+                                <div class="progress-bar css" style="--progress: {{no_of_companies_applied_in_percentage}}" data-progress="{{no_of_companies_applied_in_percentage}}">
+                                    <progress id="css" min="0" max="100" value="{{no_of_companies_applied_in_percentage}}"></progress>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-4 mb-4">
+            <div class="card dashboard-card stat-card">
+                <div class="card-header-bg-primary">
+                    <h5 class="mb-0"><i class="ti ti-user me-2"></i>Profile Score</h5>
+                </div>
+                <div class="card-body p-4">
+                    {% if not student.resume %}
+                    <div class="row align-items-center">
+                        <div class="col-12 mb-3">
+                            <div class="d-flex align-items-center">
+                                <span class="status-indicator status-rejected"></span>
+                                <span class="fs-5 fw-semibold">Resume Not Available</span>
+                            </div>
+                        </div>
+                        <div class="col-12">
+                            <a href="{% url 'upload_resume' %}" class="btn btn-outline-danger w-100">
+                                <i class="ti ti-upload me-1"></i> Upload Resume Now
+                            </a>
+                        </div>
+                    </div>
+                    {% elif not student.tenth_marksheet %}
+                    <div class="row align-items-center">
+                        <div class="col-12 mb-3">
+                            <div class="d-flex align-items-center">
+                                <span class="status-indicator status-rejected"></span>
+                                <span class="fs-5 fw-semibold">Highschool Marksheet Missing</span>
+                            </div>
+                        </div>
+                        <div class="col-12">
+                            <a href="{% url 'upload_resume' %}" class="btn btn-outline-danger w-100">
+                                <i class="ti ti-upload me-1"></i> Upload Marksheet Now
+                            </a>
+                        </div>
+                    </div>
+                    {% elif not student.twelfth_marksheet %}
+                    <div class="row align-items-center">
+                        <div class="col-12 mb-3">
+                            <div class="d-flex align-items-center">
+                                <span class="status-indicator status-rejected"></span>
+                                <span class="fs-5 fw-semibold">Intermediate Marksheet Missing</span>
+                            </div>
+                        </div>
+                        <div class="col-12">
+                            <a href="{% url 'upload_resume' %}" class="btn btn-outline-danger w-100">
+                                <i class="ti ti-upload me-1"></i> Upload Marksheet Now
+                            </a>
+                        </div>
+                    </div>
+                    {% elif not student.college_profile_print %}
+                    <div class="row align-items-center">
+                        <div class="col-12 mb-3">
+                            <div class="d-flex align-items-center">
+                                <span class="status-indicator status-rejected"></span>
+                                <span class="fs-5 fw-semibold">College Profile Print Missing</span>
+                            </div>
+                        </div>
+                        <div class="col-12">
+                            <a href="{% url 'upload_resume' %}" class="btn btn-outline-danger w-100">
+                                <i class="ti ti-upload me-1"></i> Upload Profile Print Now
+                            </a>
+                        </div>
+                    </div>
+                    {% elif student.resume %}
+                    <div class="row align-items-center">
+                        <div class="col-8">
+                            <h3 class="fw-bold mb-3">{{ student.get_profile_score }}</h3>
+                            <div class="d-flex align-items-center mb-3">
+                                <span class="me-1 rounded-circle bg-light-success round-20 d-flex align-items-center justify-content-center">
+                                    <i class="ti ti-arrow-up-right text-success"></i>
+                                </span>
+                                <p class="me-1 fs-5 mb-0">Top</p>
+                                
+                                {% if student.get_profile_score == 100 %}
+                                <p class="fs-5 mb-0 fw-semibold">1%</p>
+                                {% elif student.get_profile_score >= 90 %}
+                                <p class="fs-5 mb-0 fw-semibold">30%</p>
+                                {% elif student.get_profile_score >= 60 %}
+                                <p class="fs-5 mb-0 fw-semibold">50%</p>
+                                {% elif student.get_profile_score >= 30 %}
+                                <p class="fs-5 mb-0 fw-semibold">90%</p>
+                                {% else %}
+                                <p class="fs-5 mb-0 fw-semibold">Not Available</p>
+                                {% endif %}
+                            </div>
+                            <div class="d-flex align-items-center">
+                                <div class="me-3">
+                                    <span class="status-indicator status-accepted"></span>
+                                    <span class="fs-5">Completed</span>
+                                </div>
+                                <div>
+                                    <span class="status-indicator status-pending" style="opacity: 0.5;"></span>
+                                    <span class="fs-5">Left</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div class="d-flex justify-content-center">
+                                <div class="progress-bar js" style="--progress: {{student.get_profile_score}}" data-progress="{{student.get_profile_score}}">
+                                    <progress id="js" min="0" max="100" value="{{student.get_profile_score}}"></progress>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                     {% endif %}
                 </div>
             </div>
         </div>
+    </div>
 
-        <!-- Notifications -->
-        <div class="col-md-4">
-            <div class="card">
-                <div class="card-header d-flex justify-content-between align-items-center">
-                    <h5 class="card-title mb-0">Recent Notifications</h5>
-                    <span class="badge rounded-pill bg-danger">{{ notifications|length }}</span>
-                </div>
-                <div class="card-body">
-                    <div class="notifications-list">
-                        {% if notifications %}
-                            {% for notification in notifications|slice:":3" %}
-                                <div class="notification-item">
-                                    <div class="notification-icon">
-                                        <i class="fas fa-bell"></i>
-                                    </div>
-                                    <div class="notification-content">
-                                        <h6>{{ notification.title }}</h6>
-                                        <p>{{ notification.message }}</p>
-                                        <span class="time"><i class="far fa-clock me-1"></i>{{ notification.time }}</span>
-                                    </div>
+    <!-- Row 2 - Schedule and Top Matches -->
+    <div class="row">
+        <!-- Companies Schedule -->
+        <div class="col-lg-4 d-flex align-items-stretch mb-4">
+            <div class="card dashboard-card w-100">
+                <div class="card-body p-4">
+                    <h5 class="section-title fw-bold"><i class="ti ti-calendar-event me-2"></i>Companies Schedule</h5>
+                    
+                    <ul class="timeline-widget mb-0 position-relative">
+                        {% if applications %}
+                            {% for application in applications %}
+                            <li class="timeline-item d-flex position-relative overflow-hidden">
+                                <div class="timeline-time flex-shrink-0 text-end fw-semibold">
+                                    {{application.job.company.name|title|truncatechars:12 }}
                                 </div>
-                            {% endfor %}
-                            {% if notifications|length > 3 %}
-                                <div class="text-center mt-3">
-                                    <a href="{% url 'notifications' %}" class="btn btn-sm btn-outline-danger">
-                                        View All Notifications
+                                <div class="timeline-badge-wrap d-flex flex-column align-items-center">
+                                    <span class="timeline-badge border-2 border-success flex-shrink-0 my-8"></span>
+                                    <span class="timeline-badge-border d-block flex-shrink-0"></span>
+                                </div>
+                                <div class="timeline-desc fs-5 mt-n1">
+                                    <span class="fw-semibold">{{ application.job.interview_date }}</span>
+                                    <br>
+                                    <span class="badge bg-{{ application.get_color_based_on_status }} my-1">
+                                        {{ application.status|title }}
+                                    </span>
+                                    <a href="{% url 'applied_job' application.job.slug %}" class="text-primary d-block fw-normal">
+                                        <i class="ti ti-external-link me-1"></i>Details
                                     </a>
                                 </div>
-                            {% endif %}
+                            </li>
+                            {% endfor %}
                         {% else %}
-                            <div class="empty-state">
-                                <div class="empty-state-icon">
-                                    <i class="fas fa-bell-slash"></i>
+                            <li class="timeline-item d-flex position-relative overflow-hidden">
+                                <div class="timeline-time flex-shrink-0 text-end fw-semibold">No Data</div>
+                                <div class="timeline-badge-wrap d-flex flex-column align-items-center">
+                                    <span class="timeline-badge border-2 border-primary flex-shrink-0 my-8"></span>
+                                    <span class="timeline-badge-border d-block flex-shrink-0"></span>
                                 </div>
-                                <p class="empty-state-text">No new notifications.</p>
-                            </div>
+                                <div class="timeline-desc fs-5 mt-n1 fw-semibold">Please Apply First</div>
+                            </li>
+                            <li class="timeline-item d-flex position-relative overflow-hidden">
+                                <div class="timeline-time flex-shrink-0 text-end fw-semibold">No Data</div>
+                                <div class="timeline-badge-wrap d-flex flex-column align-items-center">
+                                    <span class="timeline-badge border-2 border-success flex-shrink-0 my-8"></span>
+                                    <span class="timeline-badge-border d-block flex-shrink-0"></span>
+                                </div>
+                                <div class="timeline-desc fs-5 mt-n1 fw-semibold">Please Apply First</div>
+                            </li>
+                            <li class="timeline-item d-flex position-relative overflow-hidden">
+                                <div class="timeline-time flex-shrink-0 text-end fw-semibold">No Data</div>
+                                <div class="timeline-badge-wrap d-flex flex-column align-items-center">
+                                    <span class="timeline-badge border-2 border-danger flex-shrink-0 my-8"></span>
+                                    <span class="timeline-badge-border d-block flex-shrink-0"></span>
+                                </div>
+                                <div class="timeline-desc fs-5 mt-n1 fw-semibold">Please Apply First</div>
+                            </li>
                         {% endif %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Best Matches For You -->
+        <div class="col-lg-8 d-flex align-items-stretch mb-4">
+            <div class="card dashboard-card w-100">
+                <div class="card-body p-4">
+                    <h5 class="section-title fw-bold"><i class="ti ti-flame me-2"></i>Best Matches For You</h5>
+                    
+                    <div class="table-responsive table-container">
+                        <table class="table custom-table mb-0 align-middle">
+                            <thead>
+                                <tr>
+                                    <th>Company</th>
+                                    <th>Job Title</th>
+                                    <th>Role</th>
+                                    <th>Salary</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for job in eligible_jobs %}
+                                <tr>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <h6 class="mb-0 fw-semibold">{{ job.company.name|title|truncatechars:12 }}</h6>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <p class="mb-0 fw-medium">{{ job.title|title|truncatechars:18 }}</p>
+                                    </td>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <span class="badge bg-light-primary text-primary">{{ job.role }}</span>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <h6 class="fw-semibold mb-0">{{ job.salary_range }}</h6>
+                                    </td>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            {% if student.resume and student.tenth_marksheet and student.twelfth_marksheet and student.college_profile_print %}
+                                            <a href="{% url 'student_job_details' job.slug %}" class="btn btn-primary action-btn">
+                                                <i class="ti ti-eye me-1"></i>View
+                                            </a>
+                                            {% else %}
+                                            <a href="{% url 'upload_resume' %}" class="btn btn-danger action-btn">
+                                                <i class="ti ti-upload me-1"></i>Upload Docs
+                                            </a>
+                                            {% endif %}
+                                            {% if job.deadline < today_date %}
+                                            <span class="badge bg-warning mt-1 d-block">Expired</span>
+                                            {% endif %}
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                                
+                                {% if not eligible_jobs %}
+                                <tr>
+                                    <td colspan="5" class="text-center py-4">
+                                        <i class="ti ti-mood-sad fs-1 text-muted mb-2"></i>
+                                        <p class="mb-0">No eligible jobs found. Complete your profile to see matches.</p>
+                                    </td>
+                                </tr>
+                                {% endif %}
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Recent Jobs -->
-    <div class="row">
+    <!-- All Eligible Companies -->
+    <div class="row mb-3">
         <div class="col-12">
-            <div class="card">
-                <div class="card-header d-flex justify-content-between align-items-center">
-                    <h5 class="card-title mb-0">Recent Job Openings</h5>
-                    <a href="{% url 'all_companies' %}" class="btn btn-sm btn-outline-primary">View All</a>
-                </div>
-                <div class="card-body">
-                    <div class="row">
-                        <!-- Job cards -->
-                        <div class="col-md-4 mb-3">
-                            <div class="job-card">
-                                <div class="company-logo">
-                                    <img src="{% static 'img/dashboard/companies/microsoft.png' %}" alt="Microsoft">
-                                </div>
-                                <div class="job-details">
-                                    <div class="job-badge">New</div>
-                                    <h5>Software Developer</h5>
-                                    <p class="company-name"><i class="fas fa-building me-1"></i> Microsoft</p>
-                                    <div class="job-info">
-                                        <span><i class="fas fa-map-marker-alt"></i> Hyderabad</span>
-                                        <span><i class="fas fa-rupee-sign"></i> 12-18 LPA</span>
-                                    </div>
-                                    <div class="job-tags">
-                                        <span class="badge bg-light text-dark">Python</span>
-                                        <span class="badge bg-light text-dark">React</span>
-                                        <span class="badge bg-light text-dark">Azure</span>
-                                    </div>
-                                    <a href="#" class="btn btn-sm btn-primary mt-2">Apply Now</a>
-                                </div>
-                            </div>
-                        </div>
+            <h5 class="section-title fw-bold"><i class="ti ti-building-skyscraper me-2"></i>All Eligible Companies</h5>
+        </div>
+    </div>
 
-                        <div class="col-md-4 mb-3">
-                            <div class="job-card">
-                                <div class="company-logo">
-                                    <img src="{% static 'img/dashboard/companies/google.png' %}" alt="Google">
-                                </div>
-                                <div class="job-details">
-                                    <div class="job-badge">Featured</div>
-                                    <h5>Data Scientist</h5>
-                                    <p class="company-name"><i class="fas fa-building me-1"></i> Google</p>
-                                    <div class="job-info">
-                                        <span><i class="fas fa-map-marker-alt"></i> Bangalore</span>
-                                        <span><i class="fas fa-rupee-sign"></i> 15-22 LPA</span>
-                                    </div>
-                                    <div class="job-tags">
-                                        <span class="badge bg-light text-dark">ML</span>
-                                        <span class="badge bg-light text-dark">TensorFlow</span>
-                                        <span class="badge bg-light text-dark">SQL</span>
-                                    </div>
-                                    <a href="#" class="btn btn-sm btn-primary mt-2">Apply Now</a>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="col-md-4 mb-3">
-                            <div class="job-card">
-                                <div class="company-logo">
-                                    <img src="{% static 'img/dashboard/companies/amazon.png' %}" alt="Amazon">
-                                </div>
-                                <div class="job-details">
-                                    <div class="job-badge">Hot</div>
-                                    <h5>Full Stack Developer</h5>
-                                    <p class="company-name"><i class="fas fa-building me-1"></i> Amazon</p>
-                                    <div class="job-info">
-                                        <span><i class="fas fa-map-marker-alt"></i> Pune</span>
-                                        <span><i class="fas fa-rupee-sign"></i> 14-20 LPA</span>
-                                    </div>
-                                    <div class="job-tags">
-                                        <span class="badge bg-light text-dark">Java</span>
-                                        <span class="badge bg-light text-dark">Spring</span>
-                                        <span class="badge bg-light text-dark">AWS</span>
-                                    </div>
-                                    <a href="#" class="btn btn-sm btn-primary mt-2">Apply Now</a>
-                                </div>
-                            </div>
+    <div class="row">
+        {% for job in all_eligible_jobs %}
+        <div class="col-md-3 mb-4">
+            <a href="{% url 'student_job_details' job.slug %}" class="text-decoration-none">
+            <div class="card dashboard-card h-100">
+                <div class="card-body p-3 text-center">
+                        <img src="{% if job.company.logo %}{{ job.company.logo.url }}{% else %}{% static 'img/user.jpg' %}{% endif %}" class="company-logo mb-3" alt="{{ job.company.name }}">
+                    <h5 class="card-title fw-semibold mb-1">{{ job.company.name|title|truncatechars:15 }}</h5>
+                    <p class="text-muted mb-2">{{ job.title|truncatechars:20 }}</p>
+                    <div class="badge bg-light-primary text-primary mb-3">₹{{ job.salary_range }}</div>
+                    <p class="card-text small mb-3">{{ job.description|truncatechars:60 }}...</p>
+                        <div class="btn btn-primary action-btn w-100">
+                        <i class="ti ti-info-circle me-1"></i>Details
                         </div>
                     </div>
                 </div>
+            </a>
+        </div>
+        {% endfor %}
+        
+        {% if not all_eligible_jobs %}
+        <div class="col-12">
+            <div class="card dashboard-card">
+                <div class="card-body text-center py-5 bg-danger-subtle">
+                    <i class="ti ti-mood-sad fs-1 text-danger mb-3"></i>
+                    <h5 class="text-danger">No Eligible Companies Found</h5>
+                    <p class="mb-3 text-danger">Complete your profile to see companies that match your qualifications.</p>
+                    <a href="{% url 'my_profile' %}" class="btn btn-danger action-btn">
+                        <i class="ti ti-user-circle me-1"></i>Update Profile
+                    </a>
+                </div>
             </div>
         </div>
+        {% endif %}
     </div>
 </div>
+
+{% if not has_complete_profile %}
+<div class="alert alert-danger">
+  <h5 class="mb-2"><i class="ti ti-alert-triangle me-2"></i>Complete Your Profile</h5>
+  <p class="mb-0">Please complete your profile to see eligible jobs. Missing information:</p>
+  <ul class="mt-2 mb-0">
+    {% for item in missing_items %}
+    <li>{{ item }}</li>
+    {% endfor %}
+  </ul>
+  <div class="mt-2">
+    {% if 'Profile Picture' in missing_items or 'Gender' in missing_items or '10th percentage' in missing_items or '12th percentage' in missing_items or 'CGPA' in missing_items or 'Course' in missing_items or 'Year' in missing_items %}
+    <a href="{% url 'edit_profile' %}" class="btn btn-danger btn-sm">Complete Profile</a>
+    {% elif 'Resume' in missing_items or '10th Marksheet' in missing_items or '12th Marksheet' in missing_items or 'College Profile Print' in missing_items %}
+    <a href="{% url 'upload_resume' %}" class="btn btn-danger btn-sm">Upload Documents</a>
+    {% endif %}
+  </div>
+</div>
+{% endif %}
+
 {% endblock %}
 
-{% block extra_css %}
-<style>
-    /* Dashboard Summary Styles */
-    .dashboard-summary {
-        padding: 1.5rem 0;
-    }
-    
-    /* Welcome Section */
-    .welcome-title {
-        font-size: 1.5rem;
-        font-weight: 600;
-        margin-bottom: 0.5rem;
-        display: flex;
-        align-items: center;
-    }
-    
-    .wave-emoji {
-        margin-left: 0.5rem;
-        font-size: 1.5rem;
-        animation: wave 1.5s infinite;
-        display: inline-block;
-        transform-origin: 70% 70%;
-    }
-    
-    @keyframes wave {
-        0% { transform: rotate(0deg); }
-        10% { transform: rotate(14deg); }
-        20% { transform: rotate(-8deg); }
-        30% { transform: rotate(14deg); }
-        40% { transform: rotate(-4deg); }
-        50% { transform: rotate(10deg); }
-        60% { transform: rotate(0deg); }
-        100% { transform: rotate(0deg); }
-    }
-    
-    .action-buttons {
-        display: flex;
-        gap: 0.75rem;
-    }
-    
-    /* Stats Card Styles */
-    .stat-card {
-        position: relative;
-        overflow: hidden;
-        transition: all 0.3s ease;
-    }
-    
-    .stat-card:hover {
-        transform: translateY(-5px);
-    }
-    
-    .stat-icon {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        width: 50px;
-        height: 50px;
-        border-radius: 12px;
-        margin-bottom: 1rem;
-        font-size: 1.25rem;
-    }
-    
-    .bg-primary-light {
-        background-color: rgba(67, 97, 238, 0.1);
-        color: var(--primary-color);
-    }
-    
-    .bg-success-light {
-        background-color: rgba(16, 185, 129, 0.1);
-        color: var(--success-color);
-    }
-    
-    .bg-warning-light {
-        background-color: rgba(245, 158, 11, 0.1);
-        color: var(--warning-color);
-    }
-    
-    .bg-info-light {
-        background-color: rgba(6, 182, 212, 0.1);
-        color: #06b6d4;
-    }
-    
-    .stat-title {
-        font-size: 0.875rem;
-        color: var(--secondary-color);
-        margin-bottom: 0.5rem;
-        font-weight: 500;
-    }
-    
-    .stat-value {
-        font-size: 2rem;
-        font-weight: 700;
-        margin-bottom: 0.5rem;
-        background: linear-gradient(90deg, var(--primary-color), #6366f1);
-        -webkit-background-clip: text;
-        background-clip: text;
-        -webkit-text-fill-color: transparent;
-        color: transparent;
-    }
-    
-    .stat-link a {
-        color: var(--primary-color);
-        text-decoration: none;
-        font-size: 0.875rem;
-        display: flex;
-        align-items: center;
-        gap: 0.25rem;
-        transition: all 0.2s ease;
-    }
-    
-    .stat-link a:hover {
-        gap: 0.5rem;
-    }
-    
-    /* Card Header Styles */
-    .card-header {
-        background-color: white;
-        border-bottom: 1px solid rgba(226, 232, 240, 0.6);
-        padding: 1rem 1.25rem;
-    }
-    
-    .card-title {
-        font-weight: 600;
-        color: #1e293b;
-    }
-    
-    /* Table Styles */
-    .table {
-        margin-bottom: 0;
-    }
-    
-    .table thead th {
-        font-weight: 600;
-        color: var(--secondary-color);
-        border-bottom: 1px solid #e2e8f0;
-        padding: 1rem;
-        font-size: 0.875rem;
-    }
-    
-    .table tbody td {
-        padding: 1rem;
-        vertical-align: middle;
-    }
-    
-    .event-icon {
-        width: 32px;
-        height: 32px;
-        background-color: rgba(67, 97, 238, 0.1);
-        color: var(--primary-color);
-        border-radius: 8px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        margin-right: 0.75rem;
-    }
-    
-    /* Notifications List */
-    .notifications-list {
-        display: flex;
-        flex-direction: column;
-        gap: 1rem;
-    }
-    
-    .notification-item {
-        display: flex;
-        gap: 1rem;
-        padding-bottom: 1rem;
-        border-bottom: 1px solid rgba(226, 232, 240, 0.6);
-    }
-    
-    .notification-item:last-child {
-        border-bottom: none;
-    }
-    
-    .notification-icon {
-        width: 40px;
-        height: 40px;
-        background-color: rgba(67, 97, 238, 0.1);
-        color: var(--primary-color);
-        border-radius: 10px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        flex-shrink: 0;
-    }
-    
-    .notification-content h6 {
-        margin-bottom: 0.25rem;
-        font-weight: 600;
-    }
-    
-    .notification-content p {
-        margin-bottom: 0.25rem;
-        color: #64748b;
-        font-size: 0.875rem;
-    }
-    
-    .notification-content .time {
-        font-size: 0.75rem;
-        color: #94a3b8;
-        display: flex;
-        align-items: center;
-    }
-    
-    /* Progress Circle */
-    .progress-circle {
-        position: relative;
-        width: 140px;
-        height: 140px;
-        border-radius: 50%;
-        background: conic-gradient(var(--primary-color) calc(var(--percentage) * 1%), #e2e8f0 0);
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        box-shadow: 0 4px 12px rgba(67, 97, 238, 0.15);
-    }
-    
-    .progress-circle-inner {
-        width: 110px;
-        height: 110px;
-        background: white;
-        border-radius: 50%;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-    }
-    
-    .progress-circle strong {
-        font-size: 1.75rem;
-        font-weight: 700;
-        color: var(--primary-color);
-    }
-    
-    .progress-circle span {
-        font-size: 0.75rem;
-        color: var(--secondary-color);
-    }
-    
-    /* Job Card */
-    .job-card {
-        border: 1px solid rgba(226, 232, 240, 0.6);
-        border-radius: var(--card-border-radius);
-        padding: 1.5rem;
-        display: flex;
-        transition: all 0.3s ease;
-        position: relative;
-        background-color: white;
-    }
-    
-    .job-card:hover {
-        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
-        transform: translateY(-5px);
-    }
-    
-    .job-badge {
-        position: absolute;
-        top: 10px;
-        right: 10px;
-        background: linear-gradient(90deg, var(--primary-color), #6366f1);
-        color: white;
-        padding: 0.25rem 0.75rem;
-        border-radius: 20px;
-        font-size: 0.75rem;
-        font-weight: 600;
-        box-shadow: 0 2px 8px rgba(67, 97, 238, 0.2);
-    }
-    
-    .company-logo {
-        width: 60px;
-        height: 60px;
-        margin-right: 1rem;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        background-color: #f8fafc;
-        border-radius: 12px;
-        padding: 0.5rem;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-        flex-shrink: 0;
-    }
-    
-    .company-logo img {
-        max-width: 100%;
-        max-height: 100%;
-        object-fit: contain;
-    }
-    
-    .job-details {
-        flex: 1;
-    }
-    
-    .job-details h5 {
-        margin-bottom: 0.25rem;
-        font-weight: 600;
-    }
-    
-    .company-name {
-        color: var(--secondary-color);
-        margin-bottom: 0.5rem;
-        font-size: 0.875rem;
-        display: flex;
-        align-items: center;
-    }
-    
-    .job-info {
-        display: flex;
-        gap: 1rem;
-        margin-bottom: 0.75rem;
-        font-size: 0.875rem;
-        color: #64748b;
-    }
-    
-    .job-tags {
-        margin-bottom: 0.75rem;
-        display: flex;
-        flex-wrap: wrap;
-        gap: 0.5rem;
-    }
-    
-    .job-tags .badge {
-        padding: 0.35rem 0.75rem;
-        font-weight: 500;
-        border-radius: 20px;
-        background-color: #f1f5f9;
-        border: 1px solid #e2e8f0;
-    }
-    
-    /* Empty State */
-    .empty-state {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        padding: 2rem 0;
-        color: #94a3b8;
-    }
-    
-    .empty-state-icon {
-        font-size: 2.5rem;
-        margin-bottom: 1rem;
-        color: #cbd5e1;
-    }
-    
-    .empty-state-text {
-        font-size: 0.875rem;
-    }
-    
-    /* Responsive Styles */
-    @media (max-width: 768px) {
-        .action-buttons {
-            flex-direction: column;
-            gap: 0.5rem;
-            align-items: flex-start;
-        }
-        
-        .job-card {
-            flex-direction: column;
-        }
-        
-        .company-logo {
-            margin-bottom: 1rem;
-            margin-right: 0;
-        }
-    }
-</style>
-{% endblock %}
-
-{% block extra_js %}
+{% block myjs %}
 <script>
-    // Animation for stat cards
+    // Initialize progress bars
     document.addEventListener('DOMContentLoaded', function() {
-        const statCards = document.querySelectorAll('.stat-card');
-        statCards.forEach((card, index) => {
-            card.style.animationDelay = `${index * 0.1}s`;
-        });
-        
-        // Update notification count
-        const notificationCount = document.getElementById('notification-count');
-        if (notificationCount) {
-            notificationCount.textContent = '{{ notifications|length }}';
-        }
+        // The progress bars are now handled by CSS custom properties
+        // No additional JavaScript needed
     });
 </script>
 {% endblock %}
